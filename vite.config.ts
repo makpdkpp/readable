@@ -9,6 +9,9 @@ export default defineConfig({
     tailwindcss(),
     reactRouter(),
   ],
+  server: {
+    watch: process.env.VITE_USE_POLLING ? { usePolling: true, interval: 300 } : undefined,
+  },
   resolve: {
     tsconfigPaths: true,
   },
