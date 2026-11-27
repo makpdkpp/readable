@@ -8,7 +8,22 @@
 
 React Router (SSR) · Cloudflare Workers · D1 + Drizzle ORM · Tailwind CSS · Vitest
 
-## เริ่มพัฒนาในเครื่อง
+## รันในเครื่องด้วย Docker (แนะนำ)
+
+ไม่ต้องติดตั้ง Node และไม่ต้องมีบัญชี Cloudflare ฐานข้อมูล D1 จะจำลองอยู่ในเครื่อง
+
+```bash
+docker compose up --build
+```
+
+เปิด http://localhost:5173 จะเห็นนิยายตัวอย่าง 2 เรื่อง (เรื่อง 18+ ที่รออนุมัติจะไม่แสดง)
+
+- แก้โค้ดแล้วหน้าเว็บจะรีเฟรชเอง
+- ข้อมูลในฐานข้อมูลเก็บใน `.wrangler/state` ถ้าอยากล้างทั้งหมดให้ลบโฟลเดอร์นี้แล้วรันใหม่
+- ถ้ามีการเพิ่ม package ใหม่ ให้รัน `docker compose up --build -V`
+- รัน test ใน container: `docker compose run --rm web npm test`
+
+## เริ่มพัฒนาในเครื่อง (ไม่ใช้ Docker)
 
 ```bash
 npm install

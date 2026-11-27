@@ -1,0 +1,12 @@
+services:
+  web:
+    build: .
+    ports:
+      - "5173:5173"
+    environment:
+      # Windows/macOS ส่งสัญญาณไฟล์เปลี่ยนเข้า container ไม่ได้ จึงให้ Vite คอยเช็กเอง
+      VITE_USE_POLLING: "true"
+    volumes:
+      - .:/app
+      # ใช้ node_modules ใน container ไม่ใช้ของเครื่อง Windows
+      - /app/node_modules
