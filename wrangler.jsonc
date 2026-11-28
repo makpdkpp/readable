@@ -10,7 +10,7 @@
 			"binding": "DB",
 			"database_name": "readable-db",
 			// ใส่ id จริงหลังรัน `npx wrangler d1 create readable-db`
-			"database_id": "00000000-0000-0000-0000-000000000000",
+			"database_id": "cb69a134-f6c5-4b62-8796-ec8877176fa8",
 			"migrations_dir": "drizzle"
 		}
 	]
