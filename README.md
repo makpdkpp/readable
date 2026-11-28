@@ -49,6 +49,7 @@ npm run dev                # เปิด http://localhost:5173
 | `/novel/:id/chapter/:chapterId` | หน้าอ่านตอน ปรับขนาดตัวอักษร ระยะบรรทัด และสีพื้นหลังได้ |
 | `/library` | ชั้นหนังสือและประวัติการอ่าน |
 | `/search` | ค้นหาชื่อเรื่อง ชื่อนักเขียน แท็ก และเลือกหมวด |
+| `/privacy` | นโยบายความเป็นส่วนตัว (PDPA) ลิงก์อยู่ท้ายทุกหน้าและในหน้าสมัคร |
 | `/admin` | (admin) อนุมัติ 18+ ซ่อนเรื่อง/คอมเมนต์ ตั้งสิทธิ์ผู้ใช้ |
 
 กฎเรื่อง 18+
@@ -82,6 +83,14 @@ npm run dev                # เปิด http://localhost:5173
 ```bash
 npx wrangler d1 execute readable-db --remote --command "UPDATE users SET role='admin' WHERE email='อีเมลของคุณ'"
 ```
+
+## นโยบายความเป็นส่วนตัว (PDPA)
+
+หน้า `/privacy` อธิบายข้อมูลที่เก็บ วัตถุประสงค์ ผู้ที่ได้รับข้อมูล (Cloudflare, Google/LINE, Google Fonts) ระยะเวลาเก็บ และสิทธิ์ของผู้ใช้
+ผู้ใช้ลบบัญชีและข้อมูลทั้งหมดได้เองที่หน้าโปรไฟล์
+
+ตั้งอีเมลติดต่อที่จะแสดงในหน้านี้: Cloudflare dashboard → Workers & Pages → readable → Settings → Variables and Secrets → Add → ชนิด Text ชื่อ `CONTACT_EMAIL`
+ถ้าไม่ตั้ง หน้าจะขึ้นว่า "ผู้ดูแลเว็บยังไม่ได้ระบุอีเมลติดต่อ"
 
 ## รูปปก (R2)
 

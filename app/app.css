@@ -167,6 +167,10 @@ h3 {
     border-bottom: var(--t-border-w) solid var(--t-header-border);
     backdrop-filter: blur(12px);
   }
+  .site-footer {
+    border-top: var(--t-border-w) solid var(--t-header-border);
+    margin-top: 2rem;
+  }
   .wordmark {
     font-family: var(--t-font-display);
     font-size: 1.35rem;

@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { Form, useNavigation } from "react-router";
+import { Form, redirect, useNavigation } from "react-router";
 
 import type { Route } from "./+types/profile";
 import { Field, FormError, SubmitButton } from "~/components/auth-ui";
@@ -7,7 +7,8 @@ import { ThemePicker } from "~/components/theme-switcher";
 import { getDb } from "~/db/client";
 import { oauthAccounts, users } from "~/db/schema";
 import { hashPassword, verifyPassword } from "~/lib/auth/password";
-import { assertSameOrigin, requireUser } from "~/lib/auth/session.server";
+import { deleteAccount } from "~/lib/auth/delete-account.server";
+import { assertSameOrigin, destroySession, requireUser } from "~/lib/auth/session.server";
 import { isValidBirthDate, validateDisplayName, validatePassword } from "~/lib/auth/validation";
 import { ageOn } from "~/lib/moderation";
 
@@ -34,13 +35,24 @@ export async function loader({ request }: Route.LoaderArgs) {
   };
 }
 
-type ActionResult = { form: "profile" | "password"; error?: string; ok?: string };
+type ActionResult = { form: "profile" | "password" | "delete"; error?: string; ok?: string };
+
+const DELETE_CONFIRM = "ลบบัญชี";
 
 export async function action({ request }: Route.ActionArgs): Promise<ActionResult> {
   assertSameOrigin(request);
   const user = await requireUser(request);
   const form = await request.formData();
   const db = getDb();
+
+  if (form.get("intent") === "delete-account") {
+    if (String(form.get("confirm") ?? "").trim() !== DELETE_CONFIRM) {
+      return { form: "delete", error: `พิมพ์คำว่า “${DELETE_CONFIRM}” เพื่อยืนยัน` };
+    }
+    const cookie = await destroySession(request);
+    await deleteAccount(user.id);
+    throw redirect("/?deleted=1", { headers: { "Set-Cookie": cookie } });
+  }
 
   if (form.get("intent") === "password") {
     if (user.email.endsWith("@users.noreply.readable")) {
@@ -155,6 +167,29 @@ export default function Profile({ loaderData, actionData }: Route.ComponentProps
         </Form>
       </section>
       )}
+
+      <section className="card p-6 space-y-3">
+        <h2 className="font-semibold text-danger">ลบบัญชี</h2>
+        <p className="text-sm text-muted">
+          ลบบัญชีและข้อมูลทั้งหมดของคุณถาวร รวมถึงนิยายที่เขียน ชั้นหนังสือ ประวัติการอ่าน คอมเมนต์ และยอดถูกใจ
+          กู้คืนไม่ได้ อ่านรายละเอียดใน <a href="/privacy" className="underline">นโยบายความเป็นส่วนตัว</a>
+        </p>
+        <details open={!!msg("delete")}>
+          <summary className="cursor-pointer text-sm text-danger">ฉันต้องการลบบัญชี</summary>
+          <Form method="post" className="mt-3 space-y-3">
+            <input type="hidden" name="intent" value="delete-account" />
+            <FormError message={msg("delete")?.error} />
+            <Field
+              label={`พิมพ์ “${DELETE_CONFIRM}” เพื่อยืนยัน`}
+              name="confirm"
+              autoComplete="off"
+            />
+            <button type="submit" disabled={busy} className="btn btn-danger">
+              ลบบัญชีถาวร
+            </button>
+          </Form>
+        </details>
+      </section>
     </div>
   );
 }
