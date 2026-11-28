@@ -17,6 +17,8 @@ export default [
   route("novel/:novelId/chapter/:chapterId", "routes/novel.$novelId.chapter.$chapterId.tsx"),
   route("library", "routes/library.tsx"),
   route("search", "routes/search.tsx"),
+  route("sitemap.xml", "routes/sitemap[.]xml.ts"),
+  route("robots.txt", "routes/robots[.]txt.ts"),
   route("covers/:key", "routes/covers.$key.ts"),
   route("admin", "routes/admin._index.ts"),
   route("admin/review", "routes/admin.review.tsx"),

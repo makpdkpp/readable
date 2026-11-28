@@ -7,12 +7,14 @@ import { getDb } from "~/db/client";
 import { novels, users } from "~/db/schema";
 import { getCurrentUser } from "~/lib/auth/session.server";
 import { canRead } from "~/lib/moderation";
+import { pageMeta } from "~/lib/seo";
 
-export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "readable — อ่านนิยายฟรี" },
-    { name: "description", content: "อ่านและเขียนนิยายภาษาไทยได้ฟรี" },
-  ];
+export function meta({ loaderData }: Route.MetaArgs) {
+  return pageMeta({
+    title: "readable — อ่านนิยายฟรี",
+    description: "อ่านและเขียนนิยายภาษาไทยได้ฟรี ค้นหาเรื่องตามหมวดและแท็ก เก็บเข้าชั้นหนังสือ คอมเมนต์คุยกับนักเขียน",
+    url: `${loaderData?.origin ?? ""}/`,
+  });
 }
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -38,7 +40,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     )
     .orderBy(desc(novels.updatedAt))
     .limit(20);
-  return { latest };
+  return { latest, origin: new URL(request.url).origin };
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {

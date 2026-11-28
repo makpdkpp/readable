@@ -22,23 +22,22 @@ import { getNovelLikeCount } from "~/lib/community.server";
 import { getLibraryEntry, setSaved } from "~/lib/novel/library.server";
 import { loadNovelForReader } from "~/lib/novel/reader.server";
 import { formatThaiDate } from "~/lib/novel/time";
+import { pageMeta } from "~/lib/seo";
 
-export function meta({ loaderData: data, location }: Route.MetaArgs) {
+export function meta({ loaderData: data }: Route.MetaArgs) {
   if (!data) return [{ title: "ไม่พบเรื่อง — readable" }];
   const { novel, origin } = data;
-  const hideFromSearch = novel.rating === "18+" || !isNovelPublic(novel.status);
-  const description = novel.rating === "18+" ? "นิยายสำหรับผู้ที่อายุ 18 ปีขึ้นไป" : novel.synopsis.slice(0, 160);
+  const adult = novel.rating === "18+";
   const image = coverUrl(novel.coverKey);
-  return [
-    { title: `${novel.title} — ${novel.author} | readable` },
-    { name: "description", content: description },
-    { property: "og:type", content: "book" },
-    { property: "og:title", content: novel.title },
-    { property: "og:description", content: description },
-    { property: "og:url", content: origin + location.pathname },
-    ...(image && novel.rating !== "18+" ? [{ property: "og:image", content: origin + image }] : []),
-    ...(hideFromSearch ? [{ name: "robots", content: "noindex" }] : []),
-  ];
+  return pageMeta({
+    title: `${novel.title} — ${novel.author} | readable`,
+    // เรื่อง 18+ ไม่เปิดเผยเรื่องย่อและปกในตัวอย่างลิงก์ และไม่ให้ Google เก็บ
+    description: adult ? "นิยายสำหรับผู้ที่อายุ 18 ปีขึ้นไป" : novel.synopsis || `นิยายโดย ${novel.author}`,
+    url: `${origin}/novel/${novel.id}`,
+    image: image && !adult ? origin + image : null,
+    type: "book",
+    noindex: adult || !isNovelPublic(novel.status),
+  });
 }
 
 export async function loader({ request, params }: Route.LoaderArgs) {

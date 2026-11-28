@@ -11,26 +11,42 @@ import { CommentSection, LikeButton } from "~/components/chapter-community";
 import { assertSameOrigin, requireUser } from "~/lib/auth/session.server";
 import { parseCommentBody } from "~/lib/community";
 import { addComment, deleteOwnComment, setCommentHidden, getChapterLikes, listChapterComments, setChapterLike } from "~/lib/community.server";
+import { coverUrl } from "~/lib/novel/cover";
+import { htmlToText, pageMeta, truncate } from "~/lib/seo";
 import { recordRead } from "~/lib/novel/library.server";
 import { loadNovelForReader } from "~/lib/novel/reader.server";
 import { formatThaiDateTime } from "~/lib/novel/time";
 
 export function meta({ loaderData: data }: Route.MetaArgs) {
   if (!data) return [{ title: "ไม่พบตอน — readable" }];
-  const { novel, chapter } = data;
-  const hide = novel.rating === "18+" || !isNovelPublic(novel.status) || !chapter?.live;
-  return [
-    { title: `${chapter ? `${chapter.title} — ` : ""}${novel.title} | readable` },
-    ...(hide ? [{ name: "robots", content: "noindex" }] : []),
-  ];
+  const { novel, chapter, origin } = data;
+  const adult = novel.rating === "18+";
+  const image = coverUrl(novel.coverKey);
+  return pageMeta({
+    title: `${chapter ? `${chapter.title} — ` : ""}${novel.title} | readable`,
+    description: adult ? "นิยายสำหรับผู้ที่อายุ 18 ปีขึ้นไป" : chapter?.excerpt || `${novel.title} โดย ${novel.author}`,
+    url: chapter ? `${origin}/novel/${novel.id}/chapter/${chapter.id}` : `${origin}/novel/${novel.id}`,
+    image: image && !adult ? origin + image : null,
+    type: "article",
+    noindex: adult || !isNovelPublic(novel.status) || !chapter?.live,
+  });
 }
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { novel, gate, canPreview, viewer } = await loadNovelForReader(request, params.novelId);
-  const novelInfo = { id: novel.id, title: novel.title, author: novel.author, rating: novel.rating, status: novel.status };
+  const origin = new URL(request.url).origin;
+  const novelInfo = {
+    id: novel.id,
+    title: novel.title,
+    author: novel.author,
+    rating: novel.rating,
+    status: novel.status,
+    // ปกของเรื่อง 18+ ใช้เฉพาะคนที่ผ่านการยืนยันอายุ
+    coverKey: gate === "ok" ? novel.coverKey : null,
+  };
   const viewerInfo = viewer && { id: viewer.id, isAdmin: viewer.role === "admin" };
   if (gate !== "ok")
-    return { gate, novel: novelInfo, chapter: null, prev: null, next: null, viewer: viewerInfo, likes: null, comments: [] };
+    return { origin, gate, novel: novelInfo, chapter: null, prev: null, next: null, viewer: viewerInfo, likes: null, comments: [] };
 
   const chapterId = Number(params.chapterId);
   const now = new Date();
@@ -60,7 +76,9 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     ? await Promise.all([getChapterLikes(c.id, viewer?.id ?? null), listChapterComments(c.id, viewer)])
     : [null, []];
   const pick = (x: (typeof visible)[number] | undefined) => (x ? { id: x.id, title: x.title } : null);
+  const contentHtml = body?.contentHtml ?? "";
   return {
+    origin,
     gate,
     novel: novelInfo,
     chapter: {
@@ -69,7 +87,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       title: c.title,
       publishAt: c.publishAt,
       live,
-      contentHtml: body?.contentHtml ?? "",
+      contentHtml,
+      excerpt: truncate(htmlToText(contentHtml), 160),
     },
     prev: pick(visible[idx - 1]),
     next: pick(visible[idx + 1]),
