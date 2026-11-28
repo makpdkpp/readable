@@ -5,5 +5,9 @@ declare namespace Cloudflare {
     GOOGLE_CLIENT_SECRET?: string;
     LINE_CHANNEL_ID?: string;
     LINE_CHANNEL_SECRET?: string;
+    // อีเมลที่เป็น admin เสมอ คั่นด้วยจุลภาค เช่น "a@x.com, b@y.com" ใช้ตั้ง admin คนแรกโดยไม่ต้องใช้คำสั่ง
+    ADMIN_EMAILS?: string;
+    // อีเมลติดต่อเรื่องข้อมูลส่วนบุคคล แสดงในหน้า /privacy
+    CONTACT_EMAIL?: string;
   }
 }

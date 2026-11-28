@@ -84,6 +84,12 @@ export default function Signup({ loaderData, actionData }: Route.ComponentProps)
           autoComplete="new-password"
           hint={`อย่างน้อย ${PASSWORD_MIN} ตัวอักษร`}
         />
+        <p className="text-xs text-muted">
+          การสมัครสมาชิกถือว่าคุณรับทราบ{" "}
+          <a href="/privacy" target="_blank" className="underline">
+            นโยบายความเป็นส่วนตัว
+          </a>
+        </p>
         <SubmitButton busy={busy}>สมัครสมาชิก</SubmitButton>
       </Form>
       <p className="text-center text-sm text-muted">

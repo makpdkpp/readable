@@ -2,6 +2,7 @@ import { desc, eq, inArray } from "drizzle-orm";
 import { Form, Link, useNavigation } from "react-router";
 
 import type { Route } from "./+types/admin.review";
+import { AdminTabs } from "~/components/admin-ui";
 import { Cover, NovelStatusBadge, RatingBadge, Notice, dangerButton, inputClass, primaryButton, secondaryButton } from "~/components/novel-ui";
 import { getDb } from "~/db/client";
 import { novels, users } from "~/db/schema";
@@ -110,6 +111,7 @@ export default function AdminReview({ loaderData, actionData }: Route.ComponentP
   const busy = useNavigation().state === "submitting";
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 space-y-8">
+      <AdminTabs />
       <h1 className="text-2xl font-bold">อนุมัติเรื่อง 18+</h1>
       <Notice {...(actionData ?? {})} />
       <section className="space-y-3">
@@ -158,23 +160,6 @@ export default function AdminReview({ loaderData, actionData }: Route.ComponentP
           </ul>
         )}
       </section>
-      <HideAny busy={busy} />
     </div>
-  );
-}
-
-function HideAny({ busy }: { busy: boolean }) {
-  return (
-    <section className="card p-4 space-y-2">
-      <h2 className="font-semibold">ซ่อนเรื่องที่เผยแพร่อยู่</h2>
-      <p className="text-sm text-muted">ใส่เลขเรื่องจาก URL เช่น /novel/12 คือเลข 12</p>
-      <Form method="post" className="flex flex-wrap gap-2">
-        <input name="novelId" type="number" min={1} required placeholder="เลขเรื่อง" className={`${inputClass} w-32`} />
-        <input name="note" required placeholder="เหตุผล" className={`${inputClass} flex-1`} />
-        <button name="intent" value="hide" disabled={busy} className={dangerButton}>
-          ซ่อน
-        </button>
-      </Form>
-    </section>
   );
 }

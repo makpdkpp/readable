@@ -1,7 +1,9 @@
+import { env } from "cloudflare:workers";
 import { and, eq, gt, lt } from "drizzle-orm";
 import { redirect } from "react-router";
 
 import { getDb } from "~/db/client";
+import { parseAdminEmails } from "~/lib/admin";
 import { sessions, users } from "~/db/schema";
 import { isSecureRequest, parseCookies, serializeCookie } from "./cookies";
 import { generateToken, sha256Hex } from "./token";
@@ -49,7 +51,13 @@ export async function getCurrentUser(request: Request): Promise<CurrentUser | nu
     .innerJoin(users, eq(sessions.userId, users.id))
     .where(and(eq(sessions.id, await sha256Hex(token)), gt(sessions.expiresAt, new Date())))
     .limit(1);
-  return row ?? null;
+  if (!row) return null;
+  // ตั้ง admin คนแรกได้จาก Cloudflare dashboard (ตัวแปร ADMIN_EMAILS) ไม่ต้องใช้คำสั่ง wrangler
+  if (row.role !== "admin" && parseAdminEmails(env.ADMIN_EMAILS).has(row.email.toLowerCase())) {
+    await db.update(users).set({ role: "admin", updatedAt: new Date() }).where(eq(users.id, row.id));
+    row.role = "admin";
+  }
+  return row;
 }
 
 /** ใช้ใน loader/action ของหน้าที่ต้องล็อกอิน ถ้ายังไม่ล็อกอินจะพาไปหน้าเข้าสู่ระบบ */

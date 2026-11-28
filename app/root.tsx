@@ -60,6 +60,7 @@ function UserNav() {
     return (
       <nav className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-sm">
         <ThemeSwitcher />
+        <Link to="/search" className="hover:underline">ค้นหา</Link>
         <Link to="/login" className="hover:underline">เข้าสู่ระบบ</Link>
         <Link to="/signup" className="btn btn-primary min-h-9! px-3! py-1! text-sm">
           สมัครสมาชิก
@@ -71,8 +72,10 @@ function UserNav() {
     <nav className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1 text-sm">
       <ThemeSwitcher />
       {user.isAdmin && (
-        <Link to="/admin/review" className="hover:underline">อนุมัติเรื่อง</Link>
+        <Link to="/admin/review" className="hover:underline">แอดมิน</Link>
       )}
+      <Link to="/search" className="hover:underline">ค้นหา</Link>
+      <Link to="/library" className="hover:underline">ชั้นหนังสือ</Link>
       <Link to="/write" className="hover:underline">เขียนนิยาย</Link>
       <Link to="/profile" className="font-semibold hover:underline">{user.displayName}</Link>
       <Form method="post" action="/logout">
@@ -96,6 +99,15 @@ export default function App() {
       <main className="flex-1">
         <Outlet />
       </main>
+      <footer className="site-footer">
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 px-4 py-6 text-sm text-muted">
+          <span>readable · อ่านและเขียนนิยายฟรี</span>
+          <nav className="flex gap-4">
+            <Link to="/search" className="hover:underline">ค้นหานิยาย</Link>
+            <Link to="/privacy" className="hover:underline">นโยบายความเป็นส่วนตัว</Link>
+          </nav>
+        </div>
+      </footer>
     </div>
   );
 }

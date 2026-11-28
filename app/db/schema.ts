@@ -132,6 +132,7 @@ export const chapters = sqliteTable(
   (t) => [index("chapters_novel_id_number_idx").on(t.novelId, t.number)],
 );
 
+// แถวเดียวต่อผู้ใช้ต่อเรื่อง ใช้ทั้งชั้นหนังสือ (saved) และประวัติการอ่าน (lastReadAt)
 export const library = sqliteTable(
   "library",
   {
@@ -141,10 +142,62 @@ export const library = sqliteTable(
     novelId: integer("novel_id")
       .notNull()
       .references(() => novels.id, { onDelete: "cascade" }),
-    lastChapterId: integer("last_chapter_id").references(() => chapters.id),
+    // ตอนที่อ่านล่าสุด ถ้านักเขียนลบตอนนั้นจะกลายเป็น null
+    lastChapterId: integer("last_chapter_id").references(() => chapters.id, { onDelete: "set null" }),
+    saved: integer("saved", { mode: "boolean" }).notNull().default(false),
+    savedAt: integer("saved_at", { mode: "timestamp" }),
+    // null = ยังไม่เคยเปิดอ่าน (กดเก็บเข้าชั้นอย่างเดียว) หรือลบออกจากประวัติแล้ว
+    lastReadAt: integer("last_read_at", { mode: "timestamp" }),
     updatedAt: timestamps.updatedAt,
   },
-  (t) => [primaryKey({ columns: [t.userId, t.novelId] })],
+  (t) => [
+    primaryKey({ columns: [t.userId, t.novelId] }),
+    index("library_user_read_idx").on(t.userId, t.lastReadAt),
+    index("library_user_saved_idx").on(t.userId, t.saved, t.savedAt),
+  ],
+);
+
+export const chapterLikes = sqliteTable(
+  "chapter_likes",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    chapterId: integer("chapter_id")
+      .notNull()
+      .references(() => chapters.id, { onDelete: "cascade" }),
+    createdAt: timestamps.createdAt,
+  },
+  (t) => [
+    primaryKey({ columns: [t.userId, t.chapterId] }),
+    index("chapter_likes_chapter_id_idx").on(t.chapterId),
+  ],
+);
+
+export const comments = sqliteTable(
+  "comments",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    chapterId: integer("chapter_id")
+      .notNull()
+      .references(() => chapters.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    body: text("body").notNull(),
+    // hidden = admin ซ่อน คนอื่นไม่เห็น แต่ยังเก็บไว้เป็นหลักฐาน
+    status: text("status", { enum: ["visible", "hidden"] })
+      .notNull()
+      .default("visible"),
+    hiddenBy: text("hidden_by").references(() => users.id, { onDelete: "set null" }),
+    hiddenReason: text("hidden_reason"),
+    ...timestamps,
+  },
+  (t) => [
+    index("comments_chapter_id_idx").on(t.chapterId, t.createdAt),
+    index("comments_user_id_idx").on(t.userId, t.createdAt),
+    index("comments_status_idx").on(t.status, t.createdAt),
+  ],
 );
 
 export type Novel = typeof novels.$inferSelect;
