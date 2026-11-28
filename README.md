@@ -61,7 +61,7 @@ npm run dev                # เปิด http://localhost:5173
 
 ## แอดมิน
 
-หน้าแอดมินอยู่ที่ `/admin` มี 4 แท็บ
+หน้าแอดมินอยู่ที่ `/admin` มี 5 แท็บ
 
 | แท็บ | ใช้ทำอะไร |
 |---|---|
@@ -69,6 +69,7 @@ npm run dev                # เปิด http://localhost:5173
 | เรื่อง (`/admin/novels`) | ค้นหาเรื่องที่เผยแพร่อยู่แล้วซ่อน (ต้องใส่เหตุผล นักเขียนจะเห็น) |
 | คอมเมนต์ (`/admin/comments`) | ดูคอมเมนต์ล่าสุด ซ่อน/เลิกซ่อน (ซ่อนจากหน้าอ่านตอนได้ด้วย) |
 | ผู้ใช้ (`/admin/users`) | ตั้งสิทธิ์ นักอ่าน / นักเขียน / แอดมิน |
+| ติดตามระบบ (`/admin/monitor`) | สถานะเว็บ โควตาฟรีของ Cloudflare ค่าใช้จ่ายโดยประมาณ และสถิติการใช้งาน |
 
 ตั้งแอดมินคนแรกโดยไม่ต้องใช้คำสั่ง
 
@@ -83,6 +84,25 @@ npm run dev                # เปิด http://localhost:5173
 ```bash
 npx wrangler d1 execute readable-db --remote --command "UPDATE users SET role='admin' WHERE email='อีเมลของคุณ'"
 ```
+
+## ติดตามระบบและค่าใช้จ่าย (`/admin/monitor`)
+
+แท็บ "ติดตามระบบ" ในหน้าแอดมินแสดง
+
+- สถานะตอนนี้: ความเร็ว D1, requests และ error วันนี้, CPU ต่อ request (แผนฟรีจำกัด 10 ms)
+- โควตาฟรีรายวัน: Workers 100,000 requests, D1 อ่าน 5 ล้านแถว, เขียน 100,000 แถว (รีเซ็ต 07:00 น. เวลาไทย) และพื้นที่ D1 5 GB
+- ค่าใช้จ่ายโดยประมาณต่อเดือน ทั้งแผนที่ใช้อยู่และถ้าเปลี่ยนแผน (ราคาอยู่ใน `app/lib/monitor/pricing.ts`)
+- กราฟ requests 30 วัน และกิจกรรมบนเว็บ (สมาชิก คนอ่าน เรื่อง ตอน คอมเมนต์ สมัครใหม่รายวัน)
+
+กิจกรรมบนเว็บใช้ได้ทันที ส่วนข้อมูลจาก Cloudflare ต้องตั้งค่าก่อน
+
+1. Cloudflare dashboard → รูปโปรไฟล์ขวาบน → My Profile → API Tokens → Create Token → Create Custom Token
+2. ตั้งชื่อ เช่น `readable-analytics` · Permissions: **Account → Account Analytics → Read** อย่างเดียว · Account Resources: บัญชีของคุณ → Continue to summary → Create Token แล้วคัดลอก token (แสดงครั้งเดียว)
+3. Workers & Pages → readable → Settings → Variables and Secrets → Add → ชนิด **Secret** ชื่อ `CF_ANALYTICS_TOKEN`
+4. Add อีกตัว ชนิด Text ชื่อ `CF_ACCOUNT_ID` ค่าเป็น Account ID (เลขยาวใน URL ของ dashboard หรือเมนู ⋯ ข้างชื่อบัญชี → Copy account ID)
+5. ถ้าอัปเกรดเป็น Workers Paid ให้เพิ่ม Text ชื่อ `CF_PLAN` ค่า `paid`
+
+token นี้อ่านสถิติได้อย่างเดียว แก้ไขหรือลบอะไรในบัญชีไม่ได้ ข้อมูลจาก Cloudflare เก็บ cache ไว้ 5 นาที กดปุ่ม "ดึงข้อมูลใหม่" เพื่อโหลดทันที
 
 ## นโยบายความเป็นส่วนตัว (PDPA)
 

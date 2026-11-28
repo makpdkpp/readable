@@ -5,6 +5,7 @@ const TABS = [
   ["/admin/novels", "เรื่อง"],
   ["/admin/comments", "คอมเมนต์"],
   ["/admin/users", "ผู้ใช้"],
+  ["/admin/monitor", "ติดตามระบบ"],
 ] as const;
 
 export function AdminTabs() {

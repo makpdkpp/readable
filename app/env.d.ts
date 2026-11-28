@@ -9,5 +9,10 @@ declare namespace Cloudflare {
     ADMIN_EMAILS?: string;
     // อีเมลติดต่อเรื่องข้อมูลส่วนบุคคล แสดงในหน้า /privacy
     CONTACT_EMAIL?: string;
+    // หน้า /admin/monitor ดึงสถิติจาก Cloudflare GraphQL API: token สิทธิ์ Account Analytics: Read (Secret) และ Account ID (Text)
+    CF_ANALYTICS_TOKEN?: string;
+    CF_ACCOUNT_ID?: string;
+    // แผน Workers ที่ใช้อยู่ "free" (ค่าเริ่มต้น) หรือ "paid" ใช้คำนวณค่าใช้จ่าย
+    CF_PLAN?: string;
   }
 }
