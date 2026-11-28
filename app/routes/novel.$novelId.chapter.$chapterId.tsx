@@ -7,6 +7,7 @@ import { ReaderSettings, THEME_STYLE, useReaderPrefs } from "~/components/reader
 import { getDb } from "~/db/client";
 import { chapters } from "~/db/schema";
 import { isChapterLive, isNovelPublic } from "~/lib/moderation";
+import { recordRead } from "~/lib/novel/library.server";
 import { loadNovelForReader } from "~/lib/novel/reader.server";
 import { formatThaiDateTime } from "~/lib/novel/time";
 
@@ -21,7 +22,7 @@ export function meta({ loaderData: data }: Route.MetaArgs) {
 }
 
 export async function loader({ request, params }: Route.LoaderArgs) {
-  const { novel, gate, canPreview } = await loadNovelForReader(request, params.novelId);
+  const { novel, gate, canPreview, viewer } = await loadNovelForReader(request, params.novelId);
   const novelInfo = { id: novel.id, title: novel.title, author: novel.author, rating: novel.rating, status: novel.status };
   if (gate !== "ok") return { gate, novel: novelInfo, chapter: null, prev: null, next: null };
 
@@ -47,6 +48,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     .from(chapters)
     .where(and(eq(chapters.id, chapterId), eq(chapters.novelId, novel.id)));
   const c = visible[idx];
+  const live = isChapterLive(c, now);
+  if (viewer && live) await recordRead(viewer.id, novel.id, c.id);
   const pick = (x: (typeof visible)[number] | undefined) => (x ? { id: x.id, title: x.title } : null);
   return {
     gate,
@@ -56,7 +59,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       number: c.number,
       title: c.title,
       publishAt: c.publishAt,
-      live: isChapterLive(c, now),
+      live,
       contentHtml: body?.contentHtml ?? "",
     },
     prev: pick(visible[idx - 1]),

@@ -372,6 +372,56 @@ h3 {
     font-weight: 600;
   }
 
+  /* แท็บ เช่น ชั้นหนังสือ / ประวัติการอ่าน และเมนูแอดมิน */
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    border-bottom: var(--t-border-w) solid var(--t-line);
+  }
+  .tab {
+    padding: 0.5rem 0.9rem;
+    margin-bottom: calc(var(--t-border-w) * -1);
+    border-bottom: 2px solid transparent;
+    color: var(--t-muted);
+    font-weight: 600;
+  }
+  .tab:hover {
+    color: var(--t-ink);
+  }
+  .tab-active {
+    color: var(--t-ink);
+    border-bottom-color: var(--t-accent);
+  }
+  [data-theme="market"] .tabs {
+    border-bottom: 0;
+    gap: 0.5rem;
+  }
+  [data-theme="market"] .tab {
+    margin: 0;
+    border: 2px solid var(--t-ink);
+    border-radius: var(--t-radius-btn);
+    color: var(--t-ink);
+    background: var(--t-surface);
+  }
+  [data-theme="market"] .tab-active {
+    background: var(--t-sun);
+    box-shadow: var(--t-btn-shadow);
+  }
+  [data-theme="cinema"] .tabs {
+    border-bottom: 0;
+    gap: 0.5rem;
+  }
+  [data-theme="cinema"] .tab {
+    margin: 0;
+    border: 0;
+    border-radius: var(--t-radius-btn);
+  }
+  [data-theme="cinema"] .tab-active {
+    background: var(--t-accent-soft);
+    color: var(--t-accent);
+  }
+
   /* หัวข้อหมวด */
   .section-title {
     font-family: var(--t-font-display);

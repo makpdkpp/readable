@@ -73,6 +73,7 @@ function UserNav() {
       {user.isAdmin && (
         <Link to="/admin/review" className="hover:underline">อนุมัติเรื่อง</Link>
       )}
+      <Link to="/library" className="hover:underline">ชั้นหนังสือ</Link>
       <Link to="/write" className="hover:underline">เขียนนิยาย</Link>
       <Link to="/profile" className="font-semibold hover:underline">{user.displayName}</Link>
       <Form method="post" action="/logout">
