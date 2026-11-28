@@ -1,8 +1,8 @@
 import { desc, eq, inArray, and, ne } from "drizzle-orm";
-import { Link } from "react-router";
+import { Form, Link } from "react-router";
 
 import type { Route } from "./+types/home";
-import { Cover, RatingBadge } from "~/components/novel-ui";
+import { Cover, RatingBadge, inputClass, primaryButton } from "~/components/novel-ui";
 import { getDb } from "~/db/client";
 import { novels, users } from "~/db/schema";
 import { getCurrentUser } from "~/lib/auth/session.server";
@@ -45,6 +45,21 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   const { latest } = loaderData;
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
+      <Form method="get" action="/search" role="search" className="mb-8 flex gap-2">
+        <label htmlFor="home-search" className="sr-only">
+          ค้นหานิยาย
+        </label>
+        <input
+          id="home-search"
+          name="q"
+          type="search"
+          placeholder="ค้นหาชื่อเรื่อง ชื่อนักเขียน หรือแท็ก"
+          className={`${inputClass} mt-0!`}
+        />
+        <button type="submit" className={primaryButton}>
+          ค้นหา
+        </button>
+      </Form>
       <h1 className="section-title mb-6">อัปเดตล่าสุด</h1>
       {latest.length === 0 ? (
         <p className="text-muted">ยังไม่มีนิยายในระบบ</p>

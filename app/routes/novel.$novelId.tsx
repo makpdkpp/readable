@@ -148,8 +148,10 @@ export default function NovelPage({ loaderData }: Route.ComponentProps) {
           {tags.length > 0 && (
             <ul className="flex flex-wrap gap-2">
               {tags.map((t) => (
-                <li key={t} className="tag-chip">
-                  #{t}
+                <li key={t}>
+                  <Link to={`/search?tag=${encodeURIComponent(t)}`} className="tag-chip">
+                    #{t}
+                  </Link>
                 </li>
               ))}
             </ul>

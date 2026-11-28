@@ -371,6 +371,18 @@ h3 {
     border: 2px solid var(--t-ink);
     font-weight: 600;
   }
+  a.tag-chip:hover {
+    background: var(--t-accent-soft);
+  }
+  .tag-chip-active,
+  a.tag-chip-active:hover {
+    background: var(--t-accent);
+    color: var(--t-on-accent);
+  }
+  [data-theme="market"] .tag-chip-active {
+    background: var(--t-sun);
+    color: var(--t-ink);
+  }
 
   /* แท็บ เช่น ชั้นหนังสือ / ประวัติการอ่าน และเมนูแอดมิน */
   .tabs {

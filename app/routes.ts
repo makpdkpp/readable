@@ -16,6 +16,7 @@ export default [
   route("novel/:novelId", "routes/novel.$novelId.tsx"),
   route("novel/:novelId/chapter/:chapterId", "routes/novel.$novelId.chapter.$chapterId.tsx"),
   route("library", "routes/library.tsx"),
+  route("search", "routes/search.tsx"),
   route("covers/:key", "routes/covers.$key.ts"),
   route("admin/review", "routes/admin.review.tsx"),
 ] satisfies RouteConfig;
