@@ -82,3 +82,15 @@ export async function deleteOwnComment(userId: string, commentId: number) {
     .delete(comments)
     .where(and(eq(comments.id, commentId), eq(comments.userId, userId)));
 }
+
+/** admin ซ่อนหรือเลิกซ่อนคอมเมนต์ (ไม่ลบ เก็บไว้เป็นหลักฐาน) */
+export async function setCommentHidden(commentId: number, adminId: string, hidden: boolean, reason = "") {
+  await getDb()
+    .update(comments)
+    .set(
+      hidden
+        ? { status: "hidden", hiddenBy: adminId, hiddenReason: reason.trim().slice(0, 200) || null, updatedAt: new Date() }
+        : { status: "visible", hiddenBy: null, hiddenReason: null, updatedAt: new Date() },
+    )
+    .where(eq(comments.id, commentId));
+}

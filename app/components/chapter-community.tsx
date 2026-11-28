@@ -141,12 +141,24 @@ function CommentRow({ c, viewer }: { c: CommentItem; viewer: Viewer }) {
         )}
       </div>
       <p className="whitespace-pre-line [overflow-wrap:anywhere]">{c.body}</p>
-      {mine && (
+      {(mine || viewer?.isAdmin) && (
         <fetcher.Form method="post" className="flex flex-wrap gap-3 text-xs opacity-70" preventScrollReset>
           <input type="hidden" name="commentId" value={c.id} />
-          <button name="intent" value="delete-comment" disabled={busy} className="hover:underline">
-            ลบ
-          </button>
+          {mine && (
+            <button name="intent" value="delete-comment" disabled={busy} className="hover:underline">
+              ลบ
+            </button>
+          )}
+          {viewer?.isAdmin && (
+            <button
+              name="intent"
+              value={c.status === "hidden" ? "unhide-comment" : "hide-comment"}
+              disabled={busy}
+              className="hover:underline"
+            >
+              {c.status === "hidden" ? "เลิกซ่อน (admin)" : "ซ่อน (admin)"}
+            </button>
+          )}
         </fetcher.Form>
       )}
     </li>

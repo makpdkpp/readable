@@ -10,7 +10,7 @@ import { isChapterLive, isNovelPublic } from "~/lib/moderation";
 import { CommentSection, LikeButton } from "~/components/chapter-community";
 import { assertSameOrigin, requireUser } from "~/lib/auth/session.server";
 import { parseCommentBody } from "~/lib/community";
-import { addComment, deleteOwnComment, getChapterLikes, listChapterComments, setChapterLike } from "~/lib/community.server";
+import { addComment, deleteOwnComment, setCommentHidden, getChapterLikes, listChapterComments, setChapterLike } from "~/lib/community.server";
 import { recordRead } from "~/lib/novel/library.server";
 import { loadNovelForReader } from "~/lib/novel/reader.server";
 import { formatThaiDateTime } from "~/lib/novel/time";
@@ -111,6 +111,11 @@ export async function action({ request, params }: Route.ActionArgs) {
   const commentId = Number(form.get("commentId"));
   if (intent === "delete-comment" && Number.isInteger(commentId)) {
     await deleteOwnComment(viewer.id, commentId);
+    return { ok: true };
+  }
+  if ((intent === "hide-comment" || intent === "unhide-comment") && Number.isInteger(commentId)) {
+    if (viewer.role !== "admin") throw new Response("Forbidden", { status: 403 });
+    await setCommentHidden(commentId, viewer.id, intent === "hide-comment");
     return { ok: true };
   }
   return { error: "ทำรายการนี้ไม่ได้" };

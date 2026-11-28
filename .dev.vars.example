@@ -4,3 +4,6 @@ GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 LINE_CHANNEL_ID=
 LINE_CHANNEL_SECRET=
+
+# อีเมลที่เป็น admin เสมอ คั่นด้วยจุลภาค (ไม่บังคับ)
+ADMIN_EMAILS=

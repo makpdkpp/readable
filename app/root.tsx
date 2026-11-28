@@ -72,7 +72,7 @@ function UserNav() {
     <nav className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1 text-sm">
       <ThemeSwitcher />
       {user.isAdmin && (
-        <Link to="/admin/review" className="hover:underline">อนุมัติเรื่อง</Link>
+        <Link to="/admin/review" className="hover:underline">แอดมิน</Link>
       )}
       <Link to="/search" className="hover:underline">ค้นหา</Link>
       <Link to="/library" className="hover:underline">ชั้นหนังสือ</Link>

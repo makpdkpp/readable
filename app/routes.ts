@@ -18,5 +18,9 @@ export default [
   route("library", "routes/library.tsx"),
   route("search", "routes/search.tsx"),
   route("covers/:key", "routes/covers.$key.ts"),
+  route("admin", "routes/admin._index.ts"),
   route("admin/review", "routes/admin.review.tsx"),
+  route("admin/novels", "routes/admin.novels.tsx"),
+  route("admin/comments", "routes/admin.comments.tsx"),
+  route("admin/users", "routes/admin.users.tsx"),
 ] satisfies RouteConfig;
