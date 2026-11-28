@@ -1,10 +1,17 @@
 import { env } from "cloudflare:workers";
-import { Google, Line, decodeIdToken, generateCodeVerifier, generateState } from "arctic";
 import { and, eq } from "drizzle-orm";
 
 import { getDb } from "~/db/client";
 import { oauthAccounts, sessions, users, type OAuthProvider } from "~/db/schema";
 import { isSecureRequest, parseCookies, serializeCookie } from "./cookies";
+import {
+  authorizationUrl,
+  decodeJwtPayload,
+  exchangeCode,
+  randomToken,
+  validateClaims,
+  type Client,
+} from "./oidc";
 import { normalizeEmail } from "./validation";
 
 export const OAUTH_PROVIDERS: OAuthProvider[] = ["google", "line"];
@@ -27,27 +34,31 @@ function credentials(provider: OAuthProvider) {
   return id && secret ? { id, secret } : null;
 }
 
-function client(provider: OAuthProvider, request: Request) {
+function client(provider: OAuthProvider, request: Request): Client | null {
   const creds = credentials(provider);
   if (!creds) return null;
-  const callback = `${new URL(request.url).origin}/auth/${provider}/callback`;
-  return provider === "google"
-    ? new Google(creds.id, creds.secret, callback)
-    : new Line(creds.id, creds.secret, callback);
+  return { ...creds, redirectUri: `${new URL(request.url).origin}/auth/${provider}/callback` };
 }
 
+type SavedState = { provider: string; state: string; nonce: string; verifier: string; redirectTo: string };
+
 /** สร้าง URL ไปหน้าล็อกอินของ Google/LINE พร้อม cookie เก็บ state ไว้ตรวจตอนกลับมา */
-export function startOAuth(provider: OAuthProvider, request: Request, redirectTo: string) {
+export async function startOAuth(provider: OAuthProvider, request: Request, redirectTo: string) {
   const c = client(provider, request);
   if (!c) return null;
-  const state = generateState();
-  const verifier = generateCodeVerifier();
-  const url = c.createAuthorizationURL(state, verifier, ["openid", "profile", "email"]);
-  const cookie = serializeCookie(
-    STATE_COOKIE,
-    JSON.stringify({ provider, state, verifier, redirectTo }),
-    { maxAge: 600, secure: isSecureRequest(request), path: "/auth" },
-  );
+  const saved: SavedState = {
+    provider,
+    state: randomToken(),
+    nonce: randomToken(),
+    verifier: randomToken(),
+    redirectTo,
+  };
+  const url = await authorizationUrl(provider, c, saved);
+  const cookie = serializeCookie(STATE_COOKIE, JSON.stringify(saved), {
+    maxAge: 600,
+    secure: isSecureRequest(request),
+    path: "/auth",
+  });
   return { url: url.toString(), cookie };
 }
 
@@ -66,17 +77,7 @@ export type OAuthProfile = {
   name: string | null;
 };
 
-type IdTokenClaims = {
-  sub: string;
-  email?: string;
-  email_verified?: boolean;
-  name?: string;
-};
-
-/**
- * ตรวจ state แล้วแลก code เป็นข้อมูลผู้ใช้
- * id token ได้มาจาก Google/LINE โดยตรงผ่าน HTTPS จึงอ่านได้โดยไม่ต้องตรวจลายเซ็นซ้ำ
- */
+/** ตรวจ state แล้วแลก code เป็นข้อมูลผู้ใช้ */
 export async function finishOAuth(
   provider: OAuthProvider,
   request: Request,
@@ -87,19 +88,19 @@ export async function finishOAuth(
   const raw = parseCookies(request.headers.get("Cookie"))[STATE_COOKIE];
   if (!code || !state || !raw) return null;
 
-  let saved: { provider: string; state: string; verifier: string; redirectTo: string };
+  let saved: Partial<SavedState>;
   try {
     saved = JSON.parse(raw);
   } catch {
     return null;
   }
-  if (saved.provider !== provider || saved.state !== state) return null;
+  if (saved.provider !== provider || !saved.state || saved.state !== state) return null;
+  if (!saved.nonce || !saved.verifier) return null;
 
   const c = client(provider, request);
   if (!c) return null;
-  const tokens = await c.validateAuthorizationCode(code, saved.verifier);
-  const claims = decodeIdToken(tokens.idToken()) as IdTokenClaims;
-  if (!claims.sub) return null;
+  const claims = decodeJwtPayload(await exchangeCode(provider, c, code, saved.verifier));
+  if (!validateClaims(provider, claims, { clientId: c.id, nonce: saved.nonce })) return null;
 
   const email = claims.email ? normalizeEmail(claims.email) : null;
   return {
@@ -110,7 +111,7 @@ export async function finishOAuth(
       emailVerified: !!email && (provider === "line" || claims.email_verified === true),
       name: claims.name?.trim() || null,
     },
-    redirectTo: saved.redirectTo,
+    redirectTo: saved.redirectTo ?? "/",
   };
 }
 

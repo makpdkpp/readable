@@ -9,6 +9,11 @@ describe("statusOnPublish", () => {
     expect(statusOnPublish("all")).toBe("ongoing");
     expect(statusOnPublish("13+")).toBe("ongoing");
   });
+  it("เรื่องที่ไม่ผ่านการอนุมัติ ลดเรตแล้วก็ต้องให้ admin ตรวจอีกครั้ง", () => {
+    expect(statusOnPublish("all", "rejected")).toBe("pending_review");
+    expect(statusOnPublish("18+", "rejected")).toBe("pending_review");
+    expect(statusOnPublish("all", "draft")).toBe("ongoing");
+  });
 });
 
 describe("canRead", () => {

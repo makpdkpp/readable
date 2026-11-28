@@ -16,6 +16,7 @@ import {
   validateDisplayName,
   validatePassword,
 } from "~/lib/auth/validation";
+import { RATE_LIMIT_MESSAGE, clientIp, isRateLimited } from "~/lib/rate-limit.server";
 
 export function meta({}: Route.MetaArgs) {
   return [{ title: "สมัครสมาชิก — readable" }];
@@ -35,6 +36,9 @@ export async function action({ request }: Route.ActionArgs) {
   const password = String(form.get("password") ?? "");
   const redirectTo = safeRedirect(form.get("redirectTo"));
   const values = { email, displayName };
+  if (await isRateLimited("auth", `signup-ip:${clientIp(request)}`)) {
+    return { error: RATE_LIMIT_MESSAGE, values };
+  }
 
   if (!isValidEmail(email)) return { error: "รูปแบบอีเมลไม่ถูกต้อง", values };
   const nameError = validateDisplayName(displayName);

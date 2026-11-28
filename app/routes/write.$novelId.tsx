@@ -26,6 +26,7 @@ import {
 import { deleteCover, uploadCover } from "~/lib/novel/cover.server";
 import { formatThaiDateTime } from "~/lib/novel/time";
 import { parseNovelForm } from "~/lib/novel/validation";
+import { RATE_LIMIT_MESSAGE, isRateLimited } from "~/lib/rate-limit.server";
 
 export function meta({ loaderData: data }: Route.MetaArgs) {
   return [
@@ -67,6 +68,7 @@ export async function action({ request, params }: Route.ActionArgs): Promise<Act
   assertSameOrigin(request);
   const user = await requireUser(request);
   const novel = await requireOwnNovel(user, params.novelId);
+  if (await isRateLimited("write", user.id)) return { form: "status", error: RATE_LIMIT_MESSAGE };
   const form = await request.formData();
   const db = getDb();
   const intent = String(form.get("intent"));
@@ -107,7 +109,7 @@ export async function action({ request, params }: Route.ActionArgs): Promise<Act
     }
     case "publish": {
       if (novel.status !== "draft" && novel.status !== "rejected") break;
-      const status = statusOnPublish(novel.rating);
+      const status = statusOnPublish(novel.rating, novel.status);
       await setStatus(status);
       return {
         form: "status",

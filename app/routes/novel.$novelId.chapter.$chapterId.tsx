@@ -9,6 +9,7 @@ import { chapters } from "~/db/schema";
 import { isChapterLive, isNovelPublic } from "~/lib/moderation";
 import { CommentSection, LikeButton } from "~/components/chapter-community";
 import { assertSameOrigin, requireUser } from "~/lib/auth/session.server";
+import { RATE_LIMIT_MESSAGE, isRateLimited } from "~/lib/rate-limit.server";
 import { parseCommentBody } from "~/lib/community";
 import { addComment, deleteOwnComment, setCommentHidden, getChapterLikes, listChapterComments, setChapterLike } from "~/lib/community.server";
 import { coverUrl } from "~/lib/novel/cover";
@@ -117,6 +118,7 @@ export async function action({ request, params }: Route.ActionArgs) {
   const form = await request.formData();
   const intent = String(form.get("intent"));
   const { viewer, chapterId } = await requireLiveChapter(request, params);
+  if (await isRateLimited("write", viewer.id)) return { error: RATE_LIMIT_MESSAGE };
 
   if (intent === "like" || intent === "unlike") {
     await setChapterLike(viewer.id, chapterId, intent === "like");

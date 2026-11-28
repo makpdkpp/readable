@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parseCookies, serializeCookie } from "./cookies";
+import { isSameOriginRequest, parseCookies, serializeCookie } from "./cookies";
 import { hashPassword, verifyPassword } from "./password";
 import { generateToken, sha256Hex } from "./token";
 import { isValidBirthDate, isValidEmail, normalizeEmail, safeRedirect, validatePassword } from "./validation";
@@ -78,5 +78,24 @@ describe("validation", () => {
     expect(safeRedirect("//evil.com")).toBe("/");
     expect(safeRedirect("/\\evil.com")).toBe("/");
     expect(safeRedirect(null)).toBe("/");
+    // tab/ขึ้นบรรทัด/ช่องว่าง ถูกเบราว์เซอร์ตัดทิ้ง ทำให้ "/\t/evil.com" กลายเป็น "//evil.com"
+    expect(safeRedirect("/\t/evil.com")).toBe("/");
+    expect(safeRedirect("/\n/evil.com")).toBe("/");
+    expect(safeRedirect("/ /evil.com")).toBe("/");
+    expect(safeRedirect("/novel/1?q=ก")).toBe("/novel/1?q=ก");
+  });
+});
+
+describe("same origin", () => {
+  const req = (headers: Record<string, string>) =>
+    new Request("https://readable.example/profile", { method: "POST", headers });
+  it("ยอมเฉพาะ Origin เดียวกัน", () => {
+    expect(isSameOriginRequest(req({ Origin: "https://readable.example" }))).toBe(true);
+    expect(isSameOriginRequest(req({ Origin: "https://evil.example" }))).toBe(false);
+  });
+  it("ไม่มี Origin ให้ดู Sec-Fetch-Site", () => {
+    expect(isSameOriginRequest(req({ "Sec-Fetch-Site": "cross-site" }))).toBe(false);
+    expect(isSameOriginRequest(req({ "Sec-Fetch-Site": "same-origin" }))).toBe(true);
+    expect(isSameOriginRequest(req({}))).toBe(true);
   });
 });
