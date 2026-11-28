@@ -3,6 +3,8 @@ import { desc, eq, inArray, and, ne } from "drizzle-orm";
 import type { Route } from "./+types/home";
 import { getDb } from "~/db/client";
 import { novels, users } from "~/db/schema";
+import { getCurrentUser } from "~/lib/auth/session.server";
+import { canRead } from "~/lib/moderation";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -11,9 +13,10 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export async function loader() {
+export async function loader({ request }: Route.LoaderArgs) {
   const db = getDb();
-  // ยังไม่มีระบบล็อกอิน หน้าแรกจึงไม่แสดงเรื่อง 18+
+  // เรื่อง 18+ แสดงเฉพาะคนที่ล็อกอินและอายุ 18 ปีขึ้นไป
+  const showAdult = canRead("18+", await getCurrentUser(request));
   const latest = await db
     .select({
       id: novels.id,
@@ -24,7 +27,10 @@ export async function loader() {
     .from(novels)
     .innerJoin(users, eq(novels.authorId, users.id))
     .where(
-      and(inArray(novels.status, ["ongoing", "completed"]), ne(novels.rating, "18+")),
+      and(
+        inArray(novels.status, ["ongoing", "completed"]),
+        showAdult ? undefined : ne(novels.rating, "18+"),
+      ),
     )
     .orderBy(desc(novels.updatedAt))
     .limit(20);

@@ -1,14 +1,23 @@
 import {
+  Form,
   isRouteErrorResponse,
+  Link,
   Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
+  useRouteLoaderData,
 } from "react-router";
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import { getCurrentUser } from "~/lib/auth/session.server";
+
+export async function loader({ request }: Route.LoaderArgs) {
+  const user = await getCurrentUser(request);
+  return { user: user && { displayName: user.displayName } };
+}
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -41,6 +50,29 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
+function UserNav() {
+  const data = useRouteLoaderData<typeof loader>("root");
+  const user = data?.user;
+  if (!user) {
+    return (
+      <nav className="flex items-center gap-4 text-sm">
+        <Link to="/login" className="hover:underline">เข้าสู่ระบบ</Link>
+        <Link to="/signup" className="rounded-md bg-amber-600 px-3 py-1.5 font-semibold text-white hover:bg-amber-700">
+          สมัครสมาชิก
+        </Link>
+      </nav>
+    );
+  }
+  return (
+    <nav className="flex items-center gap-4 text-sm">
+      <Link to="/profile" className="font-semibold hover:underline">{user.displayName}</Link>
+      <Form method="post" action="/logout">
+        <button type="submit" className="text-stone-500 hover:underline">ออกจากระบบ</button>
+      </Form>
+    </nav>
+  );
+}
+
 export default function App() {
   return (
     <div className="min-h-screen flex flex-col">
@@ -49,7 +81,7 @@ export default function App() {
           <a href="/" className="text-xl font-bold tracking-tight">
             readable
           </a>
-          <nav className="text-sm text-stone-500">อ่านฟรี เขียนได้ทุกคน</nav>
+          <UserNav />
         </div>
       </header>
       <main className="flex-1">
