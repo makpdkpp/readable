@@ -58,3 +58,21 @@ Deploy command นี้จะสร้าง/อัปเดตตาราง�
 npx wrangler login
 npm run db:migrate:remote
 ```
+
+## ระบบล็อกอิน
+
+- สมัคร/ล็อกอินด้วยอีเมลและรหัสผ่านใช้ได้ทันที ไม่ต้องตั้งค่าอะไร
+- ปุ่ม Google และ LINE จะแสดงเมื่อตั้ง secret ครบคู่เท่านั้น
+- ในเครื่อง: คัดลอก `.dev.vars.example` เป็น `.dev.vars` แล้วใส่ค่า
+- บนเว็บจริง: Cloudflare dashboard → Workers & Pages → readable → Settings → Variables and Secrets → Add → เลือกชนิด Secret
+
+| Secret | ได้มาจาก |
+|---|---|
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Google Cloud Console → APIs & Services → Credentials → OAuth client ID (Web application) |
+| `LINE_CHANNEL_ID`, `LINE_CHANNEL_SECRET` | LINE Developers Console → Provider → LINE Login channel → Basic settings |
+
+Callback URL ที่ต้องลงทะเบียนกับ Google/LINE
+
+- `https://readable.b-kongman.workers.dev/auth/google/callback`
+- `https://readable.b-kongman.workers.dev/auth/line/callback`
+- (ทดสอบในเครื่อง) `http://localhost:5173/auth/google/callback`, `http://localhost:5173/auth/line/callback`

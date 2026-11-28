@@ -1,0 +1,6 @@
+# คัดลอกไฟล์นี้เป็น .dev.vars แล้วใส่ค่าจริง (ไฟล์ .dev.vars ไม่ถูก commit)
+# ไม่ใส่ก็ได้ ล็อกอินด้วยอีเมลยังใช้ได้ ปุ่ม Google/LINE จะไม่แสดง
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+LINE_CHANNEL_ID=
+LINE_CHANNEL_SECRET=

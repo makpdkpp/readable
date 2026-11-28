@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { integer, primaryKey, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { index, integer, primaryKey, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 const timestamps = {
   createdAt: integer("created_at", { mode: "timestamp" })
@@ -19,8 +19,41 @@ export const users = sqliteTable("users", {
     .notNull()
     .default("reader"),
   birthDate: text("birth_date"), // YYYY-MM-DD ใช้ยืนยันอายุสำหรับเรื่อง 18+
+  // null = สมัครผ่าน Google/LINE อย่างเดียว ยังไม่ได้ตั้งรหัสผ่าน
+  passwordHash: text("password_hash"),
+  emailVerified: integer("email_verified", { mode: "boolean" }).notNull().default(false),
   ...timestamps,
 });
+
+// เก็บเฉพาะ SHA-256 ของ token ใน cookie ถ้าฐานข้อมูลรั่วก็เอาไปใช้ล็อกอินไม่ได้
+export const sessions = sqliteTable(
+  "sessions",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+    createdAt: timestamps.createdAt,
+  },
+  (t) => [index("sessions_user_id_idx").on(t.userId)],
+);
+
+export const oauthAccounts = sqliteTable(
+  "oauth_accounts",
+  {
+    provider: text("provider", { enum: ["google", "line"] }).notNull(),
+    providerUserId: text("provider_user_id").notNull(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamps.createdAt,
+  },
+  (t) => [
+    primaryKey({ columns: [t.provider, t.providerUserId] }),
+    index("oauth_accounts_user_id_idx").on(t.userId),
+  ],
+);
 
 export const categories = sqliteTable("categories", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -86,3 +119,5 @@ export const library = sqliteTable(
 export type Novel = typeof novels.$inferSelect;
 export type Rating = Novel["rating"];
 export type NovelStatus = Novel["status"];
+export type User = typeof users.$inferSelect;
+export type OAuthProvider = (typeof oauthAccounts.$inferSelect)["provider"];

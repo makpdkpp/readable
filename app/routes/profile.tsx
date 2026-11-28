@@ -1,0 +1,153 @@
+import { eq } from "drizzle-orm";
+import { Form, useNavigation } from "react-router";
+
+import type { Route } from "./+types/profile";
+import { Field, FormError, SubmitButton } from "~/components/auth-ui";
+import { getDb } from "~/db/client";
+import { oauthAccounts, users } from "~/db/schema";
+import { hashPassword, verifyPassword } from "~/lib/auth/password";
+import { assertSameOrigin, requireUser } from "~/lib/auth/session.server";
+import { isValidBirthDate, validateDisplayName, validatePassword } from "~/lib/auth/validation";
+import { ageOn } from "~/lib/moderation";
+
+export function meta({}: Route.MetaArgs) {
+  return [{ title: "โปรไฟล์ — readable" }, { name: "robots", content: "noindex" }];
+}
+
+export async function loader({ request }: Route.LoaderArgs) {
+  const user = await requireUser(request);
+  const db = getDb();
+  const [row] = await db
+    .select({ passwordHash: users.passwordHash })
+    .from(users)
+    .where(eq(users.id, user.id));
+  const linked = await db
+    .select({ provider: oauthAccounts.provider })
+    .from(oauthAccounts)
+    .where(eq(oauthAccounts.userId, user.id));
+  return {
+    user,
+    hasPassword: !!row?.passwordHash,
+    linked: linked.map((l) => l.provider),
+    placeholderEmail: user.email.endsWith("@users.noreply.readable"),
+  };
+}
+
+type ActionResult = { form: "profile" | "password"; error?: string; ok?: string };
+
+export async function action({ request }: Route.ActionArgs): Promise<ActionResult> {
+  assertSameOrigin(request);
+  const user = await requireUser(request);
+  const form = await request.formData();
+  const db = getDb();
+
+  if (form.get("intent") === "password") {
+    if (user.email.endsWith("@users.noreply.readable")) {
+      return { form: "password", error: "บัญชีนี้ยังไม่มีอีเมล จึงตั้งรหัสผ่านไม่ได้" };
+    }
+    const current = String(form.get("currentPassword") ?? "");
+    const next = String(form.get("newPassword") ?? "");
+    const [row] = await db
+      .select({ passwordHash: users.passwordHash })
+      .from(users)
+      .where(eq(users.id, user.id));
+    if (row?.passwordHash && !(await verifyPassword(current, row.passwordHash))) {
+      return { form: "password", error: "รหัสผ่านปัจจุบันไม่ถูกต้อง" };
+    }
+    const err = validatePassword(next);
+    if (err) return { form: "password", error: err };
+    await db
+      .update(users)
+      .set({ passwordHash: await hashPassword(next), updatedAt: new Date() })
+      .where(eq(users.id, user.id));
+    return { form: "password", ok: "บันทึกรหัสผ่านแล้ว" };
+  }
+
+  const displayName = String(form.get("displayName") ?? "").trim();
+  const nameError = validateDisplayName(displayName);
+  if (nameError) return { form: "profile", error: nameError };
+
+  const update: { displayName: string; birthDate?: string; updatedAt: Date } = {
+    displayName,
+    updatedAt: new Date(),
+  };
+  // วันเกิดตั้งได้ครั้งเดียว กันการแก้อายุเพื่อเปิดอ่านเรื่อง 18+
+  const birthDate = String(form.get("birthDate") ?? "").trim();
+  if (!user.birthDate && birthDate) {
+    if (!isValidBirthDate(birthDate)) return { form: "profile", error: "วันเกิดไม่ถูกต้อง" };
+    update.birthDate = birthDate;
+  }
+  await db.update(users).set(update).where(eq(users.id, user.id));
+  return { form: "profile", ok: "บันทึกแล้ว" };
+}
+
+const PROVIDER_NAME = { google: "Google", line: "LINE" } as const;
+
+export default function Profile({ loaderData, actionData }: Route.ComponentProps) {
+  const { user, hasPassword, linked, placeholderEmail } = loaderData;
+  const busy = useNavigation().state === "submitting";
+  const msg = (f: ActionResult["form"]) =>
+    actionData?.form === f ? actionData : undefined;
+
+  return (
+    <div className="mx-auto max-w-lg px-4 py-10 space-y-8">
+      <h1 className="text-2xl font-bold">โปรไฟล์</h1>
+
+      <section className="rounded-lg border border-stone-200 dark:border-stone-800 p-6 space-y-4">
+        <div className="text-sm">
+          <div className="font-semibold">อีเมล</div>
+          <div className="text-stone-600 dark:text-stone-400">
+            {placeholderEmail ? "ยังไม่มีอีเมล (ล็อกอินผ่าน LINE)" : user.email}
+          </div>
+          {linked.length > 0 && (
+            <div className="mt-1 text-stone-500">
+              เชื่อมกับ {linked.map((p) => PROVIDER_NAME[p]).join(", ")}
+            </div>
+          )}
+        </div>
+        <Form method="post" className="space-y-4">
+          <input type="hidden" name="intent" value="profile" />
+          <FormError message={msg("profile")?.error} />
+          {msg("profile")?.ok && <p className="text-sm text-green-700">{msg("profile")?.ok}</p>}
+          <Field label="นามปากกา / ชื่อที่แสดง" name="displayName" defaultValue={user.displayName} />
+          {user.birthDate ? (
+            <div className="text-sm">
+              <div className="font-semibold">วันเกิด</div>
+              <div className="text-stone-600 dark:text-stone-400">
+                {user.birthDate} (อายุ {ageOn(user.birthDate, new Date())} ปี)
+              </div>
+            </div>
+          ) : (
+            <Field
+              label="วันเกิด"
+              name="birthDate"
+              type="date"
+              required={false}
+              hint="ใช้ยืนยันอายุสำหรับเรื่อง 18+ ตั้งได้ครั้งเดียว"
+            />
+          )}
+          <SubmitButton busy={busy}>บันทึก</SubmitButton>
+        </Form>
+      </section>
+
+      {!placeholderEmail && (
+      <section className="rounded-lg border border-stone-200 dark:border-stone-800 p-6 space-y-4">
+        <h2 className="font-semibold">{hasPassword ? "เปลี่ยนรหัสผ่าน" : "ตั้งรหัสผ่าน"}</h2>
+        {!hasPassword && (
+          <p className="text-sm text-stone-500">ตั้งรหัสผ่านไว้เพื่อล็อกอินด้วยอีเมลได้ด้วย</p>
+        )}
+        <Form method="post" className="space-y-4">
+          <input type="hidden" name="intent" value="password" />
+          <FormError message={msg("password")?.error} />
+          {msg("password")?.ok && <p className="text-sm text-green-700">{msg("password")?.ok}</p>}
+          {hasPassword && (
+            <Field label="รหัสผ่านปัจจุบัน" name="currentPassword" type="password" autoComplete="current-password" />
+          )}
+          <Field label="รหัสผ่านใหม่" name="newPassword" type="password" autoComplete="new-password" />
+          <SubmitButton busy={busy}>บันทึกรหัสผ่าน</SubmitButton>
+        </Form>
+      </section>
+      )}
+    </div>
+  );
+}

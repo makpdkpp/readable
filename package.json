@@ -17,6 +17,7 @@
     "deploy:workers-builds": "wrangler d1 migrations apply readable-db --remote && wrangler deploy"
   },
   "dependencies": {
+    "arctic": "^3.7.0",
     "drizzle-orm": "^0.45.4",
     "isbot": "^5.1.36",
     "react": "^19.3.1",
