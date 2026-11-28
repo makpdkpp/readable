@@ -10,3 +10,9 @@ ADMIN_EMAILS=
 
 # อีเมลติดต่อเรื่องข้อมูลส่วนบุคคล แสดงในหน้า /privacy (ควรตั้งบนเว็บจริง)
 CONTACT_EMAIL=
+
+# หน้า /admin/monitor: token สิทธิ์ Account Analytics: Read และ Account ID (ไม่ตั้งก็ได้ หน้าจะแสดงเฉพาะสถิติจากฐานข้อมูล)
+CF_ANALYTICS_TOKEN=
+CF_ACCOUNT_ID=
+# free หรือ paid
+CF_PLAN=

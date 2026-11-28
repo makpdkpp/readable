@@ -26,4 +26,5 @@ export default [
   route("admin/novels", "routes/admin.novels.tsx"),
   route("admin/comments", "routes/admin.comments.tsx"),
   route("admin/users", "routes/admin.users.tsx"),
+  route("admin/monitor", "routes/admin.monitor.tsx"),
 ] satisfies RouteConfig;
