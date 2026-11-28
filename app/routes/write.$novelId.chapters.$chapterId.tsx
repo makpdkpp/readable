@@ -156,19 +156,19 @@ export default function EditChapter({ loaderData, actionData }: Route.ComponentP
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <Link to={`/write/${novel.id}`} className="text-sm text-stone-500 hover:underline">
+      <Link to={`/write/${novel.id}`} className="text-sm text-muted hover:underline">
         ← {novel.title}
       </Link>
 
       <Form method="post" className="mt-4 space-y-4" onChange={() => setDirty(true)}>
         <input type="hidden" name="contentJson" value={content} />
         <div className="flex flex-wrap items-center gap-2 text-sm">
-          <span className="text-stone-500">ตอนที่ {chapter.number}</span>
+          <span className="text-muted">ตอนที่ {chapter.number}</span>
           <ChapterStatusBadge status={chapter.status} live={chapter.live} />
           {chapter.status === "scheduled" && !chapter.live && chapter.publishAt && (
-            <span className="text-stone-500">จะเผยแพร่ {formatThaiDateTime(chapter.publishAt)}</span>
+            <span className="text-muted">จะเผยแพร่ {formatThaiDateTime(chapter.publishAt)}</span>
           )}
-          <span className="ml-auto text-stone-500">
+          <span className="ml-auto text-muted">
             {dirty ? "ยังไม่ได้บันทึก" : `บันทึกล่าสุด ${formatThaiDateTime(chapter.updatedAt)}`}
           </span>
         </div>
@@ -189,7 +189,7 @@ export default function EditChapter({ loaderData, actionData }: Route.ComponentP
           }}
         />
 
-        <div className="sticky bottom-0 -mx-4 flex flex-wrap items-center gap-2 border-t border-stone-200 dark:border-stone-800 bg-white/95 dark:bg-gray-950/95 px-4 py-3 backdrop-blur">
+        <div className="sticky bottom-0 -mx-4 flex flex-wrap items-center gap-2 border-t border-line bg-bg/95 px-4 py-3 backdrop-blur">
           <button type="submit" name="intent" value="save" disabled={busy} className={secondaryButton}>
             {submitting("save") ? "กำลังบันทึก..." : chapter.live ? "บันทึกการแก้ไข" : "บันทึกร่าง"}
           </button>
@@ -212,7 +212,7 @@ export default function EditChapter({ loaderData, actionData }: Route.ComponentP
               กลับเป็นร่าง
             </button>
           )}
-          <Link to={`/novel/${novel.id}/chapter/${chapter.id}`} target="_blank" className="ml-auto text-sm text-amber-700 hover:underline dark:text-amber-400">
+          <Link to={`/novel/${novel.id}/chapter/${chapter.id}`} target="_blank" className="ml-auto text-sm text-accent hover:underline">
             ดูตัวอย่าง
           </Link>
           {showSchedule && !chapter.live && (

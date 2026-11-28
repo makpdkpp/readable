@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>readable · ตลาดนัดเรื่องเล่า (แบบ B)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&family=Sarabun:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --red:#e8432e;--red-d:#c7321f;--sun:#ffc93c;--ink:#1d1b1a;--teal:#0f8b8d;--paper:#ffffff;
+  --soft:#fff6e0;--blush:#fde3dd;--mut:#5f5853;--line:#1d1b1a;
+  --r:18px;--sh:4px 4px 0 var(--ink);--sh-s:3px 3px 0 var(--ink);
+  --hd:"Anuphan",system-ui,sans-serif;--bd:"Sarabun",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font:400 16px/1.6 var(--bd);color:var(--ink);background:#fff;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+input,textarea,select{font:inherit;font-size:16px;color:var(--ink)}
+:focus-visible{outline:3px solid var(--teal);outline-offset:2px;border-radius:10px}
+svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+h1,h2,h3,h4{font-family:var(--hd);font-weight:700;margin:0;line-height:1.3}
+
+/* ---------- shell ---------- */
+.shell{min-height:100vh}
+.info{display:none}
+.phone{position:relative;width:100%;height:100vh;height:100dvh;overflow:hidden;background:#fff}
+@media (min-width:900px){
+  body{background:var(--sun) radial-gradient(rgba(29,27,26,.14) 1.5px,transparent 1.6px) 0 0/22px 22px}
+  .shell{display:grid;grid-template-columns:minmax(320px,440px) 390px;gap:56px;justify-content:center;align-items:center;padding:32px}
+  .info{display:block;background:#fff;border:2px solid var(--ink);border-radius:24px;box-shadow:8px 8px 0 var(--ink);padding:28px;max-height:calc(100vh - 64px);overflow:auto}
+  .phone{width:390px;height:min(844px,calc(100vh - 64px));border:3px solid var(--ink);border-radius:44px;box-shadow:10px 10px 0 var(--ink)}
+  .about-btn{display:none!important}
+}
+.info-name{font:700 30px/1.2 var(--hd)}
+.info-name small{display:block;font:600 15px var(--hd);color:var(--red);margin-bottom:6px}
+.info p{margin:12px 0 18px;color:#3b3734}
+.info h3{font-size:16px;margin:18px 0 10px}
+.sw{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.sw div{border:2px solid var(--ink);border-radius:14px;overflow:hidden;font:600 12px/1.3 var(--hd);background:#fff}
+.sw span{display:block;height:44px;border-bottom:2px solid var(--ink)}
+.sw b{display:block;padding:6px 8px 0}.sw i{display:block;font-style:normal;padding:0 8px 6px;color:var(--mut)}
+.ty{border:2px solid var(--ink);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+.ty .a{font:700 26px/1.2 var(--hd)}.ty .b{font:400 17px/1.7 var(--bd)}
+.ty small{display:block;color:var(--mut);font:500 13px var(--hd)}
+.scr{display:flex;flex-wrap:wrap;gap:8px}
+.scr a{border:2px solid var(--ink);border-radius:999px;padding:8px 14px;font:600 14px var(--hd);min-height:40px;display:inline-flex;align-items:center;background:#fff}
+.scr a:hover{background:var(--sun)}
+.note{font-size:13px;color:var(--mut);margin-top:16px}
+
+/* ---------- screens ---------- */
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;display:none;padding-bottom:104px;background:#fff;scrollbar-width:none}
+.screen::-webkit-scrollbar{display:none}
+.screen.on{display:block}
+.screen.notab{padding-bottom:32px}
+.pad{padding:0 20px}
+.top{display:flex;align-items:center;gap:10px;padding:14px 20px 10px}
+.logo{font:700 26px/1 var(--hd);letter-spacing:-.5px;display:flex;align-items:center;gap:6px}
+.logo i{width:14px;height:14px;border-radius:50%;background:var(--red);border:2px solid var(--ink);display:inline-block}
+.grow{flex:1}
+.mode{display:flex;border:2px solid var(--ink);border-radius:999px;padding:3px;background:#fff;box-shadow:2px 2px 0 var(--ink)}
+.mode a{font:600 13px var(--hd);padding:0 12px;min-height:36px;display:flex;align-items:center;border-radius:999px}
+.mode a[aria-current]{background:var(--ink);color:#fff}
+.ibtn{color:var(--ink);width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;border:2px solid var(--ink);border-radius:14px;background:#fff;box-shadow:var(--sh-s);flex:none}
+.ibtn:active,.btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.ibtn.plain{border-color:transparent;box-shadow:none;background:transparent}
+.btn{min-height:48px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0 18px;border:2px solid var(--ink);border-radius:14px;background:#fff;box-shadow:var(--sh-s);font:700 16px var(--hd);transition:transform .08s}
+.btn.red{background:var(--red);color:#fff}.btn.sun{background:var(--sun)}.btn.ink{background:var(--ink);color:#fff}.btn.teal{background:var(--teal);color:#fff}
+.btn.full{width:100%}
+.btn.sm{min-height:44px;font-size:14px;padding:0 14px;border-radius:12px}
+.about-btn{white-space:nowrap;margin-bottom:6px;font:600 12px var(--hd);border:2px solid var(--ink);border-radius:999px;padding:0 10px;min-height:36px;display:inline-flex;align-items:center;gap:4px;background:var(--soft)}
+.about-btn svg.i{width:16px;height:16px}
+
+.search-entry{margin:6px 20px 0;display:flex;align-items:center;gap:10px;min-height:52px;padding:0 16px;border:2px solid var(--ink);border-radius:16px;box-shadow:var(--sh);background:#fff;color:var(--mut);font:500 16px var(--hd)}
+.search-entry svg{color:var(--ink)}
+
+.sec{margin-top:26px}
+.sh{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:0 20px;margin-bottom:12px}
+.sh h2{font-size:22px}
+.sh h2 em{font-style:normal;background:var(--sun);padding:0 8px;border-radius:8px;border:2px solid var(--ink);display:inline-block;transform:rotate(-2deg);margin-right:4px}
+.sh a,.sh button{font:600 14px var(--hd);color:var(--teal);min-height:44px;display:inline-flex;align-items:center;gap:2px;white-space:nowrap}
+.row{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 20px 14px;scroll-padding:0 20px;scrollbar-width:none;overscroll-behavior-x:contain}
+.row::-webkit-scrollbar{display:none}
+.row>*{scroll-snap-align:start;flex:none}
+
+.chips{display:flex;gap:8px;overflow-x:auto;padding:16px 20px 6px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;min-height:44px;padding:0 16px;border:2px solid var(--ink);border-radius:999px;background:#fff;font:600 14px var(--hd);display:inline-flex;align-items:center;white-space:nowrap}
+.chip[aria-pressed="true"]{background:var(--ink);color:#fff;box-shadow:2px 2px 0 var(--red)}
+
+/* stickers & badges */
+.stk{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border:2px solid var(--ink);border-radius:999px;font:700 12px/1.5 var(--hd);background:var(--sun);transform:rotate(-4deg);white-space:nowrap}
+.stk.red{background:var(--red);color:#fff}.stk.teal{background:var(--teal);color:#fff}.stk.w{background:#fff}
+.rt{display:inline-flex;align-items:center;padding:0 8px;min-height:22px;border:2px solid var(--ink);border-radius:8px;font:700 12px var(--hd);background:#fff;white-space:nowrap}
+.rt.g{background:var(--teal);color:#fff}.rt.t{background:var(--sun)}.rt.a{background:var(--red);color:#fff}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:0 10px;min-height:26px;border:2px solid var(--ink);border-radius:999px;font:600 12px var(--hd);white-space:nowrap}
+.b-draft{background:#fff;border-style:dashed}.b-wait{background:var(--sun)}.b-pub{background:var(--teal);color:#fff}.b-rej{background:var(--red);color:#fff}.b-sch{background:var(--blush)}
+
+/* covers */
+.cv{position:relative;aspect-ratio:5/7;border:2px solid var(--ink);border-radius:12px;overflow:hidden;background:var(--c1);container-type:inline-size;display:block}
+.cv svg.art{position:absolute;inset:0;width:100%;height:100%}
+.f1{fill:var(--c1)}.f2{fill:var(--c2)}.f3{fill:var(--c3)}.fw{fill:#fff}.fi{fill:#1d1b1a}
+.ln{fill:none;stroke:#1d1b1a;stroke-width:2}
+.s2{stroke:var(--c2);stroke-width:2.6;stroke-linecap:round;fill:none}.s3{stroke:var(--c3);stroke-width:2.6;stroke-linecap:round;fill:none}
+.cv-t{position:absolute;left:9%;right:9%;bottom:15%;font:700 15cqi/1.28 var(--hd);color:var(--tc);text-wrap:balance}
+.cv.tp .cv-t{top:9%;bottom:auto}
+.cv-a{position:absolute;left:9%;bottom:6%;font:600 7cqi/1.2 var(--hd);color:var(--tc);opacity:.85}
+.cv .rt{position:absolute;top:6px;right:6px;font-size:11px;min-height:20px;padding:0 6px}
+.cv.is-lk>svg.art,.cv.is-lk .cv-t,.cv.is-lk .cv-a{filter:blur(9px)}
+.cv-lock{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:rgba(29,27,26,.35);color:#fff;font:700 12px var(--hd);text-align:center;padding:8px}
+.cv-lock span{width:40px;height:40px;border-radius:50%;background:var(--red);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center}
+.cv-lock svg.i{width:20px;height:20px}
+
+/* hero carousel */
+.hero{padding-top:6px;padding-bottom:18px}
+.hero-card{width:86%;max-width:330px;scroll-snap-align:center!important;border:2px solid var(--ink);border-radius:20px;box-shadow:5px 5px 0 var(--ink);background:var(--hb);display:grid;grid-template-columns:40% 1fr;gap:14px;padding:14px;position:relative;color:var(--hf)}
+.hero-card .cv{transform:rotate(-3deg);box-shadow:3px 3px 0 var(--ink)}
+.hero-card h3{font-size:21px;line-height:1.3;margin:10px 0 4px}
+.hero-card p{margin:0;font-size:14px;line-height:1.5;opacity:.92;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.hero-card .by{font:600 13px var(--hd);opacity:.9}
+.hero-card .go{margin-top:10px;display:inline-flex;align-items:center;gap:4px;font:700 14px var(--hd);background:#fff;color:var(--ink);border:2px solid var(--ink);border-radius:12px;padding:0 12px;min-height:44px;box-shadow:2px 2px 0 var(--ink)}
+.hero-card .stk{position:absolute;top:-10px;right:14px}
+.dots{display:flex;justify-content:center;gap:6px;margin-top:-4px}
+.dots i{width:10px;height:10px;border-radius:999px;border:2px solid var(--ink);background:#fff;transition:width .2s}
+.dots i.on{width:26px;background:var(--red)}
+
+/* continue */
+.cont{width:270px;display:flex;gap:12px;padding:12px;border:2px solid var(--ink);border-radius:var(--r);box-shadow:var(--sh);background:#fff}
+.cont .cv{width:64px;flex:none}
+.cont h3{font-size:16px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cont .m{display:block;font:500 13px var(--hd);color:var(--mut);margin-top:2px}
+.bar{display:block;height:12px;border:2px solid var(--ink);border-radius:999px;background:#fff;overflow:hidden;margin-top:8px}
+.bar b{display:block;height:100%;background:var(--red);border-right:2px solid var(--ink)}
+.cont .go{font:700 13px var(--hd);color:var(--teal);margin-top:6px;display:inline-flex;align-items:center;gap:2px}
+
+/* ranking */
+.rank-wrap{background:var(--red);border-top:2px solid var(--ink);border-bottom:2px solid var(--ink);padding:22px 0 10px;margin-top:30px;position:relative}
+.rank-wrap .sh h2{color:#fff}
+.rank-wrap .sh a{color:#fff}
+.rk{width:156px;position:relative;padding-left:40px;display:block}
+.rk-n{position:absolute;left:-2px;bottom:52px;font:700 96px/1 var(--hd);color:var(--sun);-webkit-text-stroke:2.5px var(--ink);text-shadow:4px 4px 0 var(--ink);z-index:1;pointer-events:none}
+.rk .cv{box-shadow:4px 4px 0 var(--ink)}
+.rk-t{font:700 14px/1.35 var(--hd);color:#fff;margin-top:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:38px}
+.rk-m{font:500 12px var(--hd);color:#fff;opacity:.9}
+
+/* latest list */
+.list{list-style:none;margin:0;padding:0 20px;display:grid;gap:12px}
+.li{display:flex;gap:12px;align-items:center;padding:10px;border:2px solid var(--ink);border-radius:16px;background:#fff;min-height:44px}
+.li .cv{width:58px;flex:none;border-radius:9px}
+.li h3{font-size:16px;line-height:1.35}
+.li .m{font:500 13px var(--hd);color:var(--mut)}
+.li .c{font-size:14px;margin-top:2px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.li .side{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex:none;font:500 12px var(--hd);color:var(--mut)}
+.empty{margin:0 20px;padding:22px;border:2px dashed var(--ink);border-radius:16px;text-align:center;font:500 15px var(--hd)}
+
+/* grid */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 14px;padding:0 20px}
+.bk{display:block}
+.bk .cv{box-shadow:var(--sh)}
+.bk-t{font:700 15px/1.35 var(--hd);margin-top:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.bk-m{font:500 13px var(--hd);color:var(--mut)}
+.foot{margin:28px 20px 0;font-size:13px;color:var(--mut);text-align:center}
+
+/* tab bar */
+.tabbar{position:absolute;left:0;right:0;bottom:0;z-index:40;background:#fff;border-top:2px solid var(--ink);display:none;grid-template-columns:repeat(5,1fr);padding:6px 4px calc(8px + env(safe-area-inset-bottom))}
+.tabbar.on{display:grid}
+.tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:56px;font:600 11px var(--hd);color:var(--mut)}
+.tab span.ic{width:46px;height:30px;border-radius:999px;display:flex;align-items:center;justify-content:center;border:2px solid transparent}
+.tab[aria-current]{color:var(--ink)}
+.tab[aria-current] span.ic{background:var(--sun);border-color:var(--ink)}
+.tab.write span.ic{width:48px;height:48px;margin-top:-22px;background:var(--red);color:#fff;border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink)}
+.tab.write[aria-current] span.ic{background:var(--ink)}
+
+/* novel */
+.nv-head{background:var(--red) radial-gradient(rgba(255,255,255,.18) 2px,transparent 2.2px) 0 0/18px 18px;border-bottom:2px solid var(--ink);padding:12px 20px 26px;color:#fff}
+.nv-head .bar-top{display:flex;justify-content:space-between;margin-bottom:6px}
+.nv-cover{width:150px;margin:6px auto 0;transform:rotate(-3deg)}
+.nv-cover .cv{box-shadow:6px 6px 0 var(--ink)}
+.nv-title{font:700 27px/1.3 var(--hd);text-align:center;margin:20px 0 6px}
+.nv-by{display:flex;align-items:center;justify-content:center;gap:8px;font:600 15px var(--hd)}
+.av{width:32px;height:32px;border-radius:50%;border:2px solid var(--ink);display:inline-flex;align-items:center;justify-content:center;font:700 14px var(--hd);background:var(--sun);color:var(--ink);flex:none}
+.nv-badges{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:12px}
+.nv-badges .rt,.nv-badges .badge{background:#fff;color:var(--ink)}
+.nv-badges .rt.a{background:var(--ink);color:#fff}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);margin:-18px 20px 0;border:2px solid var(--ink);border-radius:var(--r);background:#fff;box-shadow:var(--sh);position:relative}
+.stats div{padding:12px 6px;text-align:center}
+.stats div+div{border-left:2px solid var(--ink)}
+.stats b{display:block;font:700 20px/1.2 var(--hd)}
+.stats span{font:500 12px var(--hd);color:var(--mut)}
+.acts{padding:20px 20px 0;display:grid;gap:10px}
+.acts .two{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.acts .two .btn{padding:0 6px;gap:5px;white-space:nowrap}
+.tog[aria-pressed="true"]{background:var(--sun)}
+.tog.lk[aria-pressed="true"]{background:var(--red);color:#fff}
+.tog[aria-pressed="true"] svg.i{fill:currentColor}
+.box{margin:22px 20px 0;padding:16px;border:2px solid var(--ink);border-radius:var(--r);background:#fff}
+.box h2{font-size:19px;margin-bottom:8px}
+.syn{margin:0;color:#34302d;line-height:1.75}
+.syn.clamp{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.more{font:700 14px var(--hd);color:var(--teal);min-height:44px;display:inline-flex;align-items:center;gap:4px}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.tag{font:600 13px var(--hd);padding:4px 12px;border-radius:999px;background:var(--soft);border:2px solid var(--ink)}
+.chl{list-style:none;margin:0;padding:0}
+.chl li+li{border-top:2px dashed #d8d2cc}
+.chl a,.chl button{display:flex;align-items:center;gap:12px;min-height:56px;padding:8px 0;width:100%;text-align:left}
+.chl .n{font:700 14px var(--hd);width:44px;height:44px;border:2px solid var(--ink);border-radius:12px;display:flex;align-items:center;justify-content:center;flex:none;background:#fff}
+.chl .cur .n{background:var(--sun)}
+.chl .t{font:600 15px/1.35 var(--hd)}
+.chl .d{font:500 12px var(--hd);color:var(--mut)}
+.chl .stk{margin-left:auto}
+.cm{display:flex;gap:10px;padding:10px 0}
+.cm+.cm{border-top:2px dashed #d8d2cc}
+.cm b{font:700 14px var(--hd)}.cm small{color:var(--mut);font:500 12px var(--hd);margin-left:6px}
+.cm p{margin:2px 0 0;font-size:15px}
+
+/* reader */
+#read{overflow:hidden;padding:0;--rbg:#fff;--rfg:#2b2826;--rmut:#7a726b;--rline:#e9e4de;--fs:19px;--lh:1.95;background:var(--rbg);color:var(--rfg)}
+#read[data-th="sepia"]{--rbg:#f4ead6;--rfg:#45382b;--rmut:#86735f;--rline:#e2d5bb}
+#read[data-th="night"]{--rbg:#171615;--rfg:#dad4cb;--rmut:#958d84;--rline:#2e2b28}
+.rd-scroll{position:absolute;inset:0;overflow-y:auto;scrollbar-width:none}
+.rd-scroll::-webkit-scrollbar{display:none}
+.rd-prog{position:absolute;top:0;left:0;height:4px;background:var(--red);z-index:12;width:0}
+.rd-top,.rd-bot{position:absolute;left:0;right:0;z-index:10;background:var(--rbg);display:flex;align-items:center;gap:6px;padding:6px 10px;transition:transform .25s ease}
+.rd-top{top:0;border-bottom:1px solid var(--rline);padding-top:10px}
+.rd-bot{bottom:0;border-top:1px solid var(--rline);padding-bottom:calc(8px + env(safe-area-inset-bottom));justify-content:space-between}
+#read.hide .rd-top{transform:translateY(-110%)}
+#read.hide .rd-bot{transform:translateY(110%)}
+.rd-top .ttl{flex:1;min-width:0;font:600 14px/1.3 var(--hd);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rd-top .ttl small{display:block;font-weight:500;color:var(--rmut)}
+.rb{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:4px;border-radius:12px;font:600 14px var(--hd);color:var(--rfg);padding:0 10px}
+.rb:disabled{opacity:.35}
+.rb.aa{font:700 17px var(--hd)}
+.rd-art{max-width:34em;margin:0 auto;padding:84px 24px 120px;font:400 var(--fs)/var(--lh) var(--bd)}
+.rd-art .kick{font:500 14px var(--hd);color:var(--rmut);margin:0}
+.rd-art h1{font:700 1.45em/1.35 var(--hd);margin:4px 0 26px}
+.rd-art p{margin:0 0 1.05em}
+.rd-art .end{text-align:center;color:var(--rmut);font:500 14px var(--hd);margin:36px 0 18px}
+.endbox{border:2px solid var(--rfg);border-radius:18px;padding:18px;text-align:center;font-family:var(--hd)}
+.endbox h2{font-size:18px}
+.endbox .row2{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.endbox .rbx{min-height:48px;border:2px solid var(--rfg);border-radius:14px;padding:0 16px;display:inline-flex;align-items:center;gap:6px;font:700 15px var(--hd);color:var(--rfg)}
+.endbox .rbx[aria-pressed="true"]{background:var(--red);border-color:var(--red);color:#fff}
+.endbox .rbx[aria-pressed="true"] svg{fill:currentColor}
+.cform{display:flex;gap:8px;margin-top:16px}
+.cform input{flex:1;min-width:0;min-height:48px;border:2px solid var(--rfg);border-radius:14px;padding:0 14px;background:transparent;color:var(--rfg)}
+.navx{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.navx .rbx{justify-content:center}
+
+/* sheets */
+.scrim{position:absolute;inset:0;background:rgba(29,27,26,.45);z-index:80;opacity:0;pointer-events:none;transition:opacity .2s}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:90;background:#fff;border-top:2px solid var(--ink);border-radius:24px 24px 0 0;padding:10px 20px calc(24px + env(safe-area-inset-bottom));transform:translateY(105%);transition:transform .25s ease;max-height:86%;overflow-y:auto;visibility:hidden}
+.sheet.on{transform:none;visibility:visible}
+.sheet .grab{width:44px;height:5px;border-radius:9px;background:#cfc8c1;margin:0 auto 10px}
+.sheet-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sheet-h h2{font-size:20px}
+.set{margin:16px 0}
+.set>span{display:block;font:600 14px var(--hd);margin-bottom:8px}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px}
+.seg button{min-height:48px;border:2px solid var(--ink);border-radius:12px;font:600 14px var(--hd);background:#fff}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.seg .th-sepia{background:#f4ead6}.seg .th-night{background:#171615;color:#dad4cb}
+.seg .th-sepia[aria-pressed="true"],.seg .th-night[aria-pressed="true"],.seg .th-light[aria-pressed="true"],.seg .th-auto[aria-pressed="true"]{box-shadow:0 0 0 3px var(--red)}
+.seg .th-light[aria-pressed="true"],.seg .th-auto[aria-pressed="true"]{background:#fff;color:var(--ink)}
+.seg .th-night[aria-pressed="true"]{background:#171615;color:#dad4cb}.seg .th-sepia[aria-pressed="true"]{background:#f4ead6;color:#45382b}
+.fsz{display:flex;align-items:center;gap:10px}
+.fsz output{flex:1;text-align:center;font:700 18px var(--hd)}
+.fsz button{min-width:64px}
+.toc{list-style:none;margin:0;padding:0}
+.toc li+li{border-top:2px dashed #e1dbd4}
+.toc button{display:flex;gap:12px;align-items:center;width:100%;min-height:52px;text-align:left;font:600 15px var(--hd)}
+.toc button span{width:34px;color:var(--mut);font-weight:700}
+.toc button[aria-current] {color:var(--red)}
+
+.toast{position:absolute;left:50%;bottom:96px;transform:translate(-50%,20px);z-index:100;background:var(--ink);color:#fff;font:600 14px var(--hd);padding:12px 18px;border-radius:14px;box-shadow:3px 3px 0 var(--red);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;max-width:calc(100% - 40px);text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.scrim.on~.toast{bottom:auto;top:20px}
+
+/* search */
+.sbox{display:flex;align-items:center;gap:8px;margin:0 20px;padding:0 6px 0 14px;border:2px solid var(--ink);border-radius:16px;box-shadow:var(--sh)}
+.sbox input{flex:1;min-width:0;border:0;min-height:50px;background:transparent;outline:0}
+.sbox:focus-within{box-shadow:var(--sh),0 0 0 3px var(--teal)}
+.stalls{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 20px}
+.stall{position:relative;overflow:hidden;min-height:76px;border:2px solid var(--ink);border-radius:16px;padding:12px 14px;text-align:left;font:700 17px/1.3 var(--hd);background:var(--sb);color:var(--sf);box-shadow:var(--sh-s)}
+.stall svg{position:absolute;right:-10px;bottom:-12px;width:64px;height:64px;opacity:.9}
+.stall[aria-pressed="true"]{outline:3px solid var(--ink);outline-offset:2px}
+
+/* library */
+.shelf{display:grid;gap:14px;padding:0 20px}
+.sb-item{display:flex;gap:14px;padding:12px;border:2px solid var(--ink);border-radius:var(--r);box-shadow:var(--sh);background:#fff;align-items:center}
+.sb-item .cv{width:72px;flex:none}
+.sb-item h3{font-size:16px}
+.sb-item .m{display:block;font:500 13px var(--hd);color:var(--mut)}
+.pc{font:700 13px var(--hd);margin-top:6px;display:flex;justify-content:space-between}
+
+/* me */
+.me-card{margin:8px 20px 0;padding:20px;border:2px solid var(--ink);border-radius:20px;box-shadow:var(--sh);background:var(--sun);text-align:center}
+.me-card .av{width:72px;height:72px;font-size:28px;background:#fff;margin-bottom:8px}
+.menu{list-style:none;margin:20px 20px 0;padding:0;border:2px solid var(--ink);border-radius:var(--r);overflow:hidden}
+.menu li+li{border-top:2px solid var(--ink)}
+.menu a,.menu button{display:flex;align-items:center;gap:12px;min-height:56px;padding:0 16px;width:100%;font:600 15px var(--hd);text-align:left;background:#fff}
+.menu svg.chev{margin-left:auto}
+
+/* login form */
+.field{display:grid;gap:6px;margin-bottom:14px}
+.field label,.lab{font:600 14px var(--hd)}
+.inp{width:100%;min-height:50px;border:2px solid var(--ink);border-radius:14px;padding:10px 14px;background:#fff}
+textarea.inp{min-height:120px;line-height:1.7;resize:vertical}
+select.inp{appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%231d1b1a' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center}
+.chk{display:flex;gap:10px;align-items:flex-start;font-size:15px;min-height:44px}
+.chk input{width:22px;height:22px;margin-top:2px;accent-color:var(--red)}
+
+/* dash */
+.studio-h{background:var(--ink);color:#fff;padding:14px 20px 54px;border-bottom:2px solid var(--ink)}
+.studio-h .mode{border-color:#fff;box-shadow:2px 2px 0 var(--red)}
+.studio-h .mode a{color:var(--ink)}
+.studio-h .mode a[aria-current]{background:var(--red);color:#fff}
+.studio-h h1{font-size:26px;margin-top:14px}
+.studio-h p{margin:2px 0 0;color:#d9d3cc;font:500 14px var(--hd)}
+.streak{margin:-40px 20px 0;padding:16px;border:2px solid var(--ink);border-radius:20px;background:var(--sun);box-shadow:var(--sh);position:relative}
+.streak .t{display:flex;align-items:center;gap:10px}
+.streak .fl{width:48px;height:48px;border-radius:14px;background:var(--red);border:2px solid var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;flex:none}
+.streak .fl svg{width:26px;height:26px;fill:var(--sun)}
+.streak h2{font-size:19px}
+.streak small{font:500 13px var(--hd)}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:14px}
+.days div{text-align:center;font:600 12px var(--hd)}
+.days i{display:flex;margin:0 auto 4px;width:34px;height:34px;border-radius:50%;border:2px solid var(--ink);background:#fff;align-items:center;justify-content:center;color:#fff}
+.days i.y{background:var(--red)}
+.days i.td{background:#fff;border-style:dashed}
+.days i svg{width:16px;height:16px;stroke-width:3}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:18px 20px 0}
+.kpi{border:2px solid var(--ink);border-radius:16px;padding:12px 10px;background:#fff;box-shadow:var(--sh-s)}
+.kpi span{font:500 12px/1.3 var(--hd);color:var(--mut);display:block}
+.kpi b{font:700 20px/1.3 var(--hd);display:block;margin-top:4px}
+.kpi em{font:700 12px var(--hd);font-style:normal;color:var(--teal)}
+.chart{margin:14px 20px 0;padding:16px;border:2px solid var(--ink);border-radius:var(--r);background:#fff}
+.chart h2{font-size:16px;display:flex;justify-content:space-between}
+.chart h2 small{font:500 13px var(--hd);color:var(--mut)}
+.bars{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;align-items:end;height:120px;margin-top:12px}
+.bars div{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;font:600 11px var(--hd);color:var(--mut);gap:4px}
+.bars b{width:100%;max-width:30px;background:var(--red);border:2px solid var(--ink);border-radius:8px 8px 3px 3px;display:block}
+.bars div.td b{background:var(--sun)}
+.bars div.td{color:var(--ink)}
+.goal{margin:14px 20px 0;padding:16px;border:2px solid var(--ink);border-radius:var(--r);background:var(--soft);display:flex;gap:14px;align-items:center}
+.ring{width:72px;height:72px;flex:none;border-radius:50%;background:conic-gradient(var(--teal) 0 62%,#fff 62% 100%);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center}
+.ring b{width:50px;height:50px;border-radius:50%;background:var(--soft);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font:700 14px var(--hd)}
+.goal h2{font-size:16px}.goal p{margin:2px 0 0;font-size:14px;color:#3b3734}
+.mine{display:grid;gap:12px;padding:0 20px}
+.my{border:2px solid var(--ink);border-radius:var(--r);background:#fff;box-shadow:var(--sh);padding:12px;display:grid;grid-template-columns:62px 1fr;gap:12px;align-items:start}
+.my h3{font-size:16px;line-height:1.35}
+.my .m{font:500 13px var(--hd);color:var(--mut);margin:2px 0 6px}
+.my .reason{grid-column:1/-1;background:var(--blush);border:2px solid var(--ink);border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.55}
+.my .reason b{font-family:var(--hd)}
+.my .ops{grid-column:1/-1;display:flex;gap:8px}
+.feed{list-style:none;margin:0;padding:0 20px;display:grid;gap:2px}
+.feed li{display:flex;gap:12px;align-items:flex-start;padding:10px 0}
+.feed li+li{border-top:2px dashed #d8d2cc}
+.feed .fi-ic{width:40px;height:40px;border-radius:12px;border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;flex:none}
+.feed p{margin:0;font-size:15px;line-height:1.5}
+.feed small{color:var(--mut);font:500 12px var(--hd)}
+
+/* novel edit */
+.bar-sticky{position:sticky;top:0;z-index:20;background:#fff;border-bottom:2px solid var(--ink);display:flex;align-items:center;gap:8px;padding:8px 12px}
+.bar-sticky h1{font-size:17px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.form{padding:18px 20px 0}
+.upl{display:flex;gap:14px;align-items:center;padding:14px;border:2px dashed var(--ink);border-radius:var(--r);background:var(--soft);margin-bottom:16px;cursor:pointer}
+.upl .cv{width:84px;flex:none}
+.upl b{font:700 15px var(--hd);display:flex;align-items:center;gap:6px}
+.upl small{display:block;color:var(--mut);font-size:13px;margin-top:2px}
+.upl:focus-within{outline:3px solid var(--teal);outline-offset:2px}
+.tagbox{display:flex;flex-wrap:wrap;gap:8px;align-items:center;min-height:52px;border:2px solid var(--ink);border-radius:14px;padding:8px 10px}
+.tagbox:focus-within{outline:3px solid var(--teal);outline-offset:2px}
+.tagbox input{flex:1;min-width:120px;border:0;outline:0;min-height:36px;background:transparent}
+.tchip{display:inline-flex;align-items:center;gap:2px;padding-left:12px;border:2px solid var(--ink);border-radius:999px;background:var(--sun);font:600 14px var(--hd)}
+.tchip button{width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%}
+.tchip button svg.i{width:16px;height:16px}
+.hint{font-size:13px;color:var(--mut);margin-top:4px}
+fieldset{border:0;padding:0;margin:0 0 14px}
+legend{font:600 14px var(--hd);margin-bottom:8px;padding:0}
+.rate{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.rate label{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:72px;border:2px solid var(--ink);border-radius:16px;font:700 18px var(--hd);cursor:pointer;background:#fff;text-align:center}
+.rate label small{font:500 12px var(--hd);color:var(--mut)}
+.rate input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.rate label:has(input:checked){background:var(--ink);color:#fff;box-shadow:3px 3px 0 var(--red)}
+.rate label:has(input:checked) small{color:#ddd}
+.rate label:has(input:focus-visible){outline:3px solid var(--teal);outline-offset:2px}
+.n18{display:none;margin-top:12px;gap:10px;padding:12px 14px;border:2px solid var(--ink);border-radius:14px;background:var(--blush);font-size:14px;line-height:1.6}
+.n18.on{display:flex}
+.n18 svg{color:var(--red);margin-top:2px}
+.n18 b{font-family:var(--hd)}
+.eh{display:flex;justify-content:space-between;align-items:center;margin:26px 0 10px}
+.eh h2{font-size:19px}
+.chs{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.chs li{display:flex;align-items:center;gap:6px;padding:8px 10px 8px 4px;border:2px solid var(--ink);border-radius:16px;background:#fff;touch-action:pan-y}
+.chs li.drag{box-shadow:5px 5px 0 var(--red);transform:scale(1.02);position:relative;z-index:2}
+.handle{width:40px;min-height:44px;display:flex;align-items:center;justify-content:center;color:var(--mut);cursor:grab;touch-action:none;border-radius:10px}
+.chs .tx{flex:1;min-width:0}
+.chs .tx b{display:block;font:700 15px/1.35 var(--hd);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chs .tx small{display:flex;flex-wrap:wrap;gap:6px;align-items:center;color:var(--mut);font:500 12px var(--hd);margin-top:4px}
+.chs a.ed{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:12px;flex:none}
+
+/* chapter edit */
+#chapter-edit{background:#fff}
+.ce-bar{position:sticky;top:0;z-index:20;background:#fff;display:flex;align-items:center;gap:6px;padding:8px 10px;border-bottom:2px solid var(--ink)}
+.save{flex:1;min-width:0;font:500 13px var(--hd);color:var(--mut);display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden}
+.save i{width:9px;height:9px;border-radius:50%;background:var(--teal);flex:none}
+.save.ing i{background:var(--sun);border:1px solid var(--ink)}
+.pv[aria-pressed="true"]{background:var(--sun)}
+.tbar{position:sticky;top:62px;z-index:19;display:flex;gap:6px;overflow-x:auto;padding:8px 10px;background:#fff;border-bottom:2px dashed #d8d2cc;scrollbar-width:none}
+.tbar::-webkit-scrollbar{display:none}
+.tbar button{flex:none;min-width:44px;height:44px;border:2px solid var(--ink);border-radius:12px;display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:0 10px;font:600 13px var(--hd);background:#fff}
+.tbar button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.ce-wrap{padding:20px 22px 90px}
+.ce-title{width:100%;border:0;outline:0;font:700 26px/1.35 var(--hd);padding:6px 0;background:transparent}
+.ce-title:focus-visible{box-shadow:0 2px 0 var(--teal)}
+.ce-k{font:500 13px var(--hd);color:var(--mut)}
+.ed-area{min-height:340px;outline:0;font:400 18px/1.95 var(--bd);margin-top:10px;padding:4px 0}
+.ed-area:focus-visible{box-shadow:inset 3px 0 0 var(--teal);padding-left:10px}
+.ed-area p{margin:0 0 1em}
+.ed-area h3{font:700 21px/1.4 var(--hd);margin:1.2em 0 .5em}
+.ed-area blockquote{margin:1em 0;padding:10px 16px;border:2px solid var(--ink);border-radius:14px;background:var(--soft)}
+.ed-area hr{border:0;margin:1.6em 0;text-align:center;height:auto;overflow:visible}
+.ed-area hr::after{content:"✦  ✦  ✦";font-size:14px;color:var(--red);letter-spacing:6px}
+#chapter-edit.preview .tbar{display:none}
+#chapter-edit.preview .ce-wrap{background:#fffdf8}
+#chapter-edit.preview .ed-area{font-size:19px}
+.cnt{position:absolute;left:12px;right:12px;bottom:12px;z-index:30;display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--ink);color:#fff;border-radius:14px;padding:6px 6px 6px 14px;font:600 13px var(--hd);box-shadow:3px 3px 0 var(--red)}
+.cnt .btn{min-height:44px;box-shadow:none;border-color:#fff}
+.opt{display:grid;gap:10px}
+.opt label{display:flex;gap:12px;align-items:flex-start;padding:14px;border:2px solid var(--ink);border-radius:16px;cursor:pointer}
+.opt label:has(input:checked){background:var(--soft);box-shadow:3px 3px 0 var(--ink)}
+.opt input{width:22px;height:22px;accent-color:var(--red);margin-top:2px;flex:none}
+.opt b{font:700 16px var(--hd);display:block}
+.opt small{color:var(--mut);font-size:14px}
+.when{display:none;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.when.on{display:grid}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="info" aria-label="เกี่ยวกับแบบนี้">
+    <div class="info-inner">
+      <div class="info-name"><small>แบบ B · readable</small>ตลาดนัดเรื่องเล่า</div>
+      <p>เหมือนเดินตลาดนัดกลางคืนที่มีแต่เรื่องเล่า แผงแต่ละแผงเรียกให้แวะดู สีแดงมะเขือเทศกับเหลืองทานตะวันปูเป็นพื้นสีเต็ม ๆ การ์ดอ้วนกลมขอบหมึกหนาพร้อมเงาทึบ สติกเกอร์ อันดับตัวเลขใหญ่ และแถบเลื่อนแนวนอนชวนให้ค้นพบเรื่องใหม่ทุกครั้งที่ปัด แต่พอเข้าหน้าอ่าน ทุกอย่างสงบลงเหลือแค่ตัวอักษรที่อ่านสบายตา ส่วนฝั่งนักเขียนเป็นสตูดิโอครีเอเตอร์ที่มีสถิติ สตรีก และเป้าหมายให้ฮึด</p>
+      <h3>พาเลตสี</h3>
+      <div class="sw">
+        <div><span style="background:#e8432e"></span><b>มะเขือเทศ</b><i>#e8432e</i></div>
+        <div><span style="background:#ffc93c"></span><b>ทานตะวัน</b><i>#ffc93c</i></div>
+        <div><span style="background:#1d1b1a"></span><b>หมึก</b><i>#1d1b1a</i></div>
+        <div><span style="background:#0f8b8d"></span><b>เขียวหัวเป็ด</b><i>#0f8b8d</i></div>
+        <div><span style="background:#ffffff"></span><b>กระดาษ</b><i>#ffffff</i></div>
+        <div><span style="background:#f4ead6"></span><b>ซีเปีย (อ่าน)</b><i>#f4ead6</i></div>
+      </div>
+      <h3>ตัวอักษร</h3>
+      <div class="ty"><small>หัวเรื่อง · Anuphan 600–700</small><div class="a">ตลาดนัดเรื่องเล่า</div></div>
+      <div class="ty"><small>เนื้อหา / หน้าอ่าน · Sarabun 400</small><div class="b">ฝนเริ่มตกตอนหกโมงสิบห้า ตรงกับเวลาที่ร้านกาแฟเปิดไฟดวงสุดท้าย</div></div>
+      <h3>หน้าจอทั้งหมด</h3>
+      <nav class="scr" aria-label="รายการหน้าจอ">
+        <a href="#home">หน้าแรก</a><a href="#search">ค้นหา</a><a href="#novel">หน้าเรื่อง</a><a href="#read">หน้าอ่าน</a><a href="#library">ชั้นหนังสือ</a><a href="#me">โปรไฟล์</a><a href="#dash">แดชบอร์ดนักเขียน</a><a href="#novel-edit">จัดการเรื่อง</a><a href="#chapter-edit">เขียนตอน</a>
+      </nav>
+      <div class="note">ข้อมูลตัวอย่าง: ชื่อเรื่อง นักเขียน และตัวเลขทั้งหมดถูกสมมุติขึ้น</div>
+    </div>
+  </aside>
+
+  <main class="phone" id="phone">
+    <!-- HOME -->
+    <section class="screen" id="home" aria-label="หน้าแรก">
+      <div class="top">
+        <div class="logo" aria-label="readable"><i></i>readable</div>
+        <div class="grow"></div>
+        <nav class="mode" aria-label="สลับโหมด"><a href="#home" aria-current="page">อ่าน</a><a href="#dash">เขียน</a></nav>
+      </div>
+      <a class="search-entry" href="#search"><svg class="i" data-ic="search"></svg>ค้นหาเรื่อง นักเขียน หรือแท็ก</a>
+      <div class="chips" id="homeChips" role="group" aria-label="หมวดหมู่"></div>
+
+      <div class="sec">
+        <div class="sh"><h2><em>เรื่องเด่น</em>วันนี้</h2><button class="about-btn" data-open="sh-about" type="button"><svg class="i" data-ic="info"></svg>เกี่ยวกับแบบนี้</button></div>
+        <div class="row hero" id="hero"></div>
+        <div class="dots" id="heroDots" aria-hidden="true"></div>
+      </div>
+
+      <div class="sec">
+        <div class="sh"><h2>อ่านต่อ</h2><a href="#library">ชั้นหนังสือ<svg class="i" data-ic="next"></svg></a></div>
+        <div class="row" id="cont"></div>
+      </div>
+
+      <div class="rank-wrap">
+        <div class="sh"><h2>ยอดนิยม อันดับ 1–10</h2><a href="#search">ดูทั้งหมด<svg class="i" data-ic="next"></svg></a></div>
+        <div class="row" id="rank" style="padding-top:8px"></div>
+      </div>
+
+      <div class="sec" id="latestSec">
+        <div class="sh"><h2>อัปเดตล่าสุด</h2><span class="stk teal" id="latestTag">ทุกหมวด</span></div>
+        <ul class="list" id="latest"></ul>
+      </div>
+
+      <div class="sec">
+        <div class="sh"><h2><em>แนะนำ</em>สำหรับคุณ</h2></div>
+        <div class="grid" id="rec"></div>
+      </div>
+      <p class="foot">ข้อมูลตัวอย่าง · ชื่อเรื่องและตัวเลขทั้งหมดสมมุติขึ้น</p>
+    </section>
+
+    <!-- SEARCH -->
+    <section class="screen" id="search" aria-label="ค้นหา">
+      <div class="top"><h1 style="font-size:26px">ค้นหา</h1></div>
+      <form class="sbox" id="sForm" role="search"><svg class="i" data-ic="search"></svg><label class="sr" for="sInput">ค้นหา</label><input id="sInput" type="search" placeholder="พิมพ์ชื่อเรื่อง นักเขียน แท็ก" autocomplete="off"><button class="ibtn plain" type="submit" aria-label="ค้นหา"><svg class="i" data-ic="next"></svg></button></form>
+      <div class="chips" id="recent" role="group" aria-label="คำค้นล่าสุด"></div>
+      <div class="sec" style="margin-top:12px">
+        <div class="sh"><h2>เดินเล่นตามแผง</h2></div>
+        <div class="stalls" id="stalls"></div>
+      </div>
+      <div class="sec">
+        <div class="sh"><h2 id="sResTitle">ผลการค้นหา</h2></div>
+        <ul class="list" id="sRes"></ul>
+      </div>
+    </section>
+
+    <!-- NOVEL -->
+    <section class="screen notab" id="novel" aria-label="หน้าเรื่อง">
+      <div class="nv-head">
+        <div class="bar-top"><a class="ibtn" href="#home" aria-label="กลับ"><svg class="i" data-ic="back"></svg></a><button class="ibtn" type="button" data-share aria-label="แชร์"><svg class="i" data-ic="share"></svg></button></div>
+        <div class="nv-cover" id="nvCover"></div>
+        <h1 class="nv-title" id="nvTitle"></h1>
+        <div class="nv-by"><span class="av" id="nvAv"></span><span id="nvAuthor"></span></div>
+        <div class="nv-badges" id="nvBadges"></div>
+      </div>
+      <div class="stats" id="nvStats"></div>
+      <div class="acts">
+        <a class="btn red full" href="#read" id="nvCont"><svg class="i" data-ic="book"></svg><span>อ่านต่อ ตอนที่ 12</span></a>
+        <a class="btn full" href="#read" id="nvFirst" data-ch="1">อ่านตอนแรก</a>
+        <div class="two">
+          <button class="btn sm tog" type="button" id="tShelf" aria-pressed="false"><svg class="i" data-ic="bookmark"></svg>เก็บเข้าชั้น</button>
+          <button class="btn sm tog lk" type="button" id="tLike" aria-pressed="false"><svg class="i" data-ic="heart"></svg><span>ถูกใจ</span></button>
+          <button class="btn sm" type="button" data-share><svg class="i" data-ic="share"></svg>แชร์</button>
+        </div>
+      </div>
+      <div class="box">
+        <h2>เรื่องย่อ</h2>
+        <p class="syn clamp" id="syn"></p>
+        <button class="more" type="button" id="synBtn" aria-expanded="false" aria-controls="syn">อ่านเพิ่มเติม<svg class="i" data-ic="down"></svg></button>
+        <div class="tags" id="nvTags"></div>
+      </div>
+      <div class="box">
+        <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">สารบัญ</h2><span class="stk" id="nvChCount">24 ตอน</span></div>
+        <ul class="chl" id="nvCh" style="margin-top:8px"></ul>
+        <button class="btn full sm" type="button" data-open="sh-toc" style="margin-top:8px"><svg class="i" data-ic="list"></svg>ดูสารบัญทั้งหมด</button>
+      </div>
+      <div class="box">
+        <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">ความคิดเห็น</h2><span class="badge" style="background:var(--soft)">312</span></div>
+        <div id="nvCm" style="margin-top:6px"></div>
+      </div>
+    </section>
+
+    <!-- READ -->
+    <section class="screen" id="read" aria-label="หน้าอ่านตอน" data-th="light">
+      <div class="rd-prog" id="rdProg" role="progressbar" aria-label="ความคืบหน้าการอ่าน" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+      <div class="rd-top">
+        <a class="rb" href="#novel" aria-label="กลับหน้าเรื่อง"><svg class="i" data-ic="back"></svg></a>
+        <div class="ttl"><span id="rdBook">ดอกไม้ไฟกลางเมืองฝน</span><small id="rdCh">ตอนที่ 12</small></div>
+        <button class="rb aa" type="button" data-open="sh-read" aria-label="ตั้งค่าการอ่าน">Aa</button>
+      </div>
+      <div class="rd-scroll" id="rdScroll">
+        <article class="rd-art" id="art">
+          <p class="kick" id="artKick">ตอนที่ 12</p>
+          <h1 id="artTitle">ร่มคันเดียว</h1>
+          <div id="prose"></div>
+          <p class="end">— จบตอนที่ <span id="endN">12</span> —</p>
+          <div class="endbox">
+            <h2>ชอบตอนนี้ไหม</h2>
+            <div class="row2">
+              <button class="rbx" type="button" id="rdLike" aria-pressed="false"><svg class="i" data-ic="heart"></svg><span>ถูกใจ 1,204</span></button>
+              <a class="rbx" href="#novel"><svg class="i" data-ic="msg"></svg>86 ความเห็น</a>
+            </div>
+            <form class="cform" id="cForm"><label class="sr" for="cInput">เขียนความคิดเห็น</label><input id="cInput" placeholder="เขียนความคิดเห็นถึงนักเขียน" autocomplete="off"><button class="rbx" type="submit" aria-label="ส่งความคิดเห็น"><svg class="i" data-ic="send"></svg></button></form>
+            <div class="navx"><button class="rbx" type="button" data-step="-1"><svg class="i" data-ic="back"></svg>ตอนก่อนหน้า</button><button class="rbx" type="button" data-step="1">ตอนถัดไป<svg class="i" data-ic="next"></svg></button></div>
+          </div>
+        </article>
+      </div>
+      <div class="rd-bot">
+        <button class="rb" type="button" data-step="-1" id="rdPrev"><svg class="i" data-ic="back"></svg>ก่อนหน้า</button>
+        <button class="rb" type="button" data-open="sh-toc"><svg class="i" data-ic="list"></svg>สารบัญ</button>
+        <button class="rb" type="button" data-step="1" id="rdNext">ถัดไป<svg class="i" data-ic="next"></svg></button>
+      </div>
+    </section>
+
+    <!-- LIBRARY -->
+    <section class="screen" id="library" aria-label="ชั้นหนังสือ">
+      <div class="top"><h1 style="font-size:26px">ชั้นหนังสือ</h1><div class="grow"></div><span class="stk" id="libCount">5 เรื่อง</span></div>
+      <div class="chips" id="libTabs" role="group" aria-label="ตัวกรองชั้นหนังสือ" style="padding-top:4px"></div>
+      <div class="shelf" id="shelf" style="margin-top:10px"></div>
+    </section>
+
+    <!-- ME -->
+    <section class="screen" id="me" aria-label="โปรไฟล์">
+      <div class="top"><h1 style="font-size:26px">โปรไฟล์</h1></div>
+      <div class="me-card" id="meCard"></div>
+      <ul class="menu">
+        <li><a href="#dash"><svg class="i" data-ic="pen"></svg>ไปสตูดิโอนักเขียน<svg class="i chev" data-ic="next"></svg></a></li>
+        <li><a href="#library"><svg class="i" data-ic="book"></svg>ชั้นหนังสือของฉัน<svg class="i chev" data-ic="next"></svg></a></li>
+        <li><button type="button" data-open="sh-about"><svg class="i" data-ic="info"></svg>เกี่ยวกับแบบนี้<svg class="i chev" data-ic="next"></svg></button></li>
+      </ul>
+      <p class="foot">ข้อมูลตัวอย่าง · readable ต้นแบบแบบ B</p>
+    </section>
+
+    <!-- DASH -->
+    <section class="screen" id="dash" aria-label="แดชบอร์ดนักเขียน">
+      <div class="studio-h">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="logo" style="font-size:22px"><i></i>studio</div><div class="grow"></div>
+          <nav class="mode" aria-label="สลับโหมด"><a href="#home">อ่าน</a><a href="#dash" aria-current="page">เขียน</a></nav>
+        </div>
+        <h1>สวัสดี ปลายฟ้า</h1>
+        <p>วันนี้มีคนอ่านเรื่องของคุณแล้ว 1,862 ครั้ง</p>
+      </div>
+      <div class="streak">
+        <div class="t"><div class="fl"><svg class="i" data-ic="flame"></svg></div><div><h2>เขียนต่อเนื่อง 5 วัน</h2><small>เขียนอีก 300 คำวันนี้ สตรีกไม่หลุดแน่นอน</small></div></div>
+        <div class="days" id="days"></div>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><span>ยอดอ่าน 7 วัน</span><b>12,480</b><em>+18%</em></div>
+        <div class="kpi"><span>ถูกใจ</span><b>1,932</b><em>+126</em></div>
+        <div class="kpi"><span>ผู้ติดตาม</span><b>846</b><em>+41</em></div>
+      </div>
+      <div class="chart" role="img" aria-label="กราฟยอดอ่านรายวัน 7 วันล่าสุด สูงสุดวันนี้ 2,410 ครั้ง">
+        <h2>ยอดอ่านรายวัน <small>22–28 พ.ย.</small></h2>
+        <div class="bars" id="bars"></div>
+      </div>
+      <div class="goal">
+        <div class="ring"><b>62%</b></div>
+        <div><h2>เป้าหมายเดือนพฤศจิกายน</h2><p>เขียนแล้ว 24,860 จาก 40,000 คำ เหลืออีก 2 วัน</p></div>
+      </div>
+      <div class="sec">
+        <div class="sh"><h2>เรื่องของฉัน</h2><a href="#novel-edit" class="btn red sm" style="color:#fff"><svg class="i" data-ic="plus"></svg>สร้างเรื่องใหม่</a></div>
+        <div class="mine" id="mine"></div>
+      </div>
+      <div class="sec">
+        <div class="sh"><h2>ความเคลื่อนไหวล่าสุด</h2></div>
+        <ul class="feed" id="feed"></ul>
+      </div>
+      <p class="foot">ข้อมูลตัวอย่าง</p>
+    </section>
+
+    <!-- NOVEL EDIT -->
+    <section class="screen notab" id="novel-edit" aria-label="จัดการเรื่อง">
+      <div class="bar-sticky"><a class="ibtn plain" href="#dash" aria-label="กลับแดชบอร์ด"><svg class="i" data-ic="back"></svg></a><h1>จัดการเรื่อง</h1><a class="btn sm" href="#novel" data-b="0">ดูหน้าเรื่อง</a><button class="btn sm red" type="submit" form="neForm">บันทึก</button></div>
+      <form class="form" id="neForm">
+        <label class="upl" for="coverFile">
+          <span id="neCover" style="width:84px;flex:none"></span>
+          <span><b><svg class="i" data-ic="image"></svg>เปลี่ยนภาพปก</b><small>JPG หรือ PNG ขนาด 1000×1400 px ไม่เกิน 2 MB</small><span class="badge b-pub" style="margin-top:8px">เผยแพร่แล้ว</span></span>
+          <input id="coverFile" class="sr" type="file" accept="image/*">
+        </label>
+        <div class="field"><label for="neTitle">ชื่อเรื่อง</label><input class="inp" id="neTitle" value="ดอกไม้ไฟกลางเมืองฝน" maxlength="80"></div>
+        <div class="field"><label for="neSyn">เรื่องย่อ</label><textarea class="inp" id="neSyn" maxlength="1200">มินตรา นักออกแบบกราฟิกที่ใช้ชีวิตวนลูประหว่างออฟฟิศกับร้านกาแฟหน้าซอย ไม่เคยคิดว่าวันพุธที่ฝนตกหนักจะพาเธอมาเจอภูผา ชายแปลกหน้าถือร่มสีเหลืองที่ดูเหมือนจะรู้จักเธอดีกว่าที่ควร</textarea><span class="hint" id="synCount">0/1200</span></div>
+        <div class="field"><label for="neCat">หมวดหมู่</label><select class="inp" id="neCat"></select></div>
+        <div class="field"><span class="lab" id="tagLab">แท็ก</span>
+          <div class="tagbox" id="tagbox"><input id="tagIn" aria-labelledby="tagLab" placeholder="พิมพ์แล้วกด Enter" enterkeyhint="done"></div>
+          <span class="hint">เพิ่มได้สูงสุด 8 แท็ก กดกากบาทเพื่อลบ</span></div>
+        <fieldset>
+          <legend>เรตเนื้อหา</legend>
+          <div class="rate">
+            <label><input type="radio" name="rate" value="g">ทั่วไป<small>ทุกวัย</small></label>
+            <label><input type="radio" name="rate" value="13" checked>13+<small>วัยรุ่นขึ้นไป</small></label>
+            <label><input type="radio" name="rate" value="18">18+<small>ผู้ใหญ่</small></label>
+          </div>
+          <div class="n18" id="n18" role="note"><svg class="i" data-ic="lock"></svg><div><b>เรื่อง 18+ ต้องรอแอดมินอนุมัติก่อนเผยแพร่</b><br>เมื่อบันทึก เรื่องจะเปลี่ยนเป็นสถานะ “รออนุมัติ 18+” และผู้อ่านจะยังไม่เห็นจนกว่าจะผ่านการตรวจ ปกติใช้เวลา 1–2 วันทำการ</div></div>
+        </fieldset>
+        <div class="eh"><h2>ตอนทั้งหมด</h2><a class="btn sm sun" href="#chapter-edit"><svg class="i" data-ic="plus"></svg>เพิ่มตอนใหม่</a></div>
+        <p class="hint" style="margin:-4px 0 10px">ลากที่จุดจับ หรือโฟกัสแล้วกดลูกศรขึ้น/ลง เพื่อจัดลำดับ</p>
+        <ul class="chs" id="chs"></ul>
+      </form>
+    </section>
+
+    <!-- CHAPTER EDIT -->
+    <section class="screen notab" id="chapter-edit" aria-label="เขียนตอน" style="padding-bottom:0">
+      <div class="ce-bar">
+        <a class="ibtn plain" href="#novel-edit" aria-label="กลับไปจัดการเรื่อง"><svg class="i" data-ic="back"></svg></a>
+        <div class="save" id="saveSt" aria-live="polite"><i></i><span>บันทึกแล้ว 10:42</span></div>
+        <button class="btn sm pv" type="button" id="pvBtn" aria-pressed="false"><svg class="i" data-ic="eye"></svg>ตัวอย่าง</button>
+        <button class="btn sm red" type="button" data-open="sh-pub">เผยแพร่</button>
+      </div>
+      <div class="tbar" id="tbar" role="toolbar" aria-label="จัดรูปแบบข้อความ">
+        <button type="button" data-cmd="bold" aria-label="ตัวหนา" aria-pressed="false"><svg class="i" data-ic="bold"></svg></button>
+        <button type="button" data-cmd="italic" aria-label="ตัวเอียง" aria-pressed="false"><svg class="i" data-ic="italic"></svg></button>
+        <button type="button" data-cmd="h3" aria-label="หัวข้อ" aria-pressed="false"><svg class="i" data-ic="heading"></svg>หัวข้อ</button>
+        <button type="button" data-cmd="quote" aria-label="คำพูด" aria-pressed="false"><svg class="i" data-ic="quote"></svg>คำพูด</button>
+        <button type="button" data-cmd="hr" aria-label="เส้นคั่นฉาก"><svg class="i" data-ic="scene"></svg>คั่นฉาก</button>
+        <button type="button" data-cmd="center" aria-label="จัดกึ่งกลาง" aria-pressed="false"><svg class="i" data-ic="center"></svg></button>
+      </div>
+      <div class="ce-wrap">
+        <div class="ce-k">ดอกไม้ไฟกลางเมืองฝน · ตอนที่ 25</div>
+        <label class="sr" for="ceTitle">ชื่อตอน</label>
+        <input class="ce-title" id="ceTitle" value="ไฟสีส้มดวงสุดท้าย" placeholder="ชื่อตอน">
+        <div class="ed-area" id="ed" contenteditable="true" role="textbox" aria-multiline="true" aria-label="เนื้อหาตอน" spellcheck="false">
+          <p>คืนก่อนลอยกระทง ร้านกาแฟหน้าซอยอารีย์ปิดเร็วกว่าปกติ มินตรายืนอยู่หน้าประตูกระจกที่แขวนป้าย “ขอบคุณที่แวะมา” แล้วรู้สึกเหมือนถูกปฏิเสธเบา ๆ จากสถานที่ที่เคยเป็นของเธอ</p>
+          <p>“มาช้าไปสิบนาที” เสียงคุ้นหูดังมาจากด้านหลัง ภูผายืนถือกระทงใบตองสองใบ ร่มสีเหลืองหนีบไว้ใต้แขนเหมือนเป็นส่วนหนึ่งของร่างกาย</p>
+          <blockquote>บางคนมาสาย แต่ไม่เคยมาผิดที่</blockquote>
+          <p>เธอหัวเราะออกมาก่อนจะทันตั้งตัว และนั่นเป็นครั้งแรกในรอบหลายเดือนที่เสียงหัวเราะของตัวเองไม่ฟังดูเหนื่อย</p>
+        </div>
+      </div>
+      <div class="cnt"><span id="wc">0 คำ · 0 ตัวอักษร</span><button class="btn sm sun" type="button" data-open="sh-pub">ตัวเลือกเผยแพร่</button></div>
+    </section>
+
+    <!-- TAB BAR -->
+    <nav class="tabbar" id="tabbar" aria-label="เมนูหลัก">
+      <a class="tab" href="#home" data-tab="home"><span class="ic"><svg class="i" data-ic="home"></svg></span>หน้าแรก</a>
+      <a class="tab" href="#search" data-tab="search"><span class="ic"><svg class="i" data-ic="search"></svg></span>ค้นหา</a>
+      <a class="tab write" href="#dash" data-tab="dash"><span class="ic"><svg class="i" data-ic="pen"></svg></span>เขียน</a>
+      <a class="tab" href="#library" data-tab="library"><span class="ic"><svg class="i" data-ic="book"></svg></span>ชั้นหนังสือ</a>
+      <a class="tab" href="#me" data-tab="me"><span class="ic"><svg class="i" data-ic="user"></svg></span>โปรไฟล์</a>
+    </nav>
+
+    <div class="scrim" id="scrim"></div>
+
+    <div class="sheet" id="sh-read" role="dialog" aria-modal="true" aria-labelledby="shReadH">
+      <div class="grab"></div>
+      <div class="sheet-h"><h2 id="shReadH">ตั้งค่าการอ่าน</h2><button class="ibtn plain" type="button" data-close aria-label="ปิด"><svg class="i" data-ic="x"></svg></button></div>
+      <div class="set"><span>ขนาดตัวอักษร</span><div class="fsz"><button class="btn" type="button" id="fsDown" aria-label="ลดขนาดตัวอักษร">A-</button><output id="fsOut">19 px</output><button class="btn" type="button" id="fsUp" aria-label="เพิ่มขนาดตัวอักษร">A+</button></div></div>
+      <div class="set"><span>ระยะบรรทัด</span><div class="seg" id="lhSeg"><button type="button" data-lh="1.7" aria-pressed="false">แน่น</button><button type="button" data-lh="1.95" aria-pressed="true">ปกติ</button><button type="button" data-lh="2.25" aria-pressed="false">โปร่ง</button></div></div>
+      <div class="set"><span>ธีม</span><div class="seg" id="thSeg"><button type="button" class="th-light" data-th="light" aria-pressed="true">สว่าง</button><button type="button" class="th-sepia" data-th="sepia" aria-pressed="false">ซีเปีย</button><button type="button" class="th-night" data-th="night" aria-pressed="false">กลางคืน</button><button type="button" class="th-auto" data-th="auto" aria-pressed="false">ตามเครื่อง</button></div></div>
+    </div>
+
+    <div class="sheet" id="sh-toc" role="dialog" aria-modal="true" aria-labelledby="shTocH">
+      <div class="grab"></div>
+      <div class="sheet-h"><h2 id="shTocH">สารบัญ · 24 ตอน</h2><button class="ibtn plain" type="button" data-close aria-label="ปิด"><svg class="i" data-ic="x"></svg></button></div>
+      <ul class="toc" id="toc"></ul>
+    </div>
+
+    <div class="sheet" id="sh-pub" role="dialog" aria-modal="true" aria-labelledby="shPubH">
+      <div class="grab"></div>
+      <div class="sheet-h"><h2 id="shPubH">เผยแพร่ตอนนี้อย่างไร</h2><button class="ibtn plain" type="button" data-close aria-label="ปิด"><svg class="i" data-ic="x"></svg></button></div>
+      <form id="pubForm">
+        <div class="opt">
+          <label><input type="radio" name="pub" value="draft" checked><span><b>บันทึกร่าง</b><small>เก็บไว้เขียนต่อ ผู้อ่านยังมองไม่เห็น</small></span></label>
+          <label><input type="radio" name="pub" value="now"><span><b>เผยแพร่ทันที</b><small>ผู้ติดตาม 846 คนจะได้รับการแจ้งเตือน</small></span></label>
+          <label><input type="radio" name="pub" value="sch"><span><b>ตั้งเวลาเผยแพร่</b><small>เลือกวันและเวลาที่ตอนนี้จะขึ้นเอง</small></span></label>
+        </div>
+        <div class="when" id="when">
+          <div class="field"><label for="pDate">วันที่</label><input class="inp" type="date" id="pDate" value="2026-11-30"></div>
+          <div class="field"><label for="pTime">เวลา</label><input class="inp" type="time" id="pTime" value="20:00"></div>
+        </div>
+        <button class="btn red full" type="submit" id="pubGo" style="margin-top:16px">บันทึกร่าง</button>
+      </form>
+    </div>
+
+    <div class="sheet" id="sh-login" role="dialog" aria-modal="true" aria-labelledby="shLogH">
+      <div class="grab"></div>
+      <div class="sheet-h"><h2 id="shLogH">เข้าสู่ระบบเพื่ออ่านเรื่อง 18+</h2><button class="ibtn plain" type="button" data-close aria-label="ปิด"><svg class="i" data-ic="x"></svg></button></div>
+      <form id="logForm">
+        <div class="field"><label for="lEmail">อีเมล</label><input class="inp" id="lEmail" type="email" value="reader@example.com" autocomplete="email"></div>
+        <div class="field"><label for="lPass">รหัสผ่าน</label><input class="inp" id="lPass" type="password" value="sample-pass" autocomplete="current-password"></div>
+        <label class="chk"><input type="checkbox" id="lAge" checked>ฉันยืนยันว่าอายุ 18 ปีขึ้นไป</label>
+        <button class="btn red full" type="submit" style="margin-top:8px">เข้าสู่ระบบ</button>
+      </form>
+    </div>
+
+    <div class="sheet" id="sh-about" role="dialog" aria-modal="true" aria-labelledby="shAboutH">
+      <div class="grab"></div>
+      <div class="sheet-h"><h2 id="shAboutH">เกี่ยวกับแบบนี้</h2><button class="ibtn plain" type="button" data-close aria-label="ปิด"><svg class="i" data-ic="x"></svg></button></div>
+      <div class="info" id="aboutBody" style="display:block;border:0;box-shadow:none;padding:0;max-height:none"></div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </main>
+</div>
+
+<script>
+{
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const IC={
+home:'<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+book:'<path d="M4 19V5a2 2 0 0 1 2-2h14v15H6a2 2 0 0 0-2 2 2 2 0 0 0 2 2h14"/><path d="M9 7h7"/>',
+pen:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+back:'<path d="m15 18-6-6 6-6"/>',next:'<path d="m9 18 6-6-6-6"/>',down:'<path d="m6 9 6 6 6-6"/>',
+share:'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/>',
+heart:'<path d="M12 20.5s-7.5-4.6-9.5-9.3C1.2 7.9 3.3 4.5 7 4.5c2.1 0 3.6 1.1 5 3 1.4-1.9 2.9-3 5-3 3.7 0 5.8 3.4 4.5 6.7-2 4.7-9.5 9.3-9.5 9.3z"/>',
+bookmark:'<path d="M6 3h12v18l-6-4-6 4z"/>',plus:'<path d="M12 5v14M5 12h14"/>',
+eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+list:'<path d="M9 6h12M9 12h12M9 18h12M4 6h.01M4 12h.01M4 18h.01"/>',x:'<path d="M18 6 6 18M6 6l12 12"/>',
+lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+bold:'<path d="M7 5h6a3.5 3.5 0 0 1 0 7H7zM7 12h7a3.5 3.5 0 0 1 0 7H7z"/>',italic:'<path d="M19 4h-9M14 20H5M15 4 9 20"/>',
+heading:'<path d="M6 4v16M18 4v16M6 12h12"/>',quote:'<path d="M4 18c2.5 0 5-1.5 5-6V6H4v6h4M15 18c2.5 0 5-1.5 5-6V6h-5v6h4"/>',
+scene:'<path d="M4 12h2M11 12h2M18 12h2"/>',center:'<path d="M4 6h16M7 12h10M5 18h14"/>',
+grip:'<circle cx="9" cy="6" r=".6"/><circle cx="15" cy="6" r=".6"/><circle cx="9" cy="12" r=".6"/><circle cx="15" cy="12" r=".6"/><circle cx="9" cy="18" r=".6"/><circle cx="15" cy="18" r=".6"/>',
+clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',check:'<path d="m5 12 5 5 9-10"/>',
+image:'<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/>',
+flame:'<path d="M12 22c4 0 7-3 7-7 0-4-3-6-4-10-2 2-3 4-3 6-1-1-2-2-2-4-3 2-5 5-5 8 0 4 3 7 7 7z"/>',
+msg:'<path d="M21 12a8 8 0 0 1-11.8 7L3 21l2-5.5A8 8 0 1 1 21 12z"/>',
+info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
+send:'<path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/>',
+users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 4 6"/>',
+trend:'<path d="m3 17 6-6 4 4 8-8M15 7h6v6"/>',edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>'
+};
+const ic=(n,c='')=>`<svg class="i ${c}" viewBox="0 0 24 24" aria-hidden="true">${IC[n]||''}</svg>`;
+const paintIcons=(r=document)=>$$('svg[data-ic]',r).forEach(s=>{s.setAttribute('viewBox','0 0 24 24');s.setAttribute('aria-hidden','true');s.innerHTML=IC[s.dataset.ic]||'';s.removeAttribute('data-ic')});
+
+/* ---------- data ---------- */
+const CATS=['โรแมนติก','แฟนตาซี','ดราม่า','สืบสวน / ลึกลับ','สยองขวัญ','แอ็กชัน / ผจญภัย','ไซไฟ','วาย','ยูริ','ตลก','แฟนฟิค','อื่น ๆ'];
+const B=[
+{t:'ดอกไม้ไฟกลางเมืองฝน',a:'ปลายฟ้า',g:'โรแมนติก',r:'13+',st:'กำลังเขียน',ch:24,v:'128.4K',l:9312,c:['#e8432e','#ffc93c','#ffffff'],s:6,tc:'#ffffff',tp:1,up:'12 นาทีที่แล้ว',nw:1,tags:['คาเฟ่','ฝนตก','รักแรกพบ','กรุงเทพ','ฟีลกู๊ด'],
+ d:'มินตรา นักออกแบบกราฟิกที่ใช้ชีวิตวนลูประหว่างออฟฟิศกับร้านกาแฟหน้าซอย ไม่เคยคิดว่าวันพุธที่ฝนตกหนักจะพาเธอมาเจอภูผา ชายแปลกหน้าถือร่มสีเหลืองที่ดูเหมือนจะรู้จักเธอดีกว่าที่ควร ยิ่งใกล้ฤดูลอยกระทง ภาพสเกตช์ในสมุดของเขายิ่งเผยความลับทีละหน้า ว่าทำไมทุกภาพต้องมีผู้หญิงคนหนึ่งนั่งริมหน้าต่างเสมอ และทำไมเขาถึงกลัวดอกไม้ไฟมากกว่าพายุฝน เรื่องรักอบอุ่นปนเศร้าเล็ก ๆ ของคนสองคนที่บังเอิญเลือกโต๊ะติดกันในเมืองที่ฝนไม่เคยหยุดตก'},
+{t:'ผู้พิทักษ์ประตูที่เจ็ด',a:'นาคราชน้อย',g:'แฟนตาซี',r:'13+',st:'กำลังเขียน',ch:58,v:'342K',l:21540,c:['#0f8b8d','#ffc93c','#1d1b1a'],s:4,tc:'#ffffff',tp:1,up:'1 ชั่วโมงที่แล้ว',nw:1,tags:['เวทมนตร์','ตำนานไทย','ผจญภัย'],d:'เด็กหนุ่มร้านพระเครื่องย่านท่าพระจันทร์ค้นพบว่าประตูไม้เก่าหลังร้านเชื่อมไปยังเมืองบาดาล และเขาคือผู้พิทักษ์คนสุดท้ายที่เหลืออยู่'},
+{t:'คดีฆาตกรรมห้อง 409',a:'หมอกเช้า',g:'สืบสวน / ลึกลับ',r:'13+',st:'จบแล้ว',ch:42,v:'210K',l:15020,c:['#ffc93c','#1d1b1a','#e8432e'],s:3,tc:'#1d1b1a',tp:0,up:'3 ชั่วโมงที่แล้ว',nw:0,tags:['ห้องปิดตาย','นักสืบ','คอนโด'],d:'ห้องคอนโดที่ล็อกจากด้านใน ศพที่ไม่มีบาดแผล และนิติบุคคลสาวที่บังเอิญจำทุกคนที่เข้าออกตึกได้หมด'},
+{t:'เสียงกระซิบใต้ถุนบ้าน',a:'ตะเกียงเก่า',g:'สยองขวัญ',r:'18+',st:'กำลังเขียน',ch:19,v:'88.2K',l:6110,c:['#2b2a27','#e8432e','#f5efe6'],s:1,tc:'#ffffff',tp:0,up:'5 ชั่วโมงที่แล้ว',nw:0,tags:['ผีไทย','บ้านเรือนไทย'],d:'บ้านไม้สองชั้นริมคลองที่ทุกคืนวันพระจะมีเสียงเรียกชื่อคนในบ้านดังมาจากใต้ถุน'},
+{t:'ยานสำรวจหมายเลขศูนย์',a:'ดาวหาง',g:'ไซไฟ',r:'ทั่วไป',st:'กำลังเขียน',ch:31,v:'64.9K',l:4380,c:['#7fd1c7','#e8432e','#1d1b1a'],s:7,tc:'#1d1b1a',tp:1,up:'เมื่อวาน',nw:0,tags:['อวกาศ','AI','เอาชีวิตรอด'],d:'ยานสำรวจที่ถูกลืมตื่นขึ้นมาอีกครั้งพร้อมลูกเรือเพียงคนเดียว กับปัญญาประดิษฐ์ที่พูดภาษาอีสาน'},
+{t:'รักนี้ไม่มีสคริปต์',a:'ชาเย็นหวานน้อย',g:'วาย',r:'13+',st:'กำลังเขียน',ch:15,v:'156K',l:18230,c:['#ff8fab','#ffffff','#e8432e'],s:5,tc:'#1d1b1a',tp:1,up:'เมื่อวาน',nw:0,tags:['วงการบันเทิง','คู่จิ้น'],d:'นักแสดงหน้าใหม่ต้องเล่นซีรีส์คู่กับรุ่นพี่ที่เกลียดขี้หน้า แต่กล้องจับได้ว่าสายตาไม่เคยโกหก'},
+{t:'ร้านข้าวมันไก่ของยัยแม่มด',a:'มะลิซ้อน',g:'ตลก',r:'ทั่วไป',st:'กำลังเขียน',ch:47,v:'401K',l:33870,c:['#b7e36b','#ffc93c','#e8432e'],s:0,tc:'#1d1b1a',tp:1,up:'2 วันที่แล้ว',nw:0,tags:['แม่มด','อาหาร','ฮาแตก'],d:'แม่มดฝึกหัดถูกเนรเทศมาเปิดร้านข้าวมันไก่ในตลาดพลู น้ำจิ้มสูตรลับของเธอทำให้ลูกค้าพูดความจริงทุกคำ'},
+{t:'ดาบสุดท้ายแห่งลุ่มน้ำ',a:'เหล็กไหล',g:'แอ็กชัน / ผจญภัย',r:'13+',st:'กำลังเขียน',ch:61,v:'188K',l:12090,c:['#e8432e','#1d1b1a','#ffc93c'],s:2,tc:'#ffffff',tp:1,up:'2 วันที่แล้ว',nw:0,tags:['ดาบ','กำลังภายใน','ล้างแค้น'],d:'ช่างตีดาบหมู่บ้านริมน้ำต้องออกเดินทางตามหาดาบเล่มที่ตัวเองตีไว้เมื่อสิบปีก่อน ก่อนที่มันจะถูกใช้ล้มราชวงศ์'},
+{t:'คืนที่ทะเลไม่หลับ',a:'ลมทะเล',g:'ดราม่า',r:'18+',st:'จบแล้ว',ch:28,v:'97.5K',l:8820,c:['#3a7bd5','#ffc93c','#ffffff'],s:2,tc:'#ffffff',tp:1,up:'3 วันที่แล้ว',nw:0,tags:['ครอบครัว','ทะเล'],d:'สามพี่น้องกลับมาเกาะบ้านเกิดเพื่องานศพพ่อ และพบว่าความลับของครอบครัวถูกฝังไว้ใต้ทราย'},
+{t:'จดหมายถึงเธอในปี 2590',a:'ใบบัว',g:'ยูริ',r:'ทั่วไป',st:'กำลังเขียน',ch:12,v:'41.3K',l:3950,c:['#ffd6c2','#0f8b8d','#e8432e'],s:1,tc:'#1d1b1a',tp:0,up:'4 วันที่แล้ว',nw:0,tags:['ข้ามเวลา','จดหมาย'],d:'จดหมายลึกลับจากอนาคตมาถึงตู้ไปรษณีย์ของเด็กสาวมัธยมปลาย ผู้เขียนอ้างว่าเป็นคนที่เธอจะรักที่สุด'},
+{t:'ใต้เงาจันทร์สีชาด',a:'ปลายฟ้า',g:'ดราม่า',r:'18+',st:'กำลังเขียน',ch:6,v:'—',l:0,c:['#8f1d14','#ffc93c','#ffffff'],s:1,tc:'#ffffff',tp:1,up:'',nw:0,tags:[],d:''},
+{t:'บันทึกลับของแมวส้ม',a:'ปลายฟ้า',g:'ตลก',r:'ทั่วไป',st:'กำลังเขียน',ch:3,v:'—',l:0,c:['#ff9f43','#ffffff','#1d1b1a'],s:0,tc:'#1d1b1a',tp:1,up:'',nw:0,tags:[],d:''},
+{t:'สัญญารักใต้ร่มจามจุรี',a:'ปลายฟ้า',g:'โรแมนติก',r:'ทั่วไป',st:'กำลังเขียน',ch:2,v:'—',l:0,c:['#c9f0d8','#e8432e','#0f8b8d'],s:6,tc:'#1d1b1a',tp:0,up:'',nw:0,tags:[],d:''}
+];
+const CH=['แก้วที่สองของวันพุธ','สมุดสเกตช์สีน้ำเงิน','บาริสต้าช่างสังเกต','โต๊ะมุมหน้าต่าง','คนที่ชอบกาแฟไม่ใส่น้ำตาล','ข้อความที่ไม่ได้ส่ง','พายุลูกแรก','รถไฟฟ้าขบวนสุดท้าย','ภาพวาดที่ไม่มีชื่อ','เพื่อนสนิทของมินตรา','สัญญาณไฟสีเหลือง','ร่มคันเดียว','ไหล่ที่เปียกฝน','พุธหน้า','ร้านปิดปรับปรุง','ตามหาคนในภาพ','นิทรรศการเล็ก ๆ','ความลับของภูผา','จดหมายจากเชียงใหม่','ฤดูฝนที่ยาวนาน','ดอกไม้ไฟดวงแรก','คำตอบที่รอมานาน','คืนก่อนลอยกระทง','ดอกไม้ไฟกลางเมืองฝน'];
+const PROSE=[
+'ฝนเริ่มตกตอนหกโมงสิบห้า ตรงกับเวลาที่ร้านกาแฟหน้าซอยอารีย์เปิดไฟสีส้มดวงสุดท้าย มินตราเงยหน้าจากแล็ปท็อปแล้วถอนหายใจยาว เธอรู้ดีว่าร่มของตัวเองยังนอนอยู่ในลิ้นชักโต๊ะทำงานที่ออฟฟิศ ห่างออกไปสามสถานีรถไฟฟ้า',
+'“ถ้าจะรอให้หยุด คงได้นอนที่นี่” เสียงทุ้มดังขึ้นจากโต๊ะข้าง ๆ ชายหนุ่มในเสื้อเชิ้ตสีเทาที่นั่งตรงนั้นมาตั้งแต่บ่ายกำลังเก็บสมุดสเกตช์ใส่กระเป๋าผ้า ปลายนิ้วเขามีคราบหมึกสีน้ำเงินจาง ๆ เหมือนคนที่ไม่เคยเช็ดปากกาให้เรียบร้อยสักครั้ง',
+'“คุณพูดกับฉันเหรอคะ” มินตราถาม ทั้งที่ในร้านเหลือกันอยู่แค่สองคนกับบาริสต้าที่กำลังคว่ำแก้วเก็บทีละใบ',
+'เขายิ้ม ไม่ตอบ แต่ยกร่มสีเหลืองคันใหญ่ขึ้นมาให้ดูแทน ร่มคันนั้นสดใสจนดูผิดที่ผิดทางในค่ำคืนที่ทุกอย่างเป็นสีเทา “ผมไปทางสถานีเหมือนกัน ถ้าไม่รังเกียจ”',
+'เธอควรปฏิเสธ แม่สอนไว้ตั้งแต่เด็กว่าอย่าไปไหนกับคนแปลกหน้า แต่แม่ไม่เคยต้องเดินฝ่าฝนเดือนพฤศจิกายนด้วยรองเท้าผ้าใบสีขาวคู่ใหม่ มินตราปิดแล็ปท็อป ยัดทุกอย่างลงกระเป๋า แล้วพยักหน้าเร็วกว่าที่สมองจะทันห้าม',
+'ใต้ร่มคันเดียว ระยะห่างระหว่างคนสองคนเหลือไม่ถึงคืบ กลิ่นฝนผสมกับกลิ่นกาแฟคั่วที่ติดเสื้อเขามา เสียงน้ำกระทบผ้าร่มดังเป็นจังหวะเหมือนใครเคาะประตูเบา ๆ มินตรานับก้าวในใจเพื่อไม่ให้ตัวเองหันไปมองใบหน้าด้านข้างของเขาบ่อยเกินไป',
+'“ผมชื่อภูผา” เขาบอกเมื่อทั้งคู่หยุดรอสัญญาณไฟตรงทางม้าลาย “เห็นคุณมานั่งมุมเดิมทุกวันพุธ เลยคิดว่าวันนี้น่าจะถึงเวลาทักสักที”',
+'“ทุกวันพุธ” เธอทวนคำ หัวใจเต้นผิดจังหวะไปหนึ่งครั้ง “แปลว่าคุณก็มาทุกวันพุธเหมือนกัน”',
+'ไฟเขียวขึ้นพอดี ภูผาไม่ได้ตอบอะไร เขาแค่เอียงร่มมาทางเธอมากขึ้นอีกนิด จนไหล่ซ้ายของตัวเองเปียกเป็นวงกว้าง มินตราเห็น และแกล้งทำเป็นไม่เห็น เพราะถ้าพูดออกไป เธอกลัวว่าเสียงตัวเองจะสั่น',
+'คืนนั้น เมื่อประตูรถไฟฟ้าปิดลงระหว่างพวกเขา เธอเพิ่งนึกได้ว่าลืมถามสิ่งสำคัญที่สุด ไม่ใช่เบอร์โทรศัพท์ ไม่ใช่ไอจี แต่เป็นคำถามว่า พุธหน้า เขาจะยังนั่งที่เดิมหรือเปล่า'
+];
+const TM=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const thDate=d=>`${d.getDate()} ${TM[d.getMonth()]} ${d.getFullYear()+543}`;
+const chDate=n=>{const d=new Date(2026,10,28);d.setDate(d.getDate()-Math.round((24-n)*3.5));return d};
+const fmt=n=>n.toLocaleString('th-TH');
+
+let S={li:false,cur:0,ch:12,shelf:[0,2,5,1,7],liked:{},fs:19,lh:1.95,th:'light',cat:'ทั้งหมด'};
+try{const v=JSON.parse(localStorage.getItem('rb-market')||'null');if(v)S=Object.assign(S,v)}catch(e){}
+const save=()=>{try{localStorage.setItem('rb-market',JSON.stringify(S))}catch(e){}};
+const PROG={0:[12,24],2:[42,42],5:[7,15],1:[3,58],7:[20,61]};
+
+/* ---------- covers ---------- */
+const fw=(cx,cy,r,k)=>{let s='';for(let i=0;i<12;i++){const a=i*Math.PI/6,x1=cx+Math.cos(a)*r*.35,y1=cy+Math.sin(a)*r*.35,x2=cx+Math.cos(a)*r,y2=cy+Math.sin(a)*r;s+=`<path class="${k}" d="M${x1.toFixed(1)} ${y1.toFixed(1)}L${x2.toFixed(1)} ${y2.toFixed(1)}"/>`}return s};
+const SH=[
+()=>'<path class="f2" d="M50 62 0 0h20zM50 62 42 0h18zM50 62 82 0h18v10zM50 62l50-14v18zM50 62 0 36v20zM50 62l-50 50v-26zM50 62l50 40V84z"/><circle cx="50" cy="62" r="22" class="f3"/><circle cx="50" cy="62" r="22" class="ln"/><circle cx="43" cy="58" r="3" class="fi"/><circle cx="57" cy="58" r="3" class="fi"/><path d="M42 68q8 7 16 0" class="ln"/>',
+()=>'<circle cx="70" cy="40" r="20" class="f2"/><circle cx="80" cy="33" r="18" class="f1"/><g class="fw"><circle cx="18" cy="20" r="1.6"/><circle cx="34" cy="44" r="1.2"/><circle cx="12" cy="62" r="1.4"/><circle cx="48" cy="18" r="1"/><circle cx="88" cy="70" r="1.3"/></g><path d="M0 104q25-24 50-8t50-6v50H0z" class="f3"/><path d="M0 120q30-14 60-2t40-4v26H0z" class="f2" opacity=".55"/>',
+()=>'<circle cx="74" cy="32" r="14" class="f3"/><path d="M0 66q12-10 25 0t25 0 25 0 25 0v74H0z" class="f2"/><path d="M0 84q12-10 25 0t25 0 25 0 25 0v56H0z" class="f3"/><path d="M0 102q12-10 25 0t25 0 25 0 25 0v38H0z" class="f2"/><path d="M0 120q12-10 25 0t25 0 25 0 25 0v20H0z" class="fi" opacity=".25"/>',
+()=>'<g class="f3"><circle cx="10" cy="12" r="2"/><circle cx="24" cy="12" r="2"/><circle cx="38" cy="12" r="2"/><circle cx="10" cy="26" r="2"/><circle cx="24" cy="26" r="2"/><circle cx="10" cy="40" r="2"/></g><circle cx="56" cy="70" r="32" class="f2"/><circle cx="56" cy="62" r="9" class="f1"/><path d="M51 66l-4 22h18l-4-22z" class="f1"/><path d="M18 128l24-26" stroke="#e8432e" stroke-width="5" stroke-linecap="round"/>',
+()=>'<circle cx="72" cy="30" r="15" class="f2"/><path d="M-6 132 30 60l22 40 16-24 38 56z" class="f3"/><path d="M30 60l9 17-6-3-5 7-5-9z" class="fw"/><path d="M-6 140 40 96l30 26 30-20v38z" class="f2" opacity=".7"/>',
+()=>'<path class="f2" d="M-10 30 30-10h12L-10 42zM-10 62 62-10h12L-10 74zM-10 94 94-10h12L-10 106zM-10 126l120-120v12L2 126z"/><path d="M50 108C20 88 22 64 38 64c7 0 11 6 12 9 1-3 5-9 12-9 16 0 18 24-12 44z" class="f3"/><path d="M50 108C20 88 22 64 38 64c7 0 11 6 12 9 1-3 5-9 12-9 16 0 18 24-12 44z" class="ln"/>',
+()=>fw(30,92,20,'s2')+fw(74,108,14,'s3')+fw(80,78,9,'s2')+'<g stroke="#fff" stroke-width="1.2" opacity=".45"><path d="M10 0 2 16M30 4l-8 16M60 0l-8 16M90 6l-8 16M44 30l-8 16M78 34l-8 16M16 44 8 60"/></g>',
+()=>'<g class="fw"><circle cx="14" cy="16" r="1.5"/><circle cx="86" cy="20" r="1.2"/><circle cx="20" cy="110" r="1.3"/><circle cx="90" cy="118" r="1.5"/></g><circle cx="50" cy="70" r="24" class="f2"/><circle cx="50" cy="70" r="24" class="ln"/><ellipse cx="50" cy="70" rx="44" ry="9" fill="none" stroke="#1d1b1a" stroke-width="3" transform="rotate(-18 50 70)"/><circle cx="20" cy="40" r="6" class="f3"/>'
+];
+function cover(i,lk){const b=B[i];const locked=lk&&lk!==3&&b.r==='18+'&&!S.li;const rc=b.r==='18+'?'a':b.r==='13+'?'t':'g';
+ return `<span class="cv${b.tp?' tp':''}${locked?' is-lk':''}" style="--c1:${b.c[0]};--c2:${b.c[1]};--c3:${b.c[2]};--tc:${b.tc}" role="img" aria-label="ปก ${locked?'เรื่อง 18+':b.t}"><svg class="art" viewBox="0 0 100 140" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${SH[b.s]()}</svg><b class="cv-t" aria-hidden="true">${b.t}</b><span class="cv-a" aria-hidden="true">${b.a}</span>${lk!==2?`<span class="rt ${rc}">${b.r}</span>`:''}${locked?`<span class="cv-lock"><span>${ic('lock')}</span>18+ เข้าสู่ระบบ</span>`:''}</span>`}
+const isLk=i=>B[i].r==='18+'&&!S.li;
+const ttl=i=>isLk(i)?'เรื่องสำหรับผู้อายุ 18+':B[i].t;
+const rtB=r=>`<span class="rt ${r==='18+'?'a':r==='13+'?'t':'g'}">${r}</span>`;
+
+/* ---------- home ---------- */
+function renderHome(){
+ $('#homeChips').innerHTML=['ทั้งหมด',...CATS].map(c=>`<button class="chip" type="button" aria-pressed="${S.cat===c}" data-cat="${c}">${c}</button>`).join('');
+ const hero=[[0,'#e8432e','#fff','ฝนตกทีไร คิดถึงเรื่องนี้ทุกที ตอนใหม่เพิ่งขึ้นเมื่อกี้'],[6,'#ffc93c','#1d1b1a','น้ำจิ้มที่ทำให้คนพูดความจริง ฮาจนท้องแข็ง'],[1,'#0f8b8d','#fff','ประตูไม้หลังร้านพระเครื่องพาไปเมืองบาดาล']];
+ $('#hero').innerHTML=hero.map(([i,bg,fg,p],k)=>`<a class="hero-card" href="#novel" data-b="${i}" style="--hb:${bg};--hf:${fg}"><span class="stk${k===0?'':' w'}">เรื่องเด่น #${k+1}</span>${cover(i,2)}<span><span class="by">${B[i].g}</span><h3>${B[i].t}</h3><span class="by">โดย ${B[i].a}</span><p style="margin-top:6px">${p}</p><span class="go">อ่านเลย${ic('next')}</span></span></a>`).join('');
+ $('#heroDots').innerHTML=hero.map((_,k)=>`<i class="${k?'':'on'}"></i>`).join('');
+ $('#cont').innerHTML=[0,5,1].map(i=>{const[p,t]=PROG[i];return `<a class="cont" href="${i===0?'#read':'#novel'}" data-b="${i}" ${i===0?'data-ch="12"':''}>${cover(i,2)}<span style="flex:1;min-width:0"><h3>${B[i].t}</h3><span class="m">ตอนที่ ${p} จาก ${t}</span><span class="bar"><b style="width:${Math.round(p/t*100)}%"></b></span><span class="go">อ่านต่อ${ic('next')}</span></span></a>`}).join('');
+ $('#rank').innerHTML=[6,0,1,2,7,5,4,8,9,3].map((i,k)=>`<a class="rk" href="#novel" data-b="${i}"><span class="rk-n" aria-hidden="true">${k+1}</span>${cover(i,1)}<span class="rk-t"><span class="sr">อันดับ ${k+1} </span>${ttl(i)}</span><span class="rk-m">${isLk(i)?'เข้าสู่ระบบเพื่อดู':B[i].v+' ยอดอ่าน'}</span></a>`).join('');
+ renderLatest();
+ $('#rec').innerHTML=[4,3,9,8].map(i=>`<a class="bk" href="#novel" data-b="${i}">${cover(i,1)}<span class="bk-t">${ttl(i)}</span><span class="bk-m">${isLk(i)?'ต้องเข้าสู่ระบบ':B[i].a+' · '+B[i].g}</span></a>`).join('');
+}
+function liRow(i,extra){const b=B[i];return `<li><a class="li" href="#novel" data-b="${i}">${cover(i,2)}<span style="min-width:0;flex:1"><h3>${ttl(i)}</h3><span class="m">${isLk(i)?'18+ · เข้าสู่ระบบเพื่อดู':b.a+' · '+b.g}</span><span class="c">${extra||('ตอนที่ '+b.ch)}</span></span><span class="side">${rtB(b.r)}${b.nw?'<span class="stk red">ใหม่</span>':''}<span>${b.up}</span></span></a></li>`}
+function renderLatest(){
+ const ids=[0,1,2,3,4,5,6,7,8,9].filter(i=>S.cat==='ทั้งหมด'||B[i].g===S.cat);
+ $('#latestTag').textContent=S.cat==='ทั้งหมด'?'ทุกหมวด':S.cat;
+ $('#latest').innerHTML=ids.length?ids.slice(0,6).map(i=>liRow(i,i===0?'ตอนที่ 24 · ดอกไม้ไฟกลางเมืองฝน':'ตอนที่ '+B[i].ch)).join(''):'<li class="empty">แผงนี้ยังไม่มีเรื่องอัปเดต ลองเดินไปแผงอื่นดูนะ</li>';
+}
+$('#homeChips').addEventListener('click',e=>{const c=e.target.closest('[data-cat]');if(!c)return;S.cat=c.dataset.cat;save();$$('#homeChips .chip').forEach(x=>x.setAttribute('aria-pressed',x===c));renderLatest()});
+$('#hero').addEventListener('scroll',e=>{const r=e.currentTarget,w=r.firstElementChild.offsetWidth+14,k=Math.round(r.scrollLeft/w);$$('#heroDots i').forEach((d,j)=>d.classList.toggle('on',j===k))},{passive:true});
+
+/* ---------- search ---------- */
+const STALL=[['#e8432e','#fff'],['#ffc93c','#1d1b1a'],['#0f8b8d','#fff'],['#1d1b1a','#fff']];
+$('#recent').innerHTML=['แม่มด','ห้องปิดตาย','ฝนตก','ข้ามเวลา'].map(t=>`<button class="chip" type="button" data-q="${t}">${t}</button>`).join('');
+$('#stalls').innerHTML=CATS.map((c,k)=>{const[bg,fg]=STALL[k%4];return `<button class="stall" type="button" data-stall="${c}" aria-pressed="false" style="--sb:${bg};--sf:${fg}">${c}<svg viewBox="0 0 64 64" aria-hidden="true">${['<circle cx="32" cy="32" r="26" fill="'+(k%4==1?'#e8432e':'#ffc93c')+'" stroke="#1d1b1a" stroke-width="3"/>','<path d="M6 58 32 8l26 50z" fill="'+(k%4==1?'#0f8b8d':'#ffc93c')+'" stroke="#1d1b1a" stroke-width="3"/>','<rect x="8" y="8" width="48" height="48" rx="12" fill="'+(k%4==1?'#fff':'#e8432e')+'" stroke="#1d1b1a" stroke-width="3" transform="rotate(14 32 32)"/>'][k%3]}</svg></button>`}).join('');
+function doSearch(q,cat){
+ const r=B.slice(0,10).map((b,i)=>i).filter(i=>{const b=B[i];if(cat)return b.g===cat;if(!q)return true;return (b.t+b.a+b.tags.join(' ')+b.g).includes(q)});
+ $('#sResTitle').textContent=cat?'แผง'+cat:q?`ผลการค้นหา “${q}”`:'เรื่องทั้งหมดในตลาด';
+ $('#sRes').innerHTML=r.length?r.map(i=>liRow(i)).join(''):'<li class="empty">ไม่พบเรื่องที่ตรงกับคำค้น ลองคำอื่นดูนะ</li>';
+}
+$('#sForm').addEventListener('submit',e=>{e.preventDefault();doSearch($('#sInput').value.trim())});
+$('#sInput').addEventListener('input',e=>{$$('.stall').forEach(x=>x.setAttribute('aria-pressed','false'));doSearch(e.target.value.trim())});
+$('#recent').addEventListener('click',e=>{const c=e.target.closest('[data-q]');if(!c)return;$('#sInput').value=c.dataset.q;doSearch(c.dataset.q)});
+$('#stalls').addEventListener('click',e=>{const c=e.target.closest('[data-stall]');if(!c)return;const on=c.getAttribute('aria-pressed')!=='true';$$('.stall').forEach(x=>x.setAttribute('aria-pressed',x===c&&on));doSearch('',on?c.dataset.stall:'')});
+
+/* ---------- novel ---------- */
+function renderNovel(){
+ const i=S.cur,b=B[i];
+ $('#nvCover').innerHTML=cover(i,2);$('#nvTitle').textContent=b.t;$('#nvAuthor').textContent=b.a;$('#nvAv').textContent=b.a[0];
+ $('#nvBadges').innerHTML=`<span class="badge">${b.g}</span>${rtB(b.r)}<span class="badge">${b.st}</span>`;
+ $('#nvStats').innerHTML=`<div><b>${b.ch}</b><span>ตอน</span></div><div><b>${b.v}</b><span>ยอดอ่าน</span></div><div><b id="nvLikes">${fmt(b.l+(S.liked[i]?1:0))}</b><span>ถูกใจ</span></div>`;
+ $('#syn').textContent=b.d;$('#syn').classList.add('clamp');$('#synBtn').setAttribute('aria-expanded','false');$('#synBtn').firstChild.textContent='อ่านเพิ่มเติม';
+ $('#nvTags').innerHTML=b.tags.map(t=>`<span class="tag">#${t}</span>`).join('');
+ const p=PROG[i];
+ $('#nvCont').style.display=p&&p[0]<p[1]?'':'none';
+ if(p){$('#nvCont span').textContent='อ่านต่อ ตอนที่ '+p[0];$('#nvCont').dataset.ch=p[0]}
+ $('#tShelf').setAttribute('aria-pressed',S.shelf.includes(i));
+ $('#tShelf').lastChild.textContent=S.shelf.includes(i)?'อยู่ในชั้น':'เก็บเข้าชั้น';
+ $('#tLike').setAttribute('aria-pressed',!!S.liked[i]);
+ $('#nvChCount').textContent=b.ch+' ตอน';
+ const name=n=>i===0?CH[n-1]:'ตอนที่ '+n;
+ const list=[];for(let n=b.ch;n>Math.max(0,b.ch-6);n--)list.push(n);
+ $('#nvCh').innerHTML=list.map(n=>{const d=chDate(Math.min(24,n-(b.ch-24)));const nw=(new Date(2026,10,28)-d)/864e5<7;return `<li><a href="#read" data-ch="${n}"><span class="n">${n}</span><span><span class="t">${i===0?name(n):'ตอนที่ '+n}</span><br><span class="d">${thDate(d)}</span></span>${nw?'<span class="stk red">ใหม่</span>':''}</a></li>`}).join('');
+ $('#nvCm').innerHTML=[['น','น้ำหวานชอบฝน','2 ชม.','ตอนร่มคันเดียวคือใจละลาย ภูผาเอียงร่มให้แบบนี้ใครจะไม่หวั่นไหว','#ffc93c'],['ก','กาแฟดำไม่หวาน','5 ชม.','รอวันพุธเหมือนมินตราเลยค่ะ ไรต์อัปทุกพุธได้ไหม','#0f8b8d'],['ต','ต้นกล้า','เมื่อวาน','บรรยายฝนกรุงเทพเห็นภาพมาก อ่านแล้วอยากไปนั่งร้านกาแฟ','#e8432e']].map(([a,n,t,p,c])=>`<div class="cm"><span class="av" style="background:${c};color:${c==='#ffc93c'?'#1d1b1a':'#fff'}">${a}</span><div><b>${n}</b><small>${t}</small><p>${p}</p></div></div>`).join('');
+}
+$('#synBtn').addEventListener('click',e=>{const s=$('#syn'),x=s.classList.toggle('clamp');e.currentTarget.setAttribute('aria-expanded',!x);e.currentTarget.firstChild.textContent=x?'อ่านเพิ่มเติม':'ย่อเรื่องย่อ';e.currentTarget.querySelector('svg').style.transform=x?'':'rotate(180deg)'});
+$('#tShelf').addEventListener('click',()=>{const i=S.cur,k=S.shelf.indexOf(i);if(k>-1)S.shelf.splice(k,1);else S.shelf.unshift(i);save();renderNovel();renderLib();toast(k>-1?'นำออกจากชั้นหนังสือแล้ว':'เก็บเข้าชั้นหนังสือแล้ว')});
+$('#tLike').addEventListener('click',()=>{const i=S.cur;S.liked[i]=!S.liked[i];save();renderNovel();toast(S.liked[i]?'ถูกใจเรื่องนี้แล้ว':'ยกเลิกถูกใจแล้ว')});
+document.addEventListener('click',e=>{if(e.target.closest('[data-share]'))toast('คัดลอกลิงก์เรื่องแล้ว ส่งให้เพื่อนได้เลย')});
+
+/* ---------- reader ---------- */
+$('#prose').innerHTML=PROSE.map(p=>`<p>${p}</p>`).join('');
+function renderRead(){const n=S.ch;$('#rdCh').textContent='ตอนที่ '+n;$('#artKick').textContent='ตอนที่ '+n+' · '+thDate(chDate(n));$('#artTitle').textContent=CH[n-1]||'ตอนที่ '+n;$('#endN').textContent=n;$('#rdPrev').disabled=n<=1;$('#rdNext').disabled=n>=24;
+ $('#toc').innerHTML=CH.map((t,k)=>`<li><button type="button" data-ch="${k+1}" ${k+1===n?'aria-current="true"':''}><span>${k+1}</span>${t}</button></li>`).join('')}
+function applyRead(){const r=$('#read');r.style.setProperty('--fs',S.fs+'px');r.style.setProperty('--lh',S.lh);$('#fsOut').textContent=S.fs+' px';
+ let th=S.th;if(th==='auto')th=matchMedia('(prefers-color-scheme: dark)').matches?'night':'light';r.dataset.th=th;
+ $$('#lhSeg button').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.lh===+S.lh));$$('#thSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.th===S.th))}
+$('#fsDown').addEventListener('click',()=>{S.fs=Math.max(15,S.fs-1);save();applyRead()});
+$('#fsUp').addEventListener('click',()=>{S.fs=Math.min(26,S.fs+1);save();applyRead()});
+$('#lhSeg').addEventListener('click',e=>{const b=e.target.closest('[data-lh]');if(!b)return;S.lh=+b.dataset.lh;save();applyRead()});
+$('#thSeg').addEventListener('click',e=>{const b=e.target.closest('[data-th]');if(!b)return;S.th=b.dataset.th;save();applyRead()});
+try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyRead)}catch(e){}
+const rs=$('#rdScroll');let lastY=0;
+rs.addEventListener('scroll',()=>{const y=rs.scrollTop,max=rs.scrollHeight-rs.clientHeight,p=max>0?Math.min(100,y/max*100):0;$('#rdProg').style.width=p+'%';$('#rdProg').setAttribute('aria-valuenow',Math.round(p));
+ const r=$('#read');if(y>lastY+6&&y>80)r.classList.add('hide');else if(y<lastY-6||y>=max-4)r.classList.remove('hide');lastY=y},{passive:true});
+$('#art').addEventListener('click',e=>{if(e.target.closest('button,a,input,form'))return;$('#read').classList.toggle('hide')});
+document.addEventListener('click',e=>{const s=e.target.closest('[data-step]');if(!s)return;const n=S.ch+ +s.dataset.step;if(n<1||n>24)return;S.ch=n;save();renderRead();rs.scrollTop=0;$('#read').classList.remove('hide');toast('ไปตอนที่ '+n)});
+$('#rdLike').addEventListener('click',e=>{const on=e.currentTarget.getAttribute('aria-pressed')!=='true';e.currentTarget.setAttribute('aria-pressed',on);e.currentTarget.querySelector('span').textContent='ถูกใจ '+(on?'1,205':'1,204');toast(on?'ส่งหัวใจให้ตอนนี้แล้ว':'ยกเลิกถูกใจแล้ว')});
+$('#cForm').addEventListener('submit',e=>{e.preventDefault();const v=$('#cInput').value.trim();if(!v){toast('พิมพ์ความคิดเห็นก่อนนะ');return}$('#cInput').value='';toast('ส่งความคิดเห็นแล้ว ขอบคุณที่ให้กำลังใจนักเขียน')});
+
+/* ---------- library ---------- */
+let libTab='reading';
+function renderLib(){
+ const tabs=[['reading','กำลังอ่าน'],['done','อ่านจบแล้ว'],['all','ทั้งหมด']];
+ $('#libTabs').innerHTML=tabs.map(([k,t])=>`<button class="chip" type="button" data-lt="${k}" aria-pressed="${libTab===k}">${t}</button>`).join('');
+ const ids=S.shelf.filter(i=>{const p=PROG[i]||[0,B[i].ch];return libTab==='all'||(libTab==='done'?p[0]>=p[1]:p[0]<p[1])});
+ $('#libCount').textContent=S.shelf.length+' เรื่อง';
+ $('#shelf').innerHTML=ids.length?ids.map(i=>{const p=PROG[i]||[0,B[i].ch],pc=Math.round(p[0]/p[1]*100);return `<a class="sb-item" href="#novel" data-b="${i}">${cover(i,2)}<span style="flex:1;min-width:0"><h3>${B[i].t}</h3><span class="m">${B[i].a} · ${B[i].st}</span><span class="bar"><b style="width:${pc}%"></b></span><span class="pc"><span>${p[0]?'อ่านถึงตอนที่ '+p[0]:'ยังไม่เริ่มอ่าน'}</span><span>${pc}%</span></span></span></a>`}).join(''):'<div class="empty" style="margin:0">ชั้นนี้ยังว่างอยู่ ไปเดินตลาดหาเรื่องใหม่กัน</div>';
+}
+$('#libTabs').addEventListener('click',e=>{const c=e.target.closest('[data-lt]');if(!c)return;libTab=c.dataset.lt;renderLib()});
+
+/* ---------- me / login ---------- */
+function renderMe(){$('#meCard').innerHTML=S.li?`<span class="av">ม</span><h2>มะปรางอ่านเพลิน</h2><p style="margin:4px 0 14px;font:500 14px var(--hd)">นักอ่านตั้งแต่ ต.ค. 2569 · อ่านไปแล้ว 1,284 ตอน</p><button class="btn full" type="button" id="logout">ออกจากระบบ</button>`:`<span class="av">${ic('user')}</span><h2>ยังไม่ได้เข้าสู่ระบบ</h2><p style="margin:4px 0 14px;font:500 14px var(--hd)">เข้าสู่ระบบเพื่อเก็บชั้นหนังสือ ข้ามเครื่อง และอ่านเรื่อง 18+</p><button class="btn red full" type="button" data-open="sh-login">เข้าสู่ระบบ</button>`}
+$('#meCard').addEventListener('click',e=>{if(e.target.closest('#logout')){S.li=false;save();rerender();toast('ออกจากระบบแล้ว')}});
+$('#logForm').addEventListener('submit',e=>{e.preventDefault();if(!$('#lAge').checked){toast('ต้องยืนยันอายุก่อนอ่านเรื่อง 18+');return}S.li=true;save();closeSheet();rerender();toast('เข้าสู่ระบบแล้ว เรื่อง 18+ ปลดล็อกแล้ว')});
+
+/* ---------- dash ---------- */
+$('#days').innerHTML=['ส','อา','จ','อ','พ','พฤ','ศ'].map((d,k)=>`<div><i class="${k>=1&&k<=5?'y':k===6?'td':''}">${k>=1&&k<=5?ic('check'):''}</i>${k===6?'วันนี้':d}</div>`).join('');
+const BV=[[1240,'อา'],[1580,'จ'],[1420,'อ'],[2010,'พ'],[1760,'พฤ'],[2140,'ศ'],[2410,'ส']];
+$('#bars').innerHTML=BV.map(([v,d],k)=>`<div class="${k===6?'td':''}"><span>${(v/1000).toFixed(1)}K</span><b style="height:${Math.round(v/2410*78)}%"></b>${d}</div>`).join('');
+$('#mine').innerHTML=[[0,'b-pub','เผยแพร่แล้ว','24 ตอน · 128.4K ยอดอ่าน',''],[10,'b-wait','รออนุมัติ 18+','6 ตอน · ส่งตรวจเมื่อ 27 พ.ย. 2569',''],[11,'b-rej','ถูกปฏิเสธ','3 ตอน · ตรวจเมื่อ 26 พ.ย. 2569','ภาพปกมีโลโก้การ์ตูนที่อาจละเมิดลิขสิทธิ์ กรุณาเปลี่ยนภาพปกแล้วส่งตรวจอีกครั้ง'],[12,'b-draft','ฉบับร่าง','2 ตอน · แก้ไขล่าสุดเมื่อวาน','']].map(([i,c,s,m,rsn])=>`<div class="my">${cover(i,3)}<div><h3>${B[i].t}</h3><div class="m">${m}</div><span class="badge ${c}">${s}</span></div>${rsn?`<div class="reason"><b>เหตุผลจากแอดมิน:</b> ${rsn}</div>`:''}<div class="ops"><a class="btn sm" href="#novel-edit">${ic('edit')}จัดการเรื่อง</a><a class="btn sm sun" href="#chapter-edit">${ic('plus')}เขียนตอนใหม่</a></div></div>`).join('');
+$('#feed').innerHTML=[['heart','#e8432e','<b>น้ำหวานชอบฝน</b> และอีก 38 คนถูกใจตอนที่ 24','12 นาทีที่แล้ว'],['msg','#ffc93c','<b>กาแฟดำไม่หวาน</b> แสดงความคิดเห็น: “รอวันพุธเหมือนมินตราเลยค่ะ”','1 ชั่วโมงที่แล้ว'],['users','#0f8b8d','มีผู้ติดตามใหม่ 12 คนวันนี้','3 ชั่วโมงที่แล้ว'],['trend','#ffc93c','ดอกไม้ไฟกลางเมืองฝน ขึ้นอันดับ 2 ยอดนิยมประจำวัน','เมื่อวาน']].map(([i,c,t,w])=>`<li><span class="fi-ic" style="background:${c};color:${c==='#ffc93c'?'#1d1b1a':'#fff'}">${ic(i)}</span><span><p>${t}</p><small>${w}</small></span></li>`).join('');
+
+/* ---------- novel edit ---------- */
+$('#neCover').innerHTML=cover(0,2);
+$('#neCat').innerHTML=CATS.map(c=>`<option${c==='โรแมนติก'?' selected':''}>${c}</option>`).join('');
+const syn=$('#neSyn'),synC=()=>$('#synCount').textContent=syn.value.length+'/1200';syn.addEventListener('input',synC);synC();
+$('#coverFile').addEventListener('change',e=>{if(e.target.files.length)toast('อัปโหลดภาพปก “'+e.target.files[0].name+'” แล้ว')});
+let TAGS=['คาเฟ่','ฝนตก','รักแรกพบ','กรุงเทพ','ฟีลกู๊ด'];
+function renderTags(){$$('#tagbox .tchip').forEach(x=>x.remove());const inp=$('#tagIn');TAGS.forEach((t,k)=>{const s=document.createElement('span');s.className='tchip';s.innerHTML=`${t}<button type="button" data-rm="${k}" aria-label="ลบแท็ก ${t}">${ic('x')}</button>`;$('#tagbox').insertBefore(s,inp)})}
+$('#tagbox').addEventListener('click',e=>{const b=e.target.closest('[data-rm]');if(b){const t=TAGS.splice(+b.dataset.rm,1);renderTags();$('#tagIn').focus();toast('ลบแท็ก '+t+' แล้ว')}else if(e.target===e.currentTarget)$('#tagIn').focus()});
+$('#tagIn').addEventListener('keydown',e=>{const v=e.target.value.replace(/[,#]/g,'').trim();
+ if(e.key==='Enter'||e.key===','){e.preventDefault();if(!v)return;if(TAGS.length>=8){toast('เพิ่มแท็กได้สูงสุด 8 แท็ก');return}if(TAGS.includes(v)){toast('มีแท็กนี้แล้ว');e.target.value='';return}TAGS.push(v);e.target.value='';renderTags()}
+ else if(e.key==='Backspace'&&!e.target.value&&TAGS.length){TAGS.pop();renderTags()}});
+renderTags();
+const rateUpd=()=>{const v=$('input[name=rate]:checked').value;$('#n18').classList.toggle('on',v==='18')};
+$$('input[name=rate]').forEach(r=>r.addEventListener('change',rateUpd));rateUpd();
+$('#neForm').addEventListener('submit',e=>{e.preventDefault();toast($('input[name=rate]:checked').value==='18'?'บันทึกแล้ว เรื่องถูกส่งให้แอดมินตรวจ 18+':'บันทึกการเปลี่ยนแปลงแล้ว')});
+const CHS=[[21,'pub',''],[22,'pub',''],[23,'pub',''],[24,'pub',''],[25,'sch','30 พ.ย. 2569 · 20:00'],[26,'draft','']];
+const ST={pub:['b-pub','เผยแพร่แล้ว'],sch:['b-sch','ตั้งเวลา'],draft:['b-draft','ฉบับร่าง']};
+$('#chs').innerHTML=CHS.map(([n,s,w])=>{const t=n===25?'ไฟสีส้มดวงสุดท้าย':n===26?'(ยังไม่ตั้งชื่อตอน)':CH[n-1];return `<li data-n="${n}"><button type="button" class="handle" aria-label="ย้ายตอน ${t} (ใช้ลูกศรขึ้นลง)">${ic('grip')}</button><span class="tx"><b><span class="no">ตอนที่ ${n}</span> · ${t}</b><small><span class="badge ${ST[s][0]}">${ST[s][1]}</span>${s==='sch'?`${ic('clock')}${w}`:s==='pub'?thDate(chDate(n)):'แก้ไขล่าสุด 10:42'}</small></span><a class="ed" href="#chapter-edit" aria-label="แก้ไข ${t}">${ic('edit')}</a></li>`}).join('');
+const chs=$('#chs');let drag=null;
+const renum=()=>$$('#chs li').forEach((li,k)=>li.querySelector('.no').textContent='ตอนที่ '+(21+k));
+chs.addEventListener('pointerdown',e=>{const h=e.target.closest('.handle');if(!h)return;drag=h.closest('li');drag.classList.add('drag');try{h.setPointerCapture(e.pointerId)}catch(_){}e.preventDefault()});
+chs.addEventListener('pointermove',e=>{if(!drag)return;const rows=$$('#chs li').filter(r=>r!==drag);let before=null;for(const r of rows){const rc=r.getBoundingClientRect();if(e.clientY<rc.top+rc.height/2){before=r;break}}if(drag.nextElementSibling!==before)chs.insertBefore(drag,before)});
+const endDrag=()=>{if(!drag)return;drag.classList.remove('drag');drag=null;renum();toast('จัดลำดับตอนใหม่แล้ว')};
+chs.addEventListener('pointerup',endDrag);chs.addEventListener('pointercancel',endDrag);
+chs.addEventListener('keydown',e=>{const h=e.target.closest('.handle');if(!h||!['ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();const li=h.closest('li');if(e.key==='ArrowUp'&&li.previousElementSibling)chs.insertBefore(li,li.previousElementSibling);else if(e.key==='ArrowDown'&&li.nextElementSibling)chs.insertBefore(li.nextElementSibling,li);h.focus();renum();toast('ย้ายเป็น'+li.querySelector('.no').textContent)});
+
+/* ---------- chapter edit ---------- */
+const ed=$('#ed');
+const seg=(()=>{try{return new Intl.Segmenter('th',{granularity:'word'})}catch(e){return null}})();
+function count(){const t=ed.innerText.trim();let w=0;if(seg){for(const s of seg.segment(t))if(s.isWordLike)w++}else w=t?t.split(/\s+/).length:0;
+ $('#wc').textContent=fmt(w)+' คำ · '+fmt(t.replace(/\s/g,'').length)+' ตัวอักษร'}
+let st;const now=()=>{const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
+function dirty(){count();const s=$('#saveSt');s.classList.add('ing');s.lastChild.textContent='กำลังบันทึก…';clearTimeout(st);st=setTimeout(()=>{s.classList.remove('ing');s.lastChild.textContent='บันทึกแล้ว '+now()},900)}
+ed.addEventListener('input',dirty);$('#ceTitle').addEventListener('input',dirty);count();
+const tb=$('#tbar');
+tb.addEventListener('mousedown',e=>{if(e.target.closest('button'))e.preventDefault()});
+tb.addEventListener('click',e=>{const b=e.target.closest('[data-cmd]');if(!b)return;const c=b.dataset.cmd;
+ const sel=getSelection();if(!sel.rangeCount||!ed.contains(sel.anchorNode)){ed.focus();const r=document.createRange();r.selectNodeContents(ed);r.collapse(false);sel.removeAllRanges();sel.addRange(r)}
+ const blk=()=>{let n=sel.anchorNode;while(n&&n!==ed){if(n.nodeType===1&&/^(H3|BLOCKQUOTE)$/.test(n.tagName))return n.tagName;n=n.parentNode}return ''};
+ if(c==='bold'||c==='italic')document.execCommand(c);
+ else if(c==='h3')document.execCommand('formatBlock',false,blk()==='H3'?'p':'h3');
+ else if(c==='quote')document.execCommand('formatBlock',false,blk()==='BLOCKQUOTE'?'p':'blockquote');
+ else if(c==='hr')document.execCommand('insertHTML',false,'<hr><p><br></p>');
+ else if(c==='center')document.execCommand(document.queryCommandState('justifyCenter')?'justifyLeft':'justifyCenter');
+ dirty();syncTb()});
+function syncTb(){const sel=getSelection();if(!sel.rangeCount||!ed.contains(sel.anchorNode))return;let n=sel.anchorNode,tag='';while(n&&n!==ed){if(n.nodeType===1&&/^(H3|BLOCKQUOTE)$/.test(n.tagName)){tag=n.tagName;break}n=n.parentNode}
+ const set=(k,v)=>{const b=$(`[data-cmd="${k}"]`,tb);if(b)b.setAttribute('aria-pressed',!!v)};
+ try{set('bold',document.queryCommandState('bold'));set('italic',document.queryCommandState('italic'));set('center',document.queryCommandState('justifyCenter'))}catch(e){}
+ set('h3',tag==='H3');set('quote',tag==='BLOCKQUOTE')}
+document.addEventListener('selectionchange',syncTb);
+$('#pvBtn').addEventListener('click',e=>{const on=e.currentTarget.getAttribute('aria-pressed')!=='true';e.currentTarget.setAttribute('aria-pressed',on);ed.contentEditable=!on;$('#ceTitle').readOnly=on;$('#chapter-edit').classList.toggle('preview',on);toast(on?'โหมดตัวอย่าง: เห็นแบบที่ผู้อ่านเห็น':'กลับมาแก้ไขต่อ')});
+const pubUpd=()=>{const v=$('input[name=pub]:checked').value;$('#when').classList.toggle('on',v==='sch');$('#pubGo').textContent={draft:'บันทึกร่าง',now:'เผยแพร่ทันที',sch:'ตั้งเวลาเผยแพร่'}[v]};
+$$('input[name=pub]').forEach(r=>r.addEventListener('change',pubUpd));pubUpd();
+$('#pubForm').addEventListener('submit',e=>{e.preventDefault();const v=$('input[name=pub]:checked').value;let m='บันทึกร่างแล้ว';
+ if(v==='now')m='เผยแพร่ตอนใหม่แล้ว ผู้ติดตามจะได้รับแจ้งเตือน';
+ if(v==='sch'){const d=$('#pDate').value,t=$('#pTime').value;if(!d||!t){toast('เลือกวันและเวลาก่อนนะ');return}const[y,mo,da]=d.split('-').map(Number);m=`ตั้งเวลาเผยแพร่ ${da} ${TM[mo-1]} ${y+543} เวลา ${t} น. แล้ว`}
+ closeSheet();toast(m)});
+
+/* ---------- sheets & toast ---------- */
+let openSh=null,lastFocus=null;
+function openSheet(id){closeSheet(true);const s=$('#'+id);if(!s)return;lastFocus=document.activeElement;openSh=s;s.classList.add('on');$('#scrim').classList.add('on');setTimeout(()=>{const f=s.querySelector('button,input,a');f&&f.focus()},60)}
+function closeSheet(q){if(!openSh)return;openSh.classList.remove('on');$('#scrim').classList.remove('on');openSh=null;if(!q&&lastFocus&&lastFocus.focus)lastFocus.focus()}
+document.addEventListener('click',e=>{const o=e.target.closest('[data-open]');if(o){e.preventDefault();openSheet(o.dataset.open);return}if(e.target.closest('[data-close]')||e.target.id==='scrim')closeSheet()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet()});
+$('#toc').addEventListener('click',e=>{const b=e.target.closest('[data-ch]');if(!b)return;S.ch=+b.dataset.ch;save();closeSheet(true);if(location.hash!=='#read')location.hash='read';renderRead();rs.scrollTop=0});
+$('#aboutBody').innerHTML=$('.info-inner').innerHTML;
+$('#aboutBody').addEventListener('click',e=>{if(e.target.closest('a[href^="#"]'))closeSheet(true)});
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2200)}
+
+/* ---------- global book links ---------- */
+document.addEventListener('click',e=>{const a=e.target.closest('[data-b],[data-ch]');if(!a||a.closest('#toc'))return;
+ if(a.dataset.b!==undefined){const i=+a.dataset.b;if(isLk(i)){e.preventDefault();openSheet('sh-login');return}S.cur=i}
+ if(a.dataset.ch&&a.getAttribute('href')==='#read'){S.ch=Math.min(24,+a.dataset.ch);if(S.cur!==0&&!a.dataset.b)S.cur=S.cur}
+ save()},true);
+
+/* ---------- router ---------- */
+const ROUTES=['home','search','library','me','novel','read','dash','novel-edit','chapter-edit'];
+const TABBED={home:'home',search:'search',library:'library',me:'me',dash:'dash'};
+function route(){let h=location.hash.slice(1);if(!ROUTES.includes(h))h='home';closeSheet(true);
+ $$('.screen').forEach(s=>s.classList.toggle('on',s.id===h));
+ const tb=$('#tabbar');tb.classList.toggle('on',!!TABBED[h]);$$('.tab',tb).forEach(t=>t.dataset.tab===TABBED[h]?t.setAttribute('aria-current','page'):t.removeAttribute('aria-current'));
+ if(h==='novel')renderNovel();if(h==='read'){renderRead();$('#read').classList.remove('hide');$('#rdBook').textContent=B[0].t}
+ if(h==='library')renderLib();if(h==='search'&&!$('#sRes').children.length)doSearch('');
+ const sc=$('#'+h);if(h!=='read')sc.scrollTop=0;else rs.scrollTop=0;
+}
+function rerender(){renderHome();renderMe();renderLib();if($('#novel').classList.contains('on'))renderNovel();doSearch($('#sInput').value.trim())}
+paintIcons();renderHome();renderMe();renderLib();renderRead();applyRead();
+window.addEventListener('hashchange',route);route();
+}
+</script>
+</body>
+</html>

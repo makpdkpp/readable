@@ -84,7 +84,7 @@ type Row = Awaited<ReturnType<typeof loader>>["pending"][number];
 
 function NovelRow({ n, children }: { n: Row; children: React.ReactNode }) {
   return (
-    <li className="flex gap-4 rounded-lg border border-stone-200 dark:border-stone-800 p-4">
+    <li className="card flex gap-4 p-4">
       <Cover coverKey={n.coverKey} title={n.title} className="w-20" />
       <div className="min-w-0 flex-1 space-y-2">
         <div className="flex flex-wrap items-center gap-2">
@@ -94,11 +94,11 @@ function NovelRow({ n, children }: { n: Row; children: React.ReactNode }) {
           <RatingBadge rating={n.rating} />
           <NovelStatusBadge status={n.status} />
         </div>
-        <p className="text-sm text-stone-500">
+        <p className="text-sm text-muted">
           โดย {n.author} · {formatThaiDateTime(n.updatedAt)}
         </p>
         <p className="text-sm line-clamp-3 whitespace-pre-line">{n.synopsis}</p>
-        {n.reviewNote && <p className="text-sm text-stone-500">หมายเหตุ: {n.reviewNote}</p>}
+        {n.reviewNote && <p className="text-sm text-muted">หมายเหตุ: {n.reviewNote}</p>}
         {children}
       </div>
     </li>
@@ -115,7 +115,7 @@ export default function AdminReview({ loaderData, actionData }: Route.ComponentP
       <section className="space-y-3">
         <h2 className="text-lg font-semibold">รออนุมัติ ({pending.length})</h2>
         {pending.length === 0 ? (
-          <p className="text-stone-500">ไม่มีเรื่องรออนุมัติ</p>
+          <p className="text-muted">ไม่มีเรื่องรออนุมัติ</p>
         ) : (
           <ul className="space-y-3">
             {pending.map((n) => (
@@ -140,7 +140,7 @@ export default function AdminReview({ loaderData, actionData }: Route.ComponentP
       <section className="space-y-3">
         <h2 className="text-lg font-semibold">ถูกซ่อนหรือไม่ผ่าน</h2>
         {hidden.length === 0 ? (
-          <p className="text-stone-500">ไม่มี</p>
+          <p className="text-muted">ไม่มี</p>
         ) : (
           <ul className="space-y-3">
             {hidden.map((n) => (
@@ -165,9 +165,9 @@ export default function AdminReview({ loaderData, actionData }: Route.ComponentP
 
 function HideAny({ busy }: { busy: boolean }) {
   return (
-    <section className="rounded-lg border border-stone-200 dark:border-stone-800 p-4 space-y-2">
+    <section className="card p-4 space-y-2">
       <h2 className="font-semibold">ซ่อนเรื่องที่เผยแพร่อยู่</h2>
-      <p className="text-sm text-stone-500">ใส่เลขเรื่องจาก URL เช่น /novel/12 คือเลข 12</p>
+      <p className="text-sm text-muted">ใส่เลขเรื่องจาก URL เช่น /novel/12 คือเลข 12</p>
       <Form method="post" className="flex flex-wrap gap-2">
         <input name="novelId" type="number" min={1} required placeholder="เลขเรื่อง" className={`${inputClass} w-32`} />
         <input name="note" required placeholder="เหตุผล" className={`${inputClass} flex-1`} />

@@ -15,6 +15,7 @@ export type CurrentUser = {
   displayName: string;
   role: "reader" | "writer" | "admin";
   birthDate: string | null;
+  theme: string | null;
 };
 
 /** สร้าง session ใหม่ให้ผู้ใช้ คืนค่า Set-Cookie สำหรับใส่ใน response */
@@ -42,6 +43,7 @@ export async function getCurrentUser(request: Request): Promise<CurrentUser | nu
       displayName: users.displayName,
       role: users.role,
       birthDate: users.birthDate,
+      theme: users.theme,
     })
     .from(sessions)
     .innerJoin(users, eq(sessions.userId, users.id))

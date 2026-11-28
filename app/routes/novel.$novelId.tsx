@@ -72,21 +72,28 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 export default function NovelPage({ loaderData }: Route.ComponentProps) {
   const { novel, gate, canPreview, tags, chapters: list } = loaderData;
   const first = list.find((c) => c.live) ?? list[0];
+  const cover = coverUrl(novel.coverKey);
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 space-y-8">
+    <div className="relative">
+      {cover && (
+        <div className="novel-backdrop" aria-hidden="true">
+          <div style={{ backgroundImage: `url(${cover})` }} />
+        </div>
+      )}
+    <div className="relative mx-auto max-w-4xl px-4 py-8 space-y-8">
       {canPreview && !isNovelPublic(novel.status) && (
         <PreviewBanner>
           นักอ่านยังไม่เห็นเรื่องนี้ <NovelStatusBadge status={novel.status} />
         </PreviewBanner>
       )}
-      <div className="flex flex-col gap-6 sm:flex-row">
+      <div className="novel-hero flex flex-col gap-6 sm:flex-row">
         <Cover coverKey={novel.coverKey} title={novel.title} className="w-40 self-center sm:self-start" />
         <div className="space-y-3">
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-3xl font-bold">{novel.title}</h1>
             <RatingBadge rating={novel.rating} />
           </div>
-          <p className="text-stone-600 dark:text-stone-400">
+          <p className="text-muted">
             โดย <span className="font-semibold">{novel.author}</span>
             {novel.category && <> · {novel.category}</>}
             {" · "}
@@ -95,7 +102,7 @@ export default function NovelPage({ loaderData }: Route.ComponentProps) {
           {tags.length > 0 && (
             <ul className="flex flex-wrap gap-2">
               {tags.map((t) => (
-                <li key={t} className="rounded-full bg-stone-100 dark:bg-stone-800 px-3 py-0.5 text-sm">
+                <li key={t} className="tag-chip">
                   #{t}
                 </li>
               ))}
@@ -114,22 +121,22 @@ export default function NovelPage({ loaderData }: Route.ComponentProps) {
         <AgeGateNotice gate={gate} redirectTo={`/novel/${novel.id}`} />
       ) : (
         <section>
-          <h2 className="mb-3 text-lg font-semibold">สารบัญ ({list.filter((c) => c.live).length} ตอน)</h2>
+          <h2 className="section-title mb-3">สารบัญ ({list.filter((c) => c.live).length} ตอน)</h2>
           {list.length === 0 ? (
-            <p className="text-stone-500">ยังไม่มีตอนที่เผยแพร่</p>
+            <p className="text-muted">ยังไม่มีตอนที่เผยแพร่</p>
           ) : (
-            <ol className="divide-y divide-stone-200 dark:divide-stone-800 rounded-lg border border-stone-200 dark:border-stone-800">
+            <ol className="card divide-y divide-line overflow-hidden">
               {list.map((c) => (
                 <li key={c.id}>
                   <Link
                     to={`/novel/${novel.id}/chapter/${c.id}`}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-stone-50 dark:hover:bg-stone-900"
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-subtle"
                   >
-                    <span className="w-10 text-sm text-stone-500">{c.number}</span>
+                    <span className="w-10 text-sm text-muted">{c.number}</span>
                     <span className="flex-1">{c.title}</span>
                     {!c.live && <ChapterStatusBadge status={c.status} live={false} />}
                     {c.live && c.publishAt && (
-                      <span className="text-xs text-stone-500">{formatThaiDate(c.publishAt)}</span>
+                      <span className="text-xs text-muted">{formatThaiDate(c.publishAt)}</span>
                     )}
                   </Link>
                 </li>
@@ -138,6 +145,7 @@ export default function NovelPage({ loaderData }: Route.ComponentProps) {
           )}
         </section>
       )}
+    </div>
     </div>
   );
 }

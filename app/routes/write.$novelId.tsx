@@ -170,24 +170,24 @@ function StatusPanel({
         <NovelStatusBadge status={status} />
       </div>
       {status === "draft" && (
-        <p className="text-sm text-stone-500">
+        <p className="text-sm text-muted">
           {hasLiveChapter
             ? "นักอ่านยังไม่เห็นเรื่องนี้ กดเผยแพร่เมื่อพร้อม"
             : "นักอ่านยังไม่เห็นเรื่องนี้ แนะนำให้เผยแพร่ตอนแรกก่อนแล้วค่อยเผยแพร่เรื่อง"}
         </p>
       )}
       {status === "pending_review" && (
-        <p className="text-sm text-stone-500">
+        <p className="text-sm text-muted">
           เรื่อง 18+ ต้องให้ admin อนุมัติก่อนนักอ่านจะเห็น ระหว่างนี้เขียนตอนต่อได้ตามปกติ
         </p>
       )}
       {(status === "rejected" || status === "hidden") && reviewNote && (
-        <p className="rounded-md bg-red-50 dark:bg-red-950 px-3 py-2 text-sm text-red-800 dark:text-red-200">
+        <p className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">
           เหตุผลจาก admin: {reviewNote}
         </p>
       )}
       {status === "hidden" && (
-        <p className="text-sm text-stone-500">ติดต่อ admin หากต้องการให้เปิดเรื่องนี้อีกครั้ง</p>
+        <p className="text-sm text-muted">ติดต่อ admin หากต้องการให้เปิดเรื่องนี้อีกครั้ง</p>
       )}
       <div className="flex flex-wrap gap-2">
         {status === "draft" && btn("publish", "เผยแพร่เรื่อง", primaryButton)}
@@ -209,7 +209,7 @@ export default function ManageNovel({ loaderData, actionData }: Route.ComponentP
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 space-y-8">
       <div>
-        <Link to="/write" className="text-sm text-stone-500 hover:underline">
+        <Link to="/write" className="text-sm text-muted hover:underline">
           ← นิยายของฉัน
         </Link>
         <div className="mt-3 flex gap-4">
@@ -219,13 +219,13 @@ export default function ManageNovel({ loaderData, actionData }: Route.ComponentP
               <h1 className="text-2xl font-bold">{novel.title}</h1>
               <RatingBadge rating={novel.rating} />
             </div>
-            <Link to={`/novel/${novel.id}`} className="text-sm text-amber-700 hover:underline dark:text-amber-400">
+            <Link to={`/novel/${novel.id}`} className="text-sm text-accent hover:underline">
               ดูหน้าเรื่องแบบที่นักอ่านเห็น
             </Link>
             {novel.coverKey && (
               <Form method="post">
                 <input type="hidden" name="intent" value="remove-cover" />
-                <button type="submit" disabled={busy} className="text-sm text-stone-500 hover:underline">
+                <button type="submit" disabled={busy} className="text-sm text-muted hover:underline">
                   ลบรูปปก
                 </button>
               </Form>
@@ -238,7 +238,7 @@ export default function ManageNovel({ loaderData, actionData }: Route.ComponentP
       {coverError && <Notice error="สร้างเรื่องแล้ว แต่อัปโหลดรูปปกไม่สำเร็จ ลองเลือกรูปใหม่อีกครั้ง" />}
       <Notice {...(msg("cover") ?? {})} />
 
-      <section className="rounded-lg border border-stone-200 dark:border-stone-800 p-6 space-y-3">
+      <section className="card p-6 space-y-3">
         <Notice {...(msg("status") ?? {})} />
         <StatusPanel
           status={novel.status}
@@ -247,7 +247,7 @@ export default function ManageNovel({ loaderData, actionData }: Route.ComponentP
         />
       </section>
 
-      <section className="rounded-lg border border-stone-200 dark:border-stone-800 p-6 space-y-4">
+      <section className="card p-6 space-y-4">
         <div className="flex items-center justify-between gap-4">
           <h2 className="text-lg font-semibold">ตอนทั้งหมด ({list.length})</h2>
           <Form method="post">
@@ -258,22 +258,22 @@ export default function ManageNovel({ loaderData, actionData }: Route.ComponentP
           </Form>
         </div>
         {list.length === 0 ? (
-          <p className="text-sm text-stone-500">ยังไม่มีตอน</p>
+          <p className="text-sm text-muted">ยังไม่มีตอน</p>
         ) : (
-          <ul className="divide-y divide-stone-200 dark:divide-stone-800">
+          <ul className="divide-y divide-line">
             {list.map((c) => (
               <li key={c.id}>
                 <Link
                   to={`/write/${novel.id}/chapters/${c.id}`}
-                  className="flex flex-wrap items-center gap-x-3 gap-y-1 py-3 hover:bg-stone-50 dark:hover:bg-stone-900"
+                  className="flex flex-wrap items-center gap-x-3 gap-y-1 py-3 hover:bg-subtle"
                 >
-                  <span className="w-12 text-sm text-stone-500">#{c.number}</span>
+                  <span className="w-12 text-sm text-muted">#{c.number}</span>
                   <span className="flex-1 font-medium">{c.title}</span>
                   <ChapterStatusBadge status={c.status} live={c.live} />
                   {c.status === "scheduled" && !c.live && c.publishAt && (
-                    <span className="text-xs text-stone-500">{formatThaiDateTime(c.publishAt)}</span>
+                    <span className="text-xs text-muted">{formatThaiDateTime(c.publishAt)}</span>
                   )}
-                  <span className="text-xs text-stone-500">{c.wordCount.toLocaleString("th-TH")} คำ</span>
+                  <span className="text-xs text-muted">{c.wordCount.toLocaleString("th-TH")} คำ</span>
                 </Link>
               </li>
             ))}
@@ -281,7 +281,7 @@ export default function ManageNovel({ loaderData, actionData }: Route.ComponentP
         )}
       </section>
 
-      <section className="rounded-lg border border-stone-200 dark:border-stone-800 p-6">
+      <section className="card p-6">
         <h2 className="mb-4 text-lg font-semibold">ข้อมูลเรื่อง</h2>
         <NovelForm
           key={novel.updatedAt.toString()}

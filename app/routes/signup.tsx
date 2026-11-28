@@ -86,9 +86,9 @@ export default function Signup({ loaderData, actionData }: Route.ComponentProps)
         />
         <SubmitButton busy={busy}>สมัครสมาชิก</SubmitButton>
       </Form>
-      <p className="text-center text-sm text-stone-500">
+      <p className="text-center text-sm text-muted">
         มีบัญชีแล้ว?{" "}
-        <Link to={`/login?redirectTo=${encodeURIComponent(redirectTo)}`} className="text-amber-700 dark:text-amber-500 font-semibold">
+        <Link to={`/login?redirectTo=${encodeURIComponent(redirectTo)}`} className="text-accent font-semibold">
           เข้าสู่ระบบ
         </Link>
       </p>

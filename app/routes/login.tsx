@@ -66,9 +66,9 @@ export default function Login({ loaderData, actionData }: Route.ComponentProps) 
         <Field label="รหัสผ่าน" name="password" type="password" autoComplete="current-password" />
         <SubmitButton busy={busy}>เข้าสู่ระบบ</SubmitButton>
       </Form>
-      <p className="text-center text-sm text-stone-500">
+      <p className="text-center text-sm text-muted">
         ยังไม่มีบัญชี?{" "}
-        <Link to={`/signup?redirectTo=${encodeURIComponent(redirectTo)}`} className="text-amber-700 dark:text-amber-500 font-semibold">
+        <Link to={`/signup?redirectTo=${encodeURIComponent(redirectTo)}`} className="text-accent font-semibold">
           สมัครสมาชิก
         </Link>
       </p>

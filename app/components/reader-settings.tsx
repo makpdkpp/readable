@@ -41,7 +41,7 @@ export function useReaderPrefs() {
 }
 
 const THEMES: { value: ReaderTheme; label: string; swatch: string }[] = [
-  { value: "auto", label: "ตามเครื่อง", swatch: "linear-gradient(135deg,#fff 50%,#111 50%)" },
+  { value: "auto", label: "ตามธีมเว็บ", swatch: "linear-gradient(135deg,var(--t-bg) 50%,var(--t-accent) 50%)" },
   { value: "light", label: "สว่าง", swatch: "#ffffff" },
   { value: "sepia", label: "ซีเปีย", swatch: "#f6efe0" },
   { value: "dark", label: "กลางคืน", swatch: "#111111" },
@@ -54,15 +54,15 @@ export function ReaderSettings({
   prefs: ReaderPrefs;
   update: (p: Partial<ReaderPrefs>) => void;
 }) {
-  const btn = "rounded-md border border-current/20 px-3 py-1 text-sm hover:bg-black/5 dark:hover:bg-white/10";
+  const btn = "rounded-md border border-current/20 px-3 py-1 text-sm hover:bg-subtle";
   return (
     <details className="relative">
       <summary className="cursor-pointer list-none rounded-md border border-current/20 px-3 py-1 text-sm select-none">
         Aa ตั้งค่าการอ่าน
       </summary>
       <div
-        className="absolute right-0 z-20 mt-2 w-64 space-y-4 rounded-lg border border-stone-200 dark:border-stone-700 p-4 shadow-lg"
-        style={{ ...THEME_STYLE[prefs.theme === "auto" ? "light" : prefs.theme] }}
+        className="absolute right-0 z-20 mt-2 w-64 space-y-4 card p-4 shadow-lg! text-ink"
+        style={THEME_STYLE[prefs.theme]}
       >
         <div>
           <div className="mb-1 text-xs font-semibold">ขนาดตัวอักษร ({prefs.fontSize})</div>
@@ -98,7 +98,7 @@ export function ReaderSettings({
                 className="flex flex-col items-center gap-1 text-xs"
               >
                 <span
-                  className={`h-8 w-8 rounded-full border ${prefs.theme === t.value ? "ring-2 ring-amber-500" : "border-stone-300"}`}
+                  className={`h-8 w-8 rounded-full border ${prefs.theme === t.value ? "ring-2 ring-accent" : "border-line-strong"}`}
                   style={{ background: t.swatch }}
                 />
                 {t.label}

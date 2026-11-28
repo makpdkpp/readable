@@ -84,7 +84,7 @@ export default function ReadChapter({ loaderData }: Route.ComponentProps) {
   const nav = (
     <nav className="flex items-center justify-between gap-2 text-sm">
       {prev ? (
-        <Link to={`/novel/${novel.id}/chapter/${prev.id}`} className="rounded-md border border-current/20 px-3 py-2 hover:bg-black/5 dark:hover:bg-white/10">
+        <Link to={`/novel/${novel.id}/chapter/${prev.id}`} className="rounded-md border border-current/20 px-3 py-2 hover:bg-subtle">
           ← ตอนก่อนหน้า
         </Link>
       ) : (
@@ -94,7 +94,7 @@ export default function ReadChapter({ loaderData }: Route.ComponentProps) {
         สารบัญ
       </Link>
       {next ? (
-        <Link to={`/novel/${novel.id}/chapter/${next.id}`} className="rounded-md border border-current/20 px-3 py-2 hover:bg-black/5 dark:hover:bg-white/10">
+        <Link to={`/novel/${novel.id}/chapter/${next.id}`} className="rounded-md border border-current/20 px-3 py-2 hover:bg-subtle">
           ตอนถัดไป →
         </Link>
       ) : (

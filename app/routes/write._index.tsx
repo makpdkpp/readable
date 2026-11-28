@@ -40,16 +40,16 @@ export default function WriterDashboard({ loaderData }: Route.ComponentProps) {
         </Link>
       </div>
       {loaderData.novels.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-stone-300 dark:border-stone-700 p-10 text-center text-stone-500">
+        <div className="card border-dashed! p-10 text-center text-muted">
           ยังไม่มีเรื่อง เริ่มสร้างเรื่องแรกได้เลย
         </div>
       ) : (
-        <ul className="space-y-3">
+        <ul className="card-list space-y-3">
           {loaderData.novels.map((n) => (
             <li key={n.id}>
               <Link
                 to={`/write/${n.id}`}
-                className="flex gap-4 rounded-lg border border-stone-200 dark:border-stone-800 p-3 hover:bg-stone-50 dark:hover:bg-stone-900"
+                className="card flex gap-4 p-3"
               >
                 <Cover coverKey={n.coverKey} title={n.title} className="w-16" />
                 <div className="min-w-0 space-y-1">
@@ -58,7 +58,7 @@ export default function WriterDashboard({ loaderData }: Route.ComponentProps) {
                     <RatingBadge rating={n.rating} />
                   </div>
                   <NovelStatusBadge status={n.status} />
-                  <p className="text-sm text-stone-500">
+                  <p className="text-sm text-muted">
                     {n.chapterCount} ตอน · แก้ไขล่าสุด {formatThaiDate(n.updatedAt)}
                   </p>
                 </div>
