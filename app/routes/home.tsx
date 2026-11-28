@@ -1,6 +1,8 @@
 import { desc, eq, inArray, and, ne } from "drizzle-orm";
+import { Link } from "react-router";
 
 import type { Route } from "./+types/home";
+import { Cover, RatingBadge } from "~/components/novel-ui";
 import { getDb } from "~/db/client";
 import { novels, users } from "~/db/schema";
 import { getCurrentUser } from "~/lib/auth/session.server";
@@ -22,6 +24,8 @@ export async function loader({ request }: Route.LoaderArgs) {
       id: novels.id,
       title: novels.title,
       synopsis: novels.synopsis,
+      coverKey: novels.coverKey,
+      rating: novels.rating,
       author: users.displayName,
     })
     .from(novels)
@@ -47,10 +51,20 @@ export default function Home({ loaderData }: Route.ComponentProps) {
       ) : (
         <ul className="grid gap-4 sm:grid-cols-2">
           {latest.map((n) => (
-            <li key={n.id} className="rounded-lg border border-stone-200 dark:border-stone-800 p-4">
-              <h2 className="font-semibold">{n.title}</h2>
-              <p className="text-sm text-stone-500">โดย {n.author}</p>
-              <p className="mt-2 text-sm line-clamp-3">{n.synopsis}</p>
+            <li key={n.id}>
+              <Link
+                to={`/novel/${n.id}`}
+                className="flex gap-4 rounded-lg border border-stone-200 dark:border-stone-800 p-4 hover:bg-stone-50 dark:hover:bg-stone-900"
+              >
+                <Cover coverKey={n.coverKey} title={n.title} className="w-20" />
+                <div className="min-w-0">
+                  <h2 className="flex items-center gap-2 font-semibold">
+                    {n.title} <RatingBadge rating={n.rating} />
+                  </h2>
+                  <p className="text-sm text-stone-500">โดย {n.author}</p>
+                  <p className="mt-2 text-sm line-clamp-3">{n.synopsis}</p>
+                </div>
+              </Link>
             </li>
           ))}
         </ul>
