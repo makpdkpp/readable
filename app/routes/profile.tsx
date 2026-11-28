@@ -3,6 +3,7 @@ import { Form, useNavigation } from "react-router";
 
 import type { Route } from "./+types/profile";
 import { Field, FormError, SubmitButton } from "~/components/auth-ui";
+import { ThemePicker } from "~/components/theme-switcher";
 import { getDb } from "~/db/client";
 import { oauthAccounts, users } from "~/db/schema";
 import { hashPassword, verifyPassword } from "~/lib/auth/password";
@@ -90,17 +91,23 @@ export default function Profile({ loaderData, actionData }: Route.ComponentProps
     actionData?.form === f ? actionData : undefined;
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-10 space-y-8">
+    <div className="mx-auto max-w-2xl px-4 py-10 space-y-8">
       <h1 className="text-2xl font-bold">โปรไฟล์</h1>
 
-      <section className="rounded-lg border border-stone-200 dark:border-stone-800 p-6 space-y-4">
+      <section className="card p-6 space-y-3">
+        <h2 className="font-semibold">ธีมของเว็บ</h2>
+        <p className="text-sm text-muted">เลือกหน้าตาที่ชอบ ระบบจะจำไว้ในบัญชีนี้ทุกเครื่องที่ล็อกอิน</p>
+        <ThemePicker />
+      </section>
+
+      <section className="card p-6 space-y-4">
         <div className="text-sm">
           <div className="font-semibold">อีเมล</div>
-          <div className="text-stone-600 dark:text-stone-400">
+          <div className="text-muted">
             {placeholderEmail ? "ยังไม่มีอีเมล (ล็อกอินผ่าน LINE)" : user.email}
           </div>
           {linked.length > 0 && (
-            <div className="mt-1 text-stone-500">
+            <div className="mt-1 text-muted">
               เชื่อมกับ {linked.map((p) => PROVIDER_NAME[p]).join(", ")}
             </div>
           )}
@@ -108,12 +115,12 @@ export default function Profile({ loaderData, actionData }: Route.ComponentProps
         <Form method="post" className="space-y-4">
           <input type="hidden" name="intent" value="profile" />
           <FormError message={msg("profile")?.error} />
-          {msg("profile")?.ok && <p className="text-sm text-green-700">{msg("profile")?.ok}</p>}
+          {msg("profile")?.ok && <p className="text-sm text-ok">{msg("profile")?.ok}</p>}
           <Field label="นามปากกา / ชื่อที่แสดง" name="displayName" defaultValue={user.displayName} />
           {user.birthDate ? (
             <div className="text-sm">
               <div className="font-semibold">วันเกิด</div>
-              <div className="text-stone-600 dark:text-stone-400">
+              <div className="text-muted">
                 {user.birthDate} (อายุ {ageOn(user.birthDate, new Date())} ปี)
               </div>
             </div>
@@ -131,15 +138,15 @@ export default function Profile({ loaderData, actionData }: Route.ComponentProps
       </section>
 
       {!placeholderEmail && (
-      <section className="rounded-lg border border-stone-200 dark:border-stone-800 p-6 space-y-4">
+      <section className="card p-6 space-y-4">
         <h2 className="font-semibold">{hasPassword ? "เปลี่ยนรหัสผ่าน" : "ตั้งรหัสผ่าน"}</h2>
         {!hasPassword && (
-          <p className="text-sm text-stone-500">ตั้งรหัสผ่านไว้เพื่อล็อกอินด้วยอีเมลได้ด้วย</p>
+          <p className="text-sm text-muted">ตั้งรหัสผ่านไว้เพื่อล็อกอินด้วยอีเมลได้ด้วย</p>
         )}
         <Form method="post" className="space-y-4">
           <input type="hidden" name="intent" value="password" />
           <FormError message={msg("password")?.error} />
-          {msg("password")?.ok && <p className="text-sm text-green-700">{msg("password")?.ok}</p>}
+          {msg("password")?.ok && <p className="text-sm text-ok">{msg("password")?.ok}</p>}
           {hasPassword && (
             <Field label="รหัสผ่านปัจจุบัน" name="currentPassword" type="password" autoComplete="current-password" />
           )}

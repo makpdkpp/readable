@@ -1,17 +1,484 @@
 @import "tailwindcss" source(".");
 
-@theme {
-  --font-sans: "Sarabun", ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+/* ธีมทั้ง 3 แบบ ผู้ใช้เลือกได้ ค่าอยู่บน <html data-theme="..."> */
+@custom-variant dark (&:where([data-theme="cinema"], [data-theme="cinema"] *));
+
+@theme inline {
+  --color-bg: var(--t-bg);
+  --color-surface: var(--t-surface);
+  --color-subtle: var(--t-subtle);
+  --color-ink: var(--t-ink);
+  --color-muted: var(--t-muted);
+  --color-line: var(--t-line);
+  --color-line-strong: var(--t-line-strong);
+  --color-accent: var(--t-accent);
+  --color-accent-hover: var(--t-accent-hover);
+  --color-on-accent: var(--t-on-accent);
+  --color-accent-soft: var(--t-accent-soft);
+  --color-danger: var(--t-danger);
+  --color-danger-soft: var(--t-danger-soft);
+  --color-ok: var(--t-ok);
+  --color-ok-soft: var(--t-ok-soft);
+  --color-warn: var(--t-warn);
+  --color-warn-soft: var(--t-warn-soft);
+  --font-sans: var(--t-font-ui);
+  --font-display: var(--t-font-display);
+  --font-reading: var(--t-font-reading);
+}
+
+/* A หน้ากระดาษ: พื้นขาว หมึกดำ สีน้ำเงินครามสีเดียว เส้นบางแทนกล่อง */
+:root,
+[data-theme="paper"] {
+  color-scheme: light;
+  --t-bg: #ffffff;
+  --t-surface: #ffffff;
+  --t-subtle: #f4f5f8;
+  --t-ink: #16171c;
+  --t-muted: #5d606a;
+  --t-line: #e6e7eb;
+  --t-line-strong: #c9ccd4;
+  --t-accent: #2b3a8f;
+  --t-accent-hover: #1f2b70;
+  --t-on-accent: #ffffff;
+  --t-accent-soft: #eceffa;
+  --t-danger: #a12a2a;
+  --t-danger-soft: #fbefee;
+  --t-ok: #2d6a45;
+  --t-ok-soft: #e7f3eb;
+  --t-warn: #7c5300;
+  --t-warn-soft: #fbf1dc;
+  --t-font-ui: "IBM Plex Sans Thai", ui-sans-serif, system-ui, sans-serif;
+  --t-font-display: "Noto Serif Thai", Georgia, serif;
+  --t-font-reading: "Noto Serif Thai", Georgia, serif;
+  --t-radius: 10px;
+  --t-radius-btn: 999px;
+  --t-border-w: 1px;
+  --t-card-border: var(--t-line);
+  --t-card-shadow: none;
+  --t-btn-shadow: none;
+  --t-cover-from: #2b3a8f;
+  --t-cover-to: #6f7cc4;
+  --t-cover-ink: #f4f2ec;
+  --t-header-bg: rgb(255 255 255 / 0.95);
+  --t-header-border: var(--t-line);
+}
+
+/* B ตลาดนัดเรื่องเล่า: แดงมะเขือเทศ เหลืองทานตะวัน ขอบหมึกหนา เงาทึบ */
+[data-theme="market"] {
+  color-scheme: light;
+  --t-bg: #ffffff;
+  --t-surface: #ffffff;
+  --t-subtle: #fff6e0;
+  --t-ink: #1d1b1a;
+  --t-muted: #5f5853;
+  --t-line: #1d1b1a;
+  --t-line-strong: #1d1b1a;
+  --t-accent: #e8432e;
+  --t-accent-hover: #c7321f;
+  --t-on-accent: #ffffff;
+  --t-accent-soft: #fde3dd;
+  --t-danger: #b3261e;
+  --t-danger-soft: #fde3dd;
+  --t-ok: #0b6e70;
+  --t-ok-soft: #d9f1f1;
+  --t-warn: #7a5200;
+  --t-warn-soft: #ffe9a8;
+  --t-font-ui: "Anuphan", ui-sans-serif, system-ui, sans-serif;
+  --t-font-display: "Anuphan", ui-sans-serif, system-ui, sans-serif;
+  --t-font-reading: "Sarabun", ui-sans-serif, system-ui, sans-serif;
+  --t-radius: 18px;
+  --t-radius-btn: 14px;
+  --t-border-w: 2px;
+  --t-card-border: #1d1b1a;
+  --t-card-shadow: 4px 4px 0 #1d1b1a;
+  --t-btn-shadow: 3px 3px 0 #1d1b1a;
+  --t-cover-from: #e8432e;
+  --t-cover-to: #ffc93c;
+  --t-cover-ink: #1d1b1a;
+  --t-header-bg: #ffffff;
+  --t-header-border: #1d1b1a;
+  --t-sun: #ffc93c;
+}
+
+/* C โรงฉายนิยาย: พื้นพลัมอมถ่าน สีโรสคอรัลสีเดียว ภาพปกเป็นพระเอก */
+[data-theme="cinema"] {
+  color-scheme: dark;
+  --t-bg: #17121c;
+  --t-surface: #1f1825;
+  --t-subtle: #29202f;
+  --t-ink: #f3ece6;
+  --t-muted: #a8949f;
+  --t-line: rgb(243 236 230 / 0.1);
+  --t-line-strong: rgb(243 236 230 / 0.2);
+  --t-accent: #ef7a6a;
+  --t-accent-hover: #f4968a;
+  --t-on-accent: #2a1115;
+  --t-accent-soft: rgb(239 122 106 / 0.14);
+  --t-danger: #f59a8d;
+  --t-danger-soft: rgb(239 122 106 / 0.12);
+  --t-ok: #9cc4a4;
+  --t-ok-soft: rgb(156 196 164 / 0.12);
+  --t-warn: #e8bd84;
+  --t-warn-soft: rgb(232 189 132 / 0.12);
+  --t-font-ui: "Noto Sans Thai", ui-sans-serif, system-ui, sans-serif;
+  --t-font-display: "Mitr", "Noto Sans Thai", ui-sans-serif, sans-serif;
+  --t-font-reading: "Noto Sans Thai", ui-sans-serif, system-ui, sans-serif;
+  --t-radius: 18px;
+  --t-radius-btn: 16px;
+  --t-border-w: 1px;
+  --t-card-border: var(--t-line);
+  --t-card-shadow: 0 12px 28px rgb(0 0 0 / 0.35);
+  --t-btn-shadow: none;
+  --t-cover-from: #352a3b;
+  --t-cover-to: #7b4a5c;
+  --t-cover-ink: #fff6ef;
+  --t-header-bg: rgb(23 18 28 / 0.78);
+  --t-header-border: var(--t-line);
 }
 
 html,
 body {
-  @apply bg-white dark:bg-gray-950;
+  background: var(--t-bg);
+  color: var(--t-ink);
+  font-family: var(--t-font-ui);
+  -webkit-font-smoothing: antialiased;
+}
 
-  @media (prefers-color-scheme: dark) {
-    color-scheme: dark;
+:focus-visible {
+  outline: 2px solid var(--t-accent);
+  outline-offset: 2px;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--t-font-display);
+}
+[data-theme="cinema"] :is(h1, h2, h3) {
+  font-weight: 500;
+}
+
+@layer components {
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: var(--t-header-bg);
+    border-bottom: var(--t-border-w) solid var(--t-header-border);
+    backdrop-filter: blur(12px);
   }
+  .wordmark {
+    font-family: var(--t-font-display);
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .wordmark-dot {
+    color: var(--t-accent);
+  }
+  [data-theme="market"] .wordmark-dot {
+    width: 0.8rem;
+    height: 0.8rem;
+    border-radius: 999px;
+    background: var(--t-accent);
+    border: 2px solid var(--t-ink);
+    font-size: 0;
+    order: -1;
+  }
+
+  /* การ์ด กล่องเนื้อหา */
+  .card {
+    background: var(--t-surface);
+    border: var(--t-border-w) solid var(--t-card-border);
+    border-radius: var(--t-radius);
+    box-shadow: var(--t-card-shadow);
+  }
+  a.card,
+  .card-link {
+    transition: transform 0.12s ease, background-color 0.15s ease, border-color 0.15s ease;
+  }
+  a.card:hover,
+  .card-link:hover {
+    background: var(--t-subtle);
+  }
+  [data-theme="market"] a.card:hover {
+    background: var(--t-surface);
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--t-ink);
+  }
+  [data-theme="cinema"] a.card:hover {
+    border-color: var(--t-line-strong);
+  }
+  /* หน้ากระดาษ: การ์ดในรายการเป็นแค่เส้นคั่นบาง ๆ ไม่ใช่กล่อง */
+  [data-theme="paper"] .card-list > li > .card {
+    border-width: 0 0 1px;
+    border-radius: 0;
+  }
+
+  /* ปุ่ม */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    min-height: 44px;
+    padding: 0.5rem 1.1rem;
+    border-radius: var(--t-radius-btn);
+    font-weight: 600;
+    border: var(--t-border-w) solid transparent;
+    box-shadow: var(--t-btn-shadow);
+    transition: background-color 0.15s ease, transform 0.08s ease;
+    cursor: pointer;
+  }
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+  .btn:active:not(:disabled) {
+    transform: translate(1px, 1px);
+  }
+  .btn-primary {
+    background: var(--t-accent);
+    color: var(--t-on-accent);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: var(--t-accent-hover);
+  }
+  .btn-secondary {
+    background: var(--t-surface);
+    color: var(--t-ink);
+    border-color: var(--t-line-strong);
+  }
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--t-subtle);
+  }
+  .btn-danger {
+    background: transparent;
+    color: var(--t-danger);
+    box-shadow: none;
+  }
+  .btn-danger:hover:not(:disabled) {
+    background: var(--t-danger-soft);
+  }
+  [data-theme="market"] .btn-primary,
+  [data-theme="market"] .btn-secondary {
+    border-color: var(--t-ink);
+  }
+  [data-theme="cinema"] .btn-secondary {
+    background: var(--t-subtle);
+  }
+
+  /* ช่องกรอก */
+  .field-input {
+    margin-top: 0.25rem;
+    width: 100%;
+    min-height: 44px;
+    padding: 0.5rem 0.75rem;
+    font-size: 16px;
+    color: var(--t-ink);
+    background: var(--t-surface);
+    border: var(--t-border-w) solid var(--t-line-strong);
+    border-radius: calc(var(--t-radius) * 0.6);
+  }
+  .field-input:focus {
+    outline: none;
+    border-color: var(--t-accent);
+    box-shadow: 0 0 0 3px var(--t-accent-soft);
+  }
+  [data-theme="paper"] .field-input {
+    border-width: 0 0 1px;
+    border-radius: 0;
+    padding-inline: 0;
+    background: transparent;
+  }
+  [data-theme="paper"] .field-input:focus {
+    box-shadow: 0 1px 0 var(--t-accent);
+  }
+  [data-theme="paper"] textarea.field-input {
+    border-width: 1px;
+    border-radius: 8px;
+    padding-inline: 0.75rem;
+  }
+
+  /* ป้ายสถานะ */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.1rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+  [data-theme="market"] .badge {
+    border: 2px solid var(--t-ink);
+  }
+  .badge-neutral {
+    background: var(--t-subtle);
+    color: var(--t-muted);
+  }
+  .badge-ok {
+    background: var(--t-ok-soft);
+    color: var(--t-ok);
+  }
+  .badge-warn {
+    background: var(--t-warn-soft);
+    color: var(--t-warn);
+  }
+  .badge-danger {
+    background: var(--t-danger-soft);
+    color: var(--t-danger);
+  }
+  .badge-info {
+    background: var(--t-accent-soft);
+    color: var(--t-accent);
+  }
+  .badge-18 {
+    background: var(--t-ink);
+    color: var(--t-bg);
+  }
+  [data-theme="market"] .badge-18,
+  [data-theme="cinema"] .badge-18 {
+    background: var(--t-accent);
+    color: var(--t-on-accent);
+  }
+  .badge-13 {
+    background: var(--t-accent-soft);
+    color: var(--t-accent);
+  }
+  [data-theme="market"] .badge-13 {
+    background: var(--t-sun);
+    color: var(--t-ink);
+  }
+  [data-theme="cinema"] .badge-13 {
+    background: var(--t-warn-soft);
+    color: var(--t-warn);
+  }
+
+  .tag-chip {
+    border-radius: 999px;
+    padding: 0.15rem 0.75rem;
+    font-size: 0.875rem;
+    background: var(--t-subtle);
+    color: var(--t-ink);
+  }
+  [data-theme="market"] .tag-chip {
+    border: 2px solid var(--t-ink);
+    font-weight: 600;
+  }
+
+  /* หัวข้อหมวด */
+  .section-title {
+    font-family: var(--t-font-display);
+    font-size: 1.35rem;
+    font-weight: 700;
+  }
+  [data-theme="paper"] .section-title {
+    font-weight: 600;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--t-ink);
+  }
+  [data-theme="market"] .section-title::before {
+    content: "";
+    display: inline-block;
+    width: 0.9rem;
+    height: 0.9rem;
+    margin-right: 0.5rem;
+    border-radius: 4px;
+    background: var(--t-sun);
+    border: 2px solid var(--t-ink);
+    transform: rotate(-8deg);
+    vertical-align: -0.05em;
+  }
+  [data-theme="cinema"] .section-title {
+    font-weight: 500;
+  }
+
+  /* ปก */
+  .cover {
+    aspect-ratio: 2 / 3;
+    flex-shrink: 0;
+    overflow: hidden;
+    border-radius: calc(var(--t-radius) * 0.5);
+    background: linear-gradient(135deg, var(--t-cover-from), var(--t-cover-to));
+    color: var(--t-cover-ink);
+  }
+  [data-theme="paper"] .cover {
+    border-radius: 3px;
+    box-shadow: 0 1px 2px rgb(22 23 28 / 0.1), 0 8px 16px -10px rgb(22 23 28 / 0.4);
+  }
+  [data-theme="market"] .cover {
+    border: 2px solid var(--t-ink);
+    border-radius: 12px;
+  }
+  [data-theme="cinema"] .cover {
+    border-radius: 12px;
+    box-shadow: 0 12px 28px rgb(0 0 0 / 0.45);
+  }
+
+  /* หน้าเรื่อง: ธีมโรงฉายใช้ปกเบลอเป็นฉากหลัง ธีมอื่นซ่อนไว้ */
+  .novel-backdrop {
+    display: none;
+  }
+  [data-theme="cinema"] .novel-backdrop {
+    display: block;
+    position: absolute;
+    inset: 0 0 auto;
+    height: 520px;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+  }
+  [data-theme="cinema"] .novel-backdrop > div {
+    position: absolute;
+    inset: -40px;
+    background-size: cover;
+    background-position: center;
+    filter: blur(36px) saturate(1.3);
+    opacity: 0.7;
+  }
+  [data-theme="cinema"] .novel-backdrop::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(rgb(23 18 28 / 0.2), rgb(23 18 28 / 0.6) 45%, var(--t-bg));
+  }
+  /* ตลาดนัด: หัวหน้าเรื่องเป็นแถบสีแดงลายจุด */
+  [data-theme="market"] .novel-hero {
+    background: var(--t-accent) radial-gradient(rgb(255 255 255 / 0.18) 2px, transparent 2.2px) 0 0 / 18px 18px;
+    color: #ffffff;
+    border: 2px solid var(--t-ink);
+    border-radius: var(--t-radius);
+    box-shadow: var(--t-card-shadow);
+    padding: 1.25rem;
+  }
+  [data-theme="market"] .novel-hero .tag-chip {
+    background: #ffffff;
+    color: var(--t-ink);
+  }
+  [data-theme="market"] .novel-hero .btn-primary {
+    background: var(--t-sun);
+    color: var(--t-ink);
+  }
+  [data-theme="market"] .novel-hero .cover {
+    transform: rotate(-3deg);
+    box-shadow: 5px 5px 0 var(--t-ink);
+  }
+}
+
+/* อยู่นอก layer เพื่อชนะ utility text-muted บนพื้นแดง */
+[data-theme="market"] .novel-hero .text-muted {
+  color: rgb(255 255 255 / 0.92);
+}
+
+/* เนื้อหาตอนใช้ฟอนต์สำหรับอ่านของแต่ละธีม */
+.chapter-content {
+  font-family: var(--t-font-reading);
 }
 
 /* เนื้อหาตอน ใช้ทั้งในหน้าอ่านและตัวแก้ไข */
@@ -59,5 +526,5 @@ body {
   margin: 0 0 1em;
 }
 .chapter-content .ProseMirror-selectednode {
-  outline: 2px solid #d97706;
+  outline: 2px solid var(--t-accent);
 }

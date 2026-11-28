@@ -59,7 +59,7 @@ export default function NewNovel({ loaderData, actionData }: Route.ComponentProp
         submitLabel="สร้างเรื่อง"
         error={actionData?.error}
       />
-      <p className="mt-4 text-sm text-stone-500">
+      <p className="mt-4 text-sm text-muted">
         เรื่องจะเป็นร่างไว้ก่อน เพิ่มตอนแล้วค่อยกดเผยแพร่ในหน้าถัดไป
       </p>
     </div>

@@ -74,7 +74,7 @@ export function NovelForm({
             placeholder="เช่น รักใส, โรงเรียน, ตลก"
             className={inputClass}
           />
-          <span className="mt-1 block text-xs text-stone-500">คั่นด้วยจุลภาค ได้สูงสุด 10 แท็ก</span>
+          <span className="mt-1 block text-xs text-muted">คั่นด้วยจุลภาค ได้สูงสุด 10 แท็ก</span>
         </label>
       </div>
       <fieldset>
@@ -87,11 +87,11 @@ export function NovelForm({
                 name="rating"
                 value={r.value}
                 defaultChecked={(defaults?.rating ?? "all") === r.value}
-                className="mt-1 accent-amber-600"
+                className="mt-1 accent-accent"
               />
               <span>
                 <span className="font-semibold">{r.label}</span>{" "}
-                <span className="text-stone-500">{r.hint}</span>
+                <span className="text-muted">{r.hint}</span>
               </span>
             </label>
           ))}
@@ -103,9 +103,9 @@ export function NovelForm({
           name="cover"
           type="file"
           accept="image/jpeg,image/png,image/webp"
-          className="mt-1 block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-stone-100 file:px-3 file:py-2 file:font-semibold dark:file:bg-stone-800"
+          className="mt-1 block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-subtle file:px-3 file:py-2 file:font-semibold"
         />
-        <span className="mt-1 block text-xs text-stone-500">
+        <span className="mt-1 block text-xs text-muted">
           JPG, PNG หรือ WebP ไม่เกิน 2 MB แนะนำสัดส่วน 2:3 เช่น 800×1200
         </span>
       </label>

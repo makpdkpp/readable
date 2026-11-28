@@ -22,6 +22,8 @@ export const users = sqliteTable("users", {
   // null = สมัครผ่าน Google/LINE อย่างเดียว ยังไม่ได้ตั้งรหัสผ่าน
   passwordHash: text("password_hash"),
   emailVerified: integer("email_verified", { mode: "boolean" }).notNull().default(false),
+  // ธีมของเว็บที่ผู้ใช้เลือก (paper | market | cinema) null = ยังไม่เลือก
+  theme: text("theme"),
   ...timestamps,
 });
 

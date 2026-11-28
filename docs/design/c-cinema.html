@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>readable · โรงฉายนิยาย (แบบ C)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bg:#17121c;--s1:#1f1825;--s2:#29202f;--s3:#352a3b;
+  --line:rgba(243,236,230,.09);--line2:rgba(243,236,230,.17);
+  --tx:#f3ece6;--mu:#a8949f;--mu2:#7f6d78;
+  --ac:#ef7a6a;--ac-h:#f4968a;--on-ac:#2a1115;
+  --ok:#9cc4a4;--warn:#e8bd84;
+  --glass:rgba(31,24,37,.74);
+  --hd:"Mitr","Noto Sans Thai",sans-serif;--bd:"Noto Sans Thai",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:#110d14;color:var(--tx);font-family:var(--bd);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+input,select,textarea{font-size:16px}
+button{background:none;border:0;cursor:pointer}
+button:disabled{opacity:.35;cursor:default}
+a{color:inherit;text-decoration:none}
+svg{display:block}
+ul{list-style:none}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px;border-radius:10px}
+h1,h2,h3,h4,.hd{font-family:var(--hd);font-weight:500;line-height:1.3}
+.ico{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ico.sm{width:18px;height:18px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.muted{color:var(--mu)}
+
+/* ---------- stage ---------- */
+.stage{height:100%}
+.app{position:fixed;inset:0;background:var(--bg);overflow:hidden;isolation:isolate}
+.about{display:none}
+@media (min-width:900px){
+  body{overflow:auto;background:radial-gradient(900px 600px at 78% 40%,rgba(239,122,106,.07),transparent 70%),#110d14}
+  .stage{display:grid;grid-template-columns:minmax(340px,440px) 1fr;gap:56px;align-items:center;max-width:1240px;margin:0 auto;padding:32px 48px;min-height:100%;height:auto}
+  .about{display:block;max-height:calc(100vh - 64px);overflow:auto;padding-right:8px;scrollbar-width:thin}
+  .about .x{display:none!important}
+  #aboutScrim{display:none}
+  .frame{display:flex;justify-content:center}
+  .app{position:relative;inset:auto;width:390px;height:min(844px,calc(100vh - 64px));min-height:640px;border-radius:44px;border:1px solid var(--line2);box-shadow:0 0 0 9px #0a070c,0 0 0 10px #2a2230,0 50px 120px rgba(0,0,0,.6)}
+  .aboutbtn{display:none!important}
+}
+@media (max-width:899px){
+  .about.open{display:block;position:fixed;left:0;right:0;bottom:0;max-height:88vh;overflow:auto;z-index:200;background:var(--s1);border-radius:26px 26px 0 0;border-top:1px solid var(--line2);padding:12px 20px 32px;animation:up .35s cubic-bezier(.2,.8,.2,1)}
+  #aboutScrim.on{position:fixed;inset:0;background:rgba(8,5,10,.6);z-index:199}
+}
+@keyframes up{from{transform:translateY(40%);opacity:0}to{transform:none;opacity:1}}
+.about .x{position:sticky;top:0;margin-left:auto;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--s2)}
+.ab-k{font-size:13px;color:var(--mu)}
+.ab-name{font-family:var(--hd);font-size:34px;font-weight:500;line-height:1.15;margin:4px 0 2px}
+.ab-en{color:var(--ac);font-family:var(--hd);font-size:16px}
+.ab-p{color:#d9cdc6;margin:16px 0 22px;font-size:15px;line-height:1.75}
+.ab-h{font-family:var(--hd);font-size:15px;margin:22px 0 10px;color:var(--tx)}
+.sw{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.sw div{border-radius:14px;padding:44px 10px 8px;font-size:12px;line-height:1.35;border:1px solid var(--line)}
+.sw b{display:block;font-weight:600;font-family:ui-monospace,monospace;font-size:12px}
+.ty{background:var(--s1);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-bottom:8px}
+.ty small{color:var(--mu);font-size:12px;display:block}
+.scrlist{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.scrlist a{display:flex;align-items:center;min-height:44px;padding:0 12px;border-radius:12px;background:var(--s1);border:1px solid var(--line);font-size:14px}
+.scrlist a:hover{border-color:var(--ac)}
+.scrlist code{color:var(--mu);font-size:11px;margin-left:auto}
+
+/* ---------- screens ---------- */
+.scr{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;display:none;padding-bottom:100px;scrollbar-width:none;overscroll-behavior:contain}
+.scr::-webkit-scrollbar{display:none}
+.scr.on{display:block;animation:fadein .4s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.top{position:sticky;top:0;z-index:6;display:flex;align-items:center;gap:8px;padding:12px 16px;background:linear-gradient(var(--bg) 60%,rgba(23,18,28,0))}
+.top h1{font-size:20px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.logo{font-family:var(--hd);font-size:23px;font-weight:500;letter-spacing:-.01em;flex:1}
+.logo span{color:var(--ac)}
+.ib{width:44px;height:44px;display:grid;place-items:center;border-radius:50%;flex:none}
+.ib.gl{background:rgba(23,18,28,.5);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--line)}
+.ib[aria-pressed=true]{color:var(--ac)}
+.mode{display:inline-flex;border:1px solid var(--line2);border-radius:999px;padding:2px;flex:none}
+.mode a{min-height:40px;min-width:44px;padding:0 12px;display:inline-flex;align-items:center;border-radius:999px;font-size:13px;color:var(--mu)}
+.mode a.on{background:var(--tx);color:var(--bg);font-weight:600}
+.aboutbtn{font-size:12px;color:var(--mu);min-height:44px;padding:0 6px;text-decoration:underline;text-underline-offset:3px}
+.searchbar{display:flex;align-items:center;gap:10px;margin:4px 16px 0;height:48px;padding:0 16px;border-radius:16px;background:var(--s1);border:1px solid var(--line);color:var(--mu);font-size:15px}
+.sh{display:flex;justify-content:space-between;align-items:center;padding:24px 16px 10px;gap:12px}
+.sh h2{font-size:19px}
+.sh a,.sh button{font-size:13px;color:var(--mu);min-height:44px;display:inline-flex;align-items:center}
+.row{display:flex;gap:12px;overflow-x:auto;padding:2px 16px 6px;scroll-snap-type:x proximity;scrollbar-width:none}
+.row::-webkit-scrollbar,.chips::-webkit-scrollbar{display:none}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 16px;scrollbar-width:none}
+.chip{flex:none;height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--line2);color:#d6c9c3;font-size:14px;white-space:nowrap;transition:background .2s,color .2s}
+.chip[aria-pressed=true]{background:var(--tx);color:var(--bg);border-color:var(--tx);font-weight:600}
+
+/* hero */
+.hero{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:14px 16px 6px;scrollbar-width:none}
+.hero::-webkit-scrollbar{display:none}
+.hero-i{flex:0 0 80%;scroll-snap-align:center;position:relative;border-radius:26px;overflow:hidden;aspect-ratio:4/5;box-shadow:0 24px 50px rgba(0,0,0,.45)}
+.hero-art,.hero-art svg{position:absolute;inset:0;width:100%;height:100%}
+.hero-i:hover .hero-art{transform:scale(1.04)}
+.hero-art{transition:transform 1.2s cubic-bezier(.2,.8,.2,1)}
+.hero-tx{position:absolute;left:0;right:0;bottom:0;padding:60px 18px 18px;background:linear-gradient(rgba(15,10,16,0),rgba(15,10,16,.9))}
+.hero-tx h3{font-size:25px;margin:8px 0 2px}
+.hero-tx p{font-size:13px;color:#d9ccc5}
+.pill{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;font-size:12px;background:rgba(243,236,230,.14);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);margin-right:4px}
+.hero-go{position:absolute;right:16px;bottom:18px;width:48px;height:48px;border-radius:50%;background:var(--ac);color:var(--on-ac);display:grid;place-items:center}
+
+/* cards & covers */
+.cv{display:block;position:relative;border-radius:12px;overflow:hidden;aspect-ratio:2/3;background:var(--s2);box-shadow:0 12px 28px rgba(0,0,0,.42);flex:none}
+.cv svg{width:100%;height:100%}
+.cv.lock svg{filter:blur(10px) saturate(.6);transform:scale(1.2)}
+.lockov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;font-size:11px;line-height:1.4;background:rgba(23,18,28,.38);padding:6px}
+.rt{position:absolute;top:6px;left:6px;font-size:10.5px;line-height:1;padding:4px 7px;border-radius:999px;background:rgba(18,13,22,.72);color:var(--tx);font-weight:600}
+.rt.r13{color:var(--warn)}
+.rt.r18{background:var(--ac);color:var(--on-ac)}
+.card{flex:0 0 118px;scroll-snap-align:start;display:flex;flex-direction:column;gap:2px;min-width:0}
+.card .cv{margin-bottom:8px}
+.ct{font-weight:600;font-size:14px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ca{font-size:12px;color:var(--mu)}
+.cont{flex:0 0 268px;display:flex;gap:12px;align-items:center;background:var(--s1);border:1px solid var(--line);border-radius:18px;padding:10px 14px 10px 10px;scroll-snap-align:start}
+.cont .cv{width:54px;border-radius:9px}
+.cont-b{flex:1;min-width:0}
+.cont-b b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar{display:block;height:4px;border-radius:4px;background:var(--s3);overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;background:var(--ac);border-radius:4px}
+.small{font-size:12px;color:var(--mu)}
+.list li a{display:flex;gap:14px;padding:10px 16px;align-items:center}
+.list .cv{width:58px;border-radius:9px}
+.li-b{flex:1;min-width:0}
+.li-b b{display:block;font-size:15px;line-height:1.4}
+.li-b .ep,.li-b>.small{display:block}
+.li-b .ep{font-size:13px;color:#d6c9c3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.new{display:inline-block;font-size:11px;font-weight:600;color:var(--ac);border:1px solid rgba(239,122,106,.5);border-radius:6px;padding:0 6px;margin-left:6px;vertical-align:1px}
+.foot{padding:28px 16px 8px;font-size:12px;color:var(--mu2);text-align:center}
+.empty{padding:20px 16px;color:var(--mu);font-size:14px}
+
+/* tabs */
+.tabs{position:absolute;left:10px;right:10px;bottom:10px;height:66px;border-radius:24px;background:var(--glass);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid var(--line);display:flex;z-index:20;padding:0 4px}
+.tabs[hidden]{display:none}
+.tabs a{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;color:var(--mu);border-radius:18px}
+.tabs a[aria-current=page]{color:var(--tx)}
+.tabs a[aria-current=page] .ico{color:var(--ac)}
+
+/* novel page */
+.nv-bg{position:absolute;left:0;right:0;top:0;height:560px;overflow:hidden;z-index:0;pointer-events:none}
+.nv-bg svg{position:absolute;left:-20%;top:-20%;width:140%;height:140%;filter:blur(30px) saturate(1.3);opacity:.85}
+.nv-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(rgba(23,18,28,.15),rgba(23,18,28,.55) 45%,var(--bg) 96%)}
+.nv{position:relative;z-index:1}
+.nv .top{background:none}
+.nv-hero{display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 20px}
+.nv-hero .cv{width:168px;border-radius:14px;box-shadow:0 30px 60px rgba(0,0,0,.6)}
+.nv-hero h1{font-size:27px;margin:20px 0 4px}
+.nv-hero .by{color:#ddd0c9;font-size:14px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+.tag{height:28px;display:inline-flex;align-items:center;padding:0 11px;border-radius:999px;font-size:12.5px;background:rgba(243,236,230,.1);border:1px solid var(--line)}
+.tag.r18{background:var(--ac);color:var(--on-ac);border-color:transparent;font-weight:600}
+.tag.r13{color:var(--warn)}
+.tag.done{color:var(--ok)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);margin:20px 16px 0;padding:14px 0;border-radius:18px;background:rgba(31,24,37,.6);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line);text-align:center}
+.stats div+div{border-left:1px solid var(--line)}
+.stats b{display:block;font-family:var(--hd);font-size:19px;font-weight:500}
+.stats span{font-size:12px;color:var(--mu)}
+.cta{display:flex;flex-direction:column;gap:8px;padding:16px}
+.btn{min-height:50px;border-radius:16px;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:600;font-size:15px;padding:0 18px;text-align:center}
+.btn.pri{background:var(--ac);color:var(--on-ac)}
+.btn.pri:hover{background:var(--ac-h)}
+.btn.sec{background:var(--s2);border:1px solid var(--line2)}
+.btn.ghost{border:1px solid var(--line2)}
+.acts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 16px}
+.act{min-height:60px;border-radius:16px;background:var(--s1);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:12.5px;color:#d6c9c3}
+.act[aria-pressed=true]{color:var(--ac);border-color:rgba(239,122,106,.45)}
+.act[aria-pressed=true] .ico{fill:currentColor}
+.syn{padding:0 16px}
+.syn-t{color:#ddd1ca;line-height:1.8;max-height:5.4em;overflow:hidden;position:relative;transition:max-height .4s ease}
+.syn-t p+p{margin-top:.8em}
+.syn-t::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2.4em;background:linear-gradient(rgba(23,18,28,0),var(--bg))}
+.syn.open .syn-t{max-height:40em}
+.syn.open .syn-t::after{display:none}
+.linkbtn{min-height:44px;color:var(--ac);font-weight:600;font-size:14px;display:inline-flex;align-items:center;gap:4px}
+.htags{display:flex;flex-wrap:wrap;gap:6px 12px;padding:4px 16px 0;font-size:13px;color:var(--mu)}
+.chl li a{display:flex;align-items:center;gap:14px;padding:12px 16px;min-height:60px;border-top:1px solid var(--line)}
+.chl .n{font-family:var(--hd);font-size:13px;color:var(--mu);width:28px;flex:none}
+.chl .t{flex:1;min-width:0}
+.chl .t b{font-weight:500;display:block;font-size:15px}
+.chl .t span{font-size:12px;color:var(--mu)}
+.chl .read b{color:var(--mu)}
+.here{font-size:11px;color:var(--warn)}
+.cm{display:flex;gap:12px;padding:12px 16px}
+.av{width:38px;height:38px;border-radius:50%;flex:none;display:grid;place-items:center;font-family:var(--hd);font-size:15px;color:var(--bg)}
+.cm-b{flex:1;min-width:0;font-size:14px;line-height:1.65}
+.cm-b b{font-size:13.5px}
+.cm-b .small{margin-left:6px}
+.cm-l{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--mu);margin-top:4px}
+
+/* reading */
+.app[data-rth=light]{--rbg:#f8f4f0;--rtx:#2b2329;--rmu:#7a6973;--rcard:#eee6df;--rglass:rgba(248,244,240,.86);--rline:rgba(43,35,41,.12)}
+.app[data-rth=sepia]{--rbg:#f2e6d3;--rtx:#3b2e25;--rmu:#7e6a57;--rcard:#e7d8c1;--rglass:rgba(242,230,211,.88);--rline:rgba(59,46,37,.14)}
+.app[data-rth=night]{--rbg:#17121c;--rtx:#ebe2da;--rmu:#a8949f;--rcard:#221b28;--rglass:rgba(23,18,28,.84);--rline:rgba(243,236,230,.1)}
+#s-read{background:var(--rbg);color:var(--rtx);padding-bottom:40px;transition:background .3s,color .3s}
+.rc{position:absolute;left:0;right:0;z-index:15;background:var(--rglass);color:var(--rtx);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);display:flex;align-items:center;gap:4px;padding:6px 8px;transition:transform .35s cubic-bezier(.2,.8,.2,1),background .3s}
+.rc-top{top:0;border-bottom:1px solid var(--rline)}
+.rc-bot{bottom:0;border-top:1px solid var(--rline);padding-bottom:max(6px,env(safe-area-inset-bottom))}
+.app:not([data-route=read]) .rc,.app:not([data-route=read]) .rprog{display:none}
+.app.rc-hide .rc-top{transform:translateY(-110%)}
+.app.rc-hide .rc-bot{transform:translateY(110%)}
+.rc-t{flex:1;min-width:0;text-align:center;line-height:1.3}
+.rc-t b{display:block;font-family:var(--hd);font-weight:500;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rc-t span{font-size:12px;color:var(--rmu)}
+.rc-bot button{min-height:44px;padding:0 12px;border-radius:14px;display:inline-flex;align-items:center;gap:4px;font-size:14px}
+.rprog{position:absolute;top:0;left:0;right:0;height:3px;z-index:16;background:var(--ac);transform-origin:left;transform:scaleX(0)}
+.rd-art{max-width:34em;margin:0 auto;padding:84px 22px 20px;font-size:var(--fs,18px);line-height:var(--lh,1.9)}
+.rd-art .k{font-size:13px;color:var(--rmu);margin-bottom:4px;line-height:1.5}
+.rd-art h1{font-size:1.45em;line-height:1.35;margin-bottom:1.4em}
+.rd-art p{margin-bottom:1.1em}
+.rd-art .scene{text-align:center;color:var(--rmu);letter-spacing:.6em;margin:1.4em 0}
+.rd-end{max-width:34em;margin:0 auto;padding:8px 18px 90px}
+.endcard{background:var(--rcard);border-radius:22px;padding:22px 18px;text-align:center}
+.endcard h3{font-size:17px}
+.biglike{margin:14px auto 6px;width:64px;height:64px;border-radius:50%;display:grid;place-items:center;border:1.5px solid var(--rline);color:var(--rtx)}
+.biglike .ico{width:28px;height:28px}
+.biglike[aria-pressed=true]{background:var(--ac);color:var(--on-ac);border-color:var(--ac)}
+.biglike[aria-pressed=true] .ico{fill:currentColor}
+.endnav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.endnav .btn.sec{background:transparent;border-color:var(--rline);color:var(--rtx)}
+.rd-cm h3{font-size:17px;margin:28px 0 6px}
+.rd-cm .cm{padding:12px 0}
+.rd-cm .small,.rd-cm .cm-l{color:var(--rmu)}
+.cmform{display:flex;gap:8px;margin-top:10px}
+.cmform input{flex:1;min-width:0;height:48px;border-radius:14px;border:1px solid var(--rline);background:var(--rcard);color:var(--rtx);padding:0 14px}
+.cmform button{width:48px;height:48px;border-radius:14px;background:var(--ac);color:var(--on-ac);display:grid;place-items:center;flex:none}
+
+/* sheets */
+.scrim{position:absolute;inset:0;z-index:39;background:rgba(9,6,11,.52);opacity:0;pointer-events:none;transition:opacity .3s}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:40;max-height:86%;overflow:auto;background:rgba(35,27,41,.9);backdrop-filter:blur(26px) saturate(140%);-webkit-backdrop-filter:blur(26px) saturate(140%);border-top:1px solid var(--line2);border-radius:28px 28px 0 0;padding:8px 18px 26px;color:var(--tx);transform:translateY(105%);visibility:hidden;transition:transform .38s cubic-bezier(.2,.8,.2,1),visibility 0s .38s}
+.sheet.open{transform:none;visibility:visible;transition:transform .38s cubic-bezier(.2,.8,.2,1),visibility 0s}
+.grab{width:40px;height:4px;border-radius:4px;background:var(--line2);margin:4px auto 10px}
+.sh-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.sh-h h2{font-size:19px}
+.fld{margin-top:16px}
+.fld>label,.fld>.lb{display:block;font-size:13px;color:var(--mu);margin-bottom:8px}
+.stepper{display:flex;align-items:center;gap:10px}
+.stepper button{width:56px;height:48px;border-radius:14px;background:var(--s3);font-family:var(--hd);font-size:17px}
+.stepper output{flex:1;text-align:center;font-family:var(--hd);font-size:18px}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px}
+.seg button{min-height:48px;border-radius:14px;background:var(--s3);font-size:14px;border:1.5px solid transparent}
+.seg button[aria-pressed=true]{border-color:var(--ac);color:var(--tx);background:rgba(239,122,106,.14)}
+.thm{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.thm button{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12.5px;padding:8px 0;border-radius:14px;border:1.5px solid transparent}
+.thm button[aria-pressed=true]{border-color:var(--ac)}
+.thm i{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-family:var(--hd);font-style:normal;font-size:15px;border:1px solid var(--line2)}
+.toc li a{display:flex;gap:12px;align-items:center;min-height:52px;padding:0 6px;border-bottom:1px solid var(--line);font-size:15px}
+.toc li a[aria-current=true]{color:var(--ac)}
+.toc .n{font-family:var(--hd);color:var(--mu);width:28px;font-size:13px}
+
+/* toast */
+.toast{position:absolute;left:50%;bottom:92px;z-index:60;max-width:calc(100% - 32px);transform:translate(-50%,16px);opacity:0;pointer-events:none;background:var(--tx);color:var(--bg);font-weight:500;font-size:14px;padding:12px 18px;border-radius:16px;box-shadow:0 16px 40px rgba(0,0,0,.45);transition:opacity .25s,transform .25s;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* writer studio */
+.studio{background:#141017}
+.studio .top{background:linear-gradient(#141017 60%,rgba(20,16,23,0))}
+.hello{padding:4px 16px 0}
+.hello h2{font-size:24px}
+.qs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:16px 16px 0}
+.qs div{background:var(--s1);border:1px solid var(--line);border-radius:18px;padding:12px}
+.qs b{display:block;font-family:var(--hd);font-size:20px;font-weight:500;margin:2px 0}
+.qs span{font-size:11.5px;color:var(--mu);line-height:1.35;display:block}
+.qs em{font-style:normal;font-size:11.5px;color:var(--ok)}
+.mine li{display:flex;gap:14px;padding:12px 16px;border-top:1px solid var(--line)}
+.mine .cv{width:60px;border-radius:9px}
+.mine .li-b b{display:block;font-size:15px}
+.sb{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:999px;font-size:12px;font-weight:600;margin-top:6px;white-space:nowrap}
+.sb::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.sb.pub{color:var(--ok);background:rgba(156,196,164,.12)}
+.sb.draft{color:#cbbcc4;background:rgba(203,188,196,.1)}
+.sb.pend,.sb.sch{color:var(--warn);background:rgba(232,189,132,.12)}
+.sb.rej{color:var(--ac);background:rgba(239,122,106,.13)}
+.reason{margin-top:8px;font-size:12.5px;line-height:1.55;color:#e8c9c3;background:rgba(239,122,106,.08);border:1px solid rgba(239,122,106,.25);border-radius:12px;padding:8px 10px}
+.mine .row-a{display:flex;gap:6px;margin-top:6px}
+.mini{min-height:44px;display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--mu);padding:0 4px}
+.feed li{display:flex;gap:12px;padding:10px 16px;align-items:flex-start}
+.feed .fi{width:38px;height:38px;border-radius:12px;background:var(--s2);display:grid;place-items:center;flex:none;color:var(--ac)}
+.feed p{font-size:14px;line-height:1.55}
+.form{padding:0 16px}
+.form .fld>label,.form .lb{color:#cfc2bb}
+.in{width:100%;min-height:50px;border-radius:14px;background:var(--s1);border:1px solid var(--line2);padding:12px 14px;color:var(--tx)}
+.in:focus{border-color:var(--ac);outline:none;box-shadow:0 0 0 3px rgba(239,122,106,.2)}
+textarea.in{min-height:120px;resize:vertical;line-height:1.7}
+select.in{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--mu) 50%),linear-gradient(-45deg,transparent 50%,var(--mu) 50%);background-position:calc(100% - 20px) 22px,calc(100% - 15px) 22px;background-size:5px 5px;background-repeat:no-repeat}
+.hint{font-size:12px;color:var(--mu);margin-top:6px}
+.fld>label.upl,.upl{display:flex;gap:14px;align-items:center;padding:12px;border-radius:18px;border:1.5px dashed var(--line2);cursor:pointer;position:relative}
+.upl:hover,.upl:focus-within{border-color:var(--ac)}
+.upl .cv{width:72px;border-radius:10px}
+.upl b{display:flex;align-items:center;gap:6px;color:var(--ac);font-size:14px}
+.upl input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
+.tagbox{display:flex;flex-wrap:wrap;gap:6px;padding:8px;border-radius:14px;background:var(--s1);border:1px solid var(--line2);min-height:50px}
+.tagbox:focus-within{border-color:var(--ac)}
+.tc{display:inline-flex;align-items:center;gap:2px;height:34px;padding:0 2px 0 12px;border-radius:999px;background:var(--s3);font-size:14px}
+.tc button{width:32px;height:32px;display:grid;place-items:center;border-radius:50%;color:var(--mu)}
+.tc button:hover{color:var(--ac)}
+.tagbox input{flex:1;min-width:120px;border:0;background:none;outline:none;height:34px;padding:0 6px}
+.rates{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.rates label{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:64px;border-radius:16px;background:var(--s1);border:1.5px solid var(--line2);cursor:pointer;text-align:center;line-height:1.3}
+.rates input{position:absolute;opacity:0;pointer-events:none}
+.rates b{font-family:var(--hd);font-weight:500;font-size:16px}
+.rates span{font-size:11.5px;color:var(--mu)}
+.rates label:has(input:checked){border-color:var(--ac);background:rgba(239,122,106,.1)}
+.rates label:has(input:focus-visible){outline:2px solid var(--ac);outline-offset:2px}
+.note18{display:none;gap:10px;margin-top:10px;padding:12px;border-radius:14px;background:rgba(232,189,132,.1);border:1px solid rgba(232,189,132,.3);color:#f0d9b8;font-size:13px;line-height:1.6}
+.note18.on{display:flex}
+.tl{position:relative;padding:0 16px}
+.tl::before{content:"";position:absolute;left:73px;top:8px;bottom:8px;width:2px;background:var(--s3)}
+.tl li{position:relative;display:flex;align-items:center;gap:8px;padding:6px 0;border-radius:14px;transition:background .2s}
+.tl li.dragging{opacity:.4}
+.tl li.over{background:rgba(239,122,106,.08)}
+.grip{width:44px;height:44px;display:grid;place-items:center;color:var(--mu);cursor:grab;flex:none;border-radius:12px}
+.dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--mu2);background:#141017;flex:none;position:relative;z-index:1}
+.st-pub .dot{background:var(--ok);border-color:var(--ok)}
+.st-sch .dot{border-color:var(--warn);box-shadow:0 0 0 4px rgba(232,189,132,.15)}
+.wc{flex:1;min-width:0;display:block;padding:8px 12px;border-radius:14px;background:var(--s1);border:1px solid var(--line)}
+.wc:hover{border-color:var(--line2)}
+.wc .small b{font-weight:500}
+.wc>b{display:block;font-weight:500;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wc .sb{margin-top:4px}
+.addch{margin:12px 16px 0;width:calc(100% - 32px)}
+
+/* editor */
+.edtop{position:sticky;top:0;z-index:8;background:rgba(20,16,23,.9);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line);transition:opacity .4s}
+.edbar{display:flex;align-items:center;gap:2px;padding:6px 8px}
+.save{flex:1;min-width:0;display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--mu);padding-left:4px;white-space:nowrap;overflow:hidden}
+.save .ico{color:var(--ok)}
+.save.busy .ico{color:var(--warn)}
+.pubbtn{min-height:44px;padding:0 16px;border-radius:14px;background:var(--ac);color:var(--on-ac);font-weight:600;font-size:14px}
+.tb{display:flex;gap:2px;padding:0 8px 6px;overflow-x:auto;scrollbar-width:none}
+.tb button{flex:1;min-width:48px;min-height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border-radius:12px;font-size:10px;color:var(--mu)}
+.tb button:hover{background:var(--s2);color:var(--tx)}
+.tb button[aria-pressed=true]{color:var(--ac);background:rgba(239,122,106,.1)}
+.edwrap{padding:22px 22px 80px;max-width:34em;margin:0 auto}
+.edk{font-size:13px;color:var(--mu)}
+.edtitle{width:100%;background:none;border:0;font-family:var(--hd);font-size:24px;font-weight:500;color:var(--tx);padding:4px 0 14px;outline:none;border-bottom:1px solid var(--line)}
+.edtitle:focus-visible{border-bottom-color:var(--ac)}
+.ed{outline:none;font-size:18px;line-height:1.95;padding-top:16px;min-height:50vh;color:#ece3dc;caret-color:var(--ac)}
+.ed>*{transition:opacity .35s}
+.ed p{margin-bottom:1em}
+.ed h3{font-size:21px;margin:1.2em 0 .5em}
+.ed blockquote{border-left:2px solid var(--ac);padding:2px 0 2px 16px;margin:0 0 1em;color:#d8cbc4;font-style:italic}
+.ed hr{border:0;height:24px;margin:1em 0;background:radial-gradient(circle,var(--mu) 1.6px,transparent 2px) center/22px 24px repeat-x;width:66px;margin-inline:auto}
+.focus .ed>*:not(.cur){opacity:.22}
+.focus .edtop,.focus .edcount{opacity:.3}
+.focus .edtop:hover,.focus .edtop:focus-within{opacity:1}
+.preview .ed{caret-color:transparent}
+.preview .tb{opacity:.35;pointer-events:none}
+.pvbadge{display:none;font-size:12px;color:var(--warn);margin-bottom:8px}
+.preview .pvbadge{display:block}
+.edcount{position:absolute;left:0;right:0;bottom:0;z-index:8;display:flex;justify-content:space-between;align-items:center;padding:10px 16px;font-size:12.5px;color:var(--mu);background:rgba(20,16,23,.92);border-top:1px solid var(--line);transition:opacity .4s}
+.app:not([data-route=chapter-edit]) .edcount{display:none}
+.opt{display:flex;gap:12px;align-items:flex-start;padding:14px;border-radius:16px;border:1.5px solid var(--line2);margin-top:8px;cursor:pointer}
+.opt:has(input:checked){border-color:var(--ac);background:rgba(239,122,106,.08)}
+.opt input{width:20px;height:20px;accent-color:var(--ac);margin-top:3px;flex:none}
+.opt b{display:block;font-size:15px}
+.opt span{font-size:13px;color:var(--mu)}
+.schf{display:none;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.schf.on{display:grid}
+.schf input{color-scheme:dark}
+
+/* library/profile/search */
+.shelf li{display:flex;align-items:flex-start!important;gap:14px;padding:12px 16px;align-items:center}
+.shelf .cv{width:72px;border-radius:10px}
+.shelf .li-b b{display:block;font-size:15.5px}
+.shelf .btn{min-height:44px;font-size:13.5px;margin-top:8px;display:inline-flex;padding:0 14px}
+.prof{display:flex;flex-direction:column;align-items:center;text-align:center;padding:20px 16px}
+.prof .av{width:84px;height:84px;font-size:32px;background:var(--mu)}
+.prof h2{margin-top:12px;font-size:22px}
+.plist{margin:12px 16px;border-radius:18px;background:var(--s1);border:1px solid var(--line);overflow:hidden}
+.plist a,.plist button{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;padding:0 16px;text-align:left;font-size:15px}
+.plist>*+*{border-top:1px solid var(--line)}
+.plist .ico:last-child{margin-left:auto;color:var(--mu)}
+.sfield{display:flex;align-items:center;gap:10px;margin:4px 16px 8px;height:52px;padding:0 14px;border-radius:16px;background:var(--s1);border:1px solid var(--line2)}
+.sfield:focus-within{border-color:var(--ac)}
+.sfield input{flex:1;min-width:0;border:0;background:none;outline:none;height:100%}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+<div class="stage">
+  <aside class="about" id="about" aria-label="เกี่ยวกับแบบดีไซน์นี้">
+    <button class="x" type="button" aria-label="ปิด" data-aclose><i data-i="x"></i></button>
+    <div class="ab-k">readable · แนวทางที่ C</div>
+    <div class="ab-name">โรงฉายนิยาย</div>
+    <div class="ab-en">Story Cinema · Immersive</div>
+    <p class="ab-p">ทุกเรื่องคือภาพยนตร์ที่รอฉาย ปกนิยายเป็นพระเอกของหน้าจอ ภาพปกถูกเบลอเต็มฉากเป็นฉากหลังของหน้าเรื่อง แถบเลื่อนปกขนาดใหญ่ชวนให้เลือกเหมือนเดินผ่านโปสเตอร์หน้าโรง พื้นสีพลัมอมถ่านทำให้สีของปกเปล่งออกมา โดยมีสีโรสคอรัลเป็นจุดเน้นเพียงสีเดียวสำหรับปุ่มสำคัญ ตัวโปรแกรมมืดเสมอ แต่หน้าอ่านเปลี่ยนเป็นสว่างหรือซีเปียได้ ส่วนฝั่งนักเขียนคือสตูดิโอมืดที่มีโหมดโฟกัส หรี่ทุกอย่างยกเว้นย่อหน้าที่กำลังเขียน</p>
+    <div class="ab-h">ชุดสี</div>
+    <div class="sw">
+      <div style="background:#17121c"><b>#17121c</b>พื้นพลัมถ่าน</div>
+      <div style="background:#29202f"><b>#29202f</b>พื้นผิวยกระดับ</div>
+      <div style="background:#f3ece6;color:#17121c"><b>#f3ece6</b>ตัวอักษรหลัก</div>
+      <div style="background:#a8949f;color:#17121c"><b>#a8949f</b>ม่วงเทา ข้อความรอง</div>
+      <div style="background:#ef7a6a;color:#2a1115"><b>#ef7a6a</b>โรสคอรัล จุดเน้น</div>
+      <div style="background:#f2e6d3;color:#3b2e25"><b>#f2e6d3</b>ซีเปีย หน้าอ่าน</div>
+    </div>
+    <div class="ab-h">ตัวอักษร</div>
+    <div class="ty"><small>Mitr · หัวเรื่อง ชื่อเรื่อง</small><div style="font-family:var(--hd);font-size:26px;font-weight:500">เงาจันทร์ใต้ผืนน้ำ</div></div>
+    <div class="ty"><small>Noto Sans Thai · เนื้อหาและหน้าอ่าน</small><div style="font-size:16px;line-height:1.8">คืนนั้นบึงน้ำนิ่งเหมือนกระจกที่ใครสักคนลืมเช็ด ดวงจันทร์ลอยอยู่สองดวง</div></div>
+    <div class="ab-h">หน้าจอทั้งหมด</div>
+    <nav class="scrlist" aria-label="รายการหน้าจอ">
+      <a href="#home">หน้าแรก<code>#home</code></a>
+      <a href="#novel" data-book="moon">หน้าเรื่อง<code>#novel</code></a>
+      <a href="#read">หน้าอ่าน<code>#read</code></a>
+      <a href="#library">ชั้นหนังสือ<code>#library</code></a>
+      <a href="#search">ค้นหา<code>#search</code></a>
+      <a href="#profile">โปรไฟล์<code>#profile</code></a>
+      <a href="#dash">แดชบอร์ด<code>#dash</code></a>
+      <a href="#novel-edit">จัดการเรื่อง<code>#novel-edit</code></a>
+      <a href="#chapter-edit">เขียนตอน<code>#chapter-edit</code></a>
+    </nav>
+  </aside>
+  <div id="aboutScrim" data-aclose></div>
+
+  <div class="frame">
+  <div class="app" id="app" data-route="home" data-rth="night">
+
+    <!-- HOME -->
+    <section class="scr" id="s-home" aria-label="หน้าแรก">
+      <header class="top">
+        <div class="logo">readable<span>.</span></div>
+        <button class="aboutbtn" type="button">เกี่ยวกับแบบนี้</button>
+        <nav class="mode" aria-label="สลับฝั่ง"><a href="#home" class="on" aria-current="true">ผู้อ่าน</a><a href="#dash">นักเขียน</a></nav>
+      </header>
+      <a class="searchbar" href="#search"><i data-i="search"></i>ค้นหาเรื่อง นักเขียน หรือแท็ก</a>
+      <div class="hero" id="hero" aria-label="ฉายเด่นสัปดาห์นี้"></div>
+      <div class="sh"><h2>เลือกตามหมวด</h2></div>
+      <div class="chips" id="chips-home" role="group" aria-label="หมวดหมู่"></div>
+      <div class="sh"><h2>อ่านต่อ</h2><a href="#library">ชั้นหนังสือ</a></div>
+      <div class="row" id="cont"></div>
+      <div class="sh"><h2 id="pop-h">ยอดนิยมและแนะนำ</h2></div>
+      <div class="row" id="pop"></div>
+      <div class="sh"><h2>อัปเดตล่าสุด</h2></div>
+      <ul class="list" id="latest"></ul>
+      <p class="foot">ข้อมูลตัวอย่าง: ชื่อเรื่อง นักเขียน และตัวเลขทั้งหมดสมมติขึ้นเพื่อการออกแบบ</p>
+    </section>
+
+    <!-- SEARCH -->
+    <section class="scr" id="s-search" aria-label="ค้นหา">
+      <header class="top"><h1>ค้นหา</h1></header>
+      <label class="sfield"><i data-i="search"></i><span class="sr">คำค้นหา</span><input id="q" type="search" placeholder="ชื่อเรื่อง นักเขียน แท็ก" autocomplete="off"></label>
+      <div class="chips" id="chips-search" role="group" aria-label="กรองหมวด"></div>
+      <ul class="list" id="sres" style="margin-top:8px"></ul>
+    </section>
+
+    <!-- NOVEL -->
+    <section class="scr" id="s-novel" aria-label="หน้าเรื่อง">
+      <div class="nv-bg" id="nv-bg" aria-hidden="true"></div>
+      <div class="nv">
+        <header class="top">
+          <a class="ib gl" href="#home" aria-label="กลับ"><i data-i="back"></i></a>
+          <span style="flex:1"></span>
+          <button class="ib gl" type="button" id="nv-share2" aria-label="แชร์"><i data-i="share"></i></button>
+        </header>
+        <div class="nv-hero">
+          <div class="cv" id="nv-cover"></div>
+          <h1 id="nv-title"></h1>
+          <div class="by">โดย <b id="nv-author"></b></div>
+          <div class="tags" id="nv-meta"></div>
+        </div>
+        <div class="stats" id="nv-stats"></div>
+        <div class="cta">
+          <a class="btn pri" href="#read" id="nv-cont" data-ep="12"><i data-i="play"></i><span>อ่านต่อ ตอนที่ 12</span></a>
+          <a class="btn sec" href="#read" data-ep="1">อ่านตอนแรก</a>
+        </div>
+        <div class="acts">
+          <button class="act" type="button" id="nv-shelf" aria-pressed="false"><i data-i="bookmark"></i><span>เก็บเข้าชั้น</span></button>
+          <button class="act" type="button" id="nv-like" aria-pressed="false"><i data-i="heart"></i><span>ถูกใจ</span></button>
+          <button class="act" type="button" id="nv-share"><i data-i="share"></i><span>แชร์</span></button>
+        </div>
+        <div class="sh"><h2>เรื่องย่อ</h2></div>
+        <div class="syn" id="syn"><div class="syn-t" id="nv-syn"></div><button class="linkbtn" type="button" id="syn-btn" aria-expanded="false" aria-controls="nv-syn">อ่านเพิ่มเติม</button></div>
+        <div class="htags" id="nv-tags"></div>
+        <div class="sh"><h2 id="nv-chh">ตอนทั้งหมด</h2><button type="button" data-open="sh-toc">ดูสารบัญ</button></div>
+        <ul class="chl" id="nv-ch"></ul>
+        <div class="sh"><h2>ความคิดเห็น</h2><span class="small">342 ความคิดเห็น</span></div>
+        <div class="cm"><span class="av" style="background:#e8bd84">น</span><div class="cm-b"><b>น้ำหวานใจดี</b><span class="small">2 ชั่วโมงที่แล้ว · ตอนที่ 24</span><p>ฉากระฆังดังครั้งที่สามขนลุกมากค่ะ อ่านตอนตีหนึ่งคือพลาดสุด ๆ แต่หยุดไม่ได้เลย</p><span class="cm-l"><i data-i="heart" class="sm"></i>128</span></div></div>
+        <div class="cm"><span class="av" style="background:#9cc4a4">ภ</span><div class="cm-b"><b>ภูมิใจในบึงนี้</b><span class="small">เมื่อวาน · ตอนที่ 23</span><p>ภูผาต้องรู้อะไรแน่ ๆ ทำไมถึงไม่กล้ามองเงาตัวเองในน้ำ ทฤษฎีของผมคือเขาเคยลงไปข้างล่างมาแล้ว</p><span class="cm-l"><i data-i="heart" class="sm"></i>87</span></div></div>
+      </div>
+    </section>
+
+    <!-- READ -->
+    <section class="scr" id="s-read" aria-label="หน้าอ่าน">
+      <article class="rd-art" id="rd-art">
+        <div class="k" id="rd-k">เงาจันทร์ใต้ผืนน้ำ</div>
+        <h1 id="rd-h">ตอนที่ 12 เสียงระฆังจากก้นบึง</h1>
+        <p>คืนนั้นบึงน้ำนิ่งเหมือนกระจกที่ใครสักคนลืมเช็ด ดวงจันทร์ลอยอยู่สองดวง ดวงหนึ่งบนฟ้า อีกดวงหนึ่งจมอยู่ใต้ผิวน้ำ และมีเพียงดวงหลังเท่านั้นที่กำลังกะพริบ</p>
+        <p>“อย่ามองนานนัก” ยายเคยเตือนไว้ตั้งแต่ฉันยังเล็ก “จันทร์ใต้น้ำมันจำหน้าคนได้” ตอนนั้นฉันหัวเราะ คิดว่าเป็นแค่นิทานที่ผู้ใหญ่ใช้ไล่ให้หลานเข้านอน แต่คืนนี้ ขณะที่ปลายเท้าแตะขอบท่าน้ำไม้เก่า ฉันกลับไม่แน่ใจอีกต่อไป</p>
+        <p>เสียงระฆังดังขึ้นครั้งแรกเบามาก เบาจนเกือบกลืนไปกับเสียงจิ้งหรีด มันไม่ได้มาจากวัดบนเนิน ไม่ได้มาจากหมู่บ้านฝั่งโน้น แต่ดังขึ้นจากที่ไหนสักแห่งลึกลงไปใต้น้ำ ราวกับมีใครกำลังเคาะประตูจากอีกด้านหนึ่ง</p>
+        <p>ภูผาที่ยืนถือตะเกียงอยู่ข้างหลังขยับเข้ามาใกล้ “ได้ยินใช่ไหม” เขากระซิบ แสงไฟสั่นไหวสะท้อนบนแว่นตา ฉันพยักหน้าแทนคำตอบ เพราะกลัวว่าถ้าเปิดปากพูด เสียงของตัวเองจะไปปลุกอะไรบางอย่างให้ตื่น</p>
+        <p>ครั้งที่สองระฆังดังชัดขึ้น ผิวน้ำเริ่มเป็นวงกระเพื่อมออกจากกลางบึงทั้งที่ไม่มีลมสักนิด ใบบัวที่ลอยอยู่ใกล้ฝั่งหมุนช้า ๆ หันเข้าหาแสงจันทร์ใต้น้ำพร้อมกัน เหมือนฝูงคนที่กำลังรอฟังประกาศสำคัญ</p>
+        <div class="scene" aria-hidden="true">· · ·</div>
+        <p>ฉันนึกถึงจดหมายฉบับสุดท้ายของแม่ที่ซ่อนอยู่ในกล่องไม้ใต้เตียง ลายมือเอียงขวาเขียนไว้เพียงบรรทัดเดียวว่า “ถ้าได้ยินเสียงระฆังเมื่อไร ให้จำไว้ว่าแม่ไม่ได้หายไปไหน” สิบปีที่ผ่านมาฉันอ่านมันซ้ำจนกระดาษนุ่มเหมือนผ้า แต่ไม่เคยเข้าใจความหมายเลยสักครั้ง</p>
+        <p>“ข้าวฟ่าง” ภูผาเรียกชื่อฉัน เสียงของเขาแหบลงเล็กน้อย “เงาของเธอ…” ฉันก้มลงมอง เงาที่ควรจะทอดยาวไปบนพื้นไม้กลับไม่อยู่ตรงนั้น มันไหลลงไปในน้ำ ยืดยาวออกไปจนเกือบแตะดวงจันทร์ที่กะพริบอยู่ใต้บึง</p>
+        <p>ฉันควรจะกลัว ควรจะถอยหลังกลับขึ้นไปบนตลิ่ง แต่ร่างกายกลับรู้สึกเบาอย่างประหลาด เหมือนทุกอย่างที่แบกไว้ตลอดสิบปีกำลังถูกน้ำเย็นค่อย ๆ ชะล้างออกไปทีละชั้น</p>
+        <p>ระฆังดังครั้งที่สาม และในวินาทีนั้นเอง ฉันเห็นใบหน้าหนึ่งสะท้อนขึ้นมาจากก้นบึง ใบหน้าที่ฉันจำได้แม้จะไม่ได้เห็นมานานกว่าสิบปี ริมฝีปากนั้นขยับช้า ๆ เป็นประโยคเดียวที่ฉันรอคอยมาตลอดชีวิต</p>
+        <p>“กลับบ้านเถอะลูก”</p>
+      </article>
+      <div class="rd-end">
+        <div class="endcard">
+          <h3>จบตอนแล้ว ชอบตอนนี้ไหม</h3>
+          <button class="biglike" type="button" id="ep-like" aria-pressed="false" aria-label="ถูกใจตอนนี้"><i data-i="heart"></i></button>
+          <div class="small" style="color:var(--rmu)"><span id="ep-likes">1,204</span> คนถูกใจตอนนี้</div>
+          <div class="endnav">
+            <button class="btn sec" type="button" id="end-toc" data-open="sh-toc">สารบัญ</button>
+            <button class="btn pri" type="button" id="end-next">ตอนถัดไป</button>
+          </div>
+        </div>
+        <div class="rd-cm">
+          <h3>ความคิดเห็นในตอนนี้ (<span id="cm-n">56</span>)</h3>
+          <form class="cmform" id="cm-form"><label class="sr" for="cm-in">เขียนความคิดเห็น</label><input id="cm-in" placeholder="เขียนความคิดเห็นถึงนักเขียน" autocomplete="off"><button type="submit" aria-label="ส่งความคิดเห็น"><i data-i="send"></i></button></form>
+          <ul id="cm-list">
+            <li class="cm"><span class="av" style="background:#ef7a6a">ม</span><div class="cm-b"><b>มะปรางสุก</b><span class="small">15 นาทีที่แล้ว</span><p>“กลับบ้านเถอะลูก” คือน้ำตาไหลเลยค่ะ รอตอนต่อไปไม่ไหวแล้ว</p><span class="cm-l"><i data-i="heart" class="sm"></i>42</span></div></li>
+            <li class="cm"><span class="av" style="background:#a8949f">ต</span><div class="cm-b"><b>ต้นกล้าริมบึง</b><span class="small">1 ชั่วโมงที่แล้ว</span><p>บรรยายเสียงระฆังสามครั้งได้จังหวะมาก ตอนอ่านเหมือนได้ยินจริง ๆ</p><span class="cm-l"><i data-i="heart" class="sm"></i>19</span></div></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- LIBRARY -->
+    <section class="scr" id="s-library" aria-label="ชั้นหนังสือ">
+      <header class="top"><h1>ชั้นหนังสือ</h1><span class="small" id="lib-n"></span></header>
+      <ul class="shelf" id="shelf"></ul>
+    </section>
+
+    <!-- PROFILE -->
+    <section class="scr" id="s-profile" aria-label="โปรไฟล์">
+      <header class="top"><h1>โปรไฟล์</h1><button class="aboutbtn" type="button">เกี่ยวกับแบบนี้</button></header>
+      <div class="prof"><span class="av" id="pf-av">?</span><h2 id="pf-name">ยังไม่ได้เข้าสู่ระบบ</h2><p class="small" id="pf-sub">เข้าสู่ระบบเพื่อเก็บชั้นหนังสือ แสดงความคิดเห็น และดูเรื่องเรต 18+</p></div>
+      <div style="padding:0 16px"><button class="btn pri" style="width:100%" type="button" id="login">เข้าสู่ระบบ (จำลอง)</button></div>
+      <div class="plist">
+        <a href="#library"><i data-i="shelf"></i>ชั้นหนังสือของฉัน<i data-i="next" class="sm"></i></a>
+        <a href="#dash"><i data-i="pen"></i>สลับไปฝั่งนักเขียน<i data-i="next" class="sm"></i></a>
+        <button type="button" data-toast="ยังไม่มีการแจ้งเตือนใหม่"><i data-i="bell"></i>การแจ้งเตือน<i data-i="next" class="sm"></i></button>
+      </div>
+    </section>
+
+    <!-- DASH -->
+    <section class="scr studio" id="s-dash" aria-label="แดชบอร์ดนักเขียน">
+      <header class="top">
+        <div class="logo" style="font-size:20px">สตูดิโอ<span>.</span></div>
+        <button class="aboutbtn" type="button">เกี่ยวกับแบบนี้</button>
+        <nav class="mode" aria-label="สลับฝั่ง"><a href="#home">ผู้อ่าน</a><a href="#dash" class="on" aria-current="true">นักเขียน</a></nav>
+      </header>
+      <div class="hello"><p class="small">สวัสดีตอนเช้า</p><h2>ปลายฟ้า</h2></div>
+      <div class="qs">
+        <div><span>ยอดอ่าน 7 วัน</span><b>18,240</b><em>+12%</em></div>
+        <div><span>ถูกใจ</span><b>1,326</b><em>+84</em></div>
+        <div><span>ผู้ติดตาม</span><b>2,081</b><em>+12</em></div>
+      </div>
+      <div style="padding:14px 16px 0"><a class="btn pri" href="#novel-edit" data-toast="สร้างฉบับร่างเรื่องใหม่แล้ว"><i data-i="plus"></i>สร้างเรื่องใหม่</a></div>
+      <div class="sh"><h2>เรื่องของฉัน</h2><span class="small">4 เรื่อง</span></div>
+      <ul class="mine" id="mine"></ul>
+      <div class="sh"><h2>กิจกรรมล่าสุด</h2></div>
+      <ul class="feed">
+        <li><span class="fi"><i data-i="comment" class="sm"></i></span><p><b>น้ำหวานใจดี</b> แสดงความคิดเห็นในตอนที่ 24<br><span class="small">2 ชั่วโมงที่แล้ว</span></p></li>
+        <li><span class="fi"><i data-i="user" class="sm"></i></span><p>มีผู้ติดตามใหม่ 12 คนในวันนี้<br><span class="small">5 ชั่วโมงที่แล้ว</span></p></li>
+        <li><span class="fi"><i data-i="check" class="sm"></i></span><p>ตอนที่ 24 “จันทร์ดวงที่สาม” เผยแพร่แล้ว<br><span class="small">28 พ.ย. 2569 · 08:00</span></p></li>
+        <li><span class="fi"><i data-i="clock" class="sm"></i></span><p>“รอยสักแห่งราตรี” อยู่ระหว่างให้แอดมินตรวจเรต 18+<br><span class="small">26 พ.ย. 2569</span></p></li>
+      </ul>
+    </section>
+
+    <!-- NOVEL EDIT -->
+    <section class="scr studio" id="s-novel-edit" aria-label="จัดการเรื่อง">
+      <header class="top"><a class="ib" href="#dash" aria-label="กลับแดชบอร์ด"><i data-i="back"></i></a><h1>จัดการเรื่อง</h1><a class="mini" href="#novel" data-book="moon"><i data-i="eye" class="sm"></i>ดูหน้าเรื่อง</a></header>
+      <form class="form" id="nform">
+        <div class="fld"><span class="lb">ภาพปก</span>
+          <label class="upl"><span class="cv" id="ne-cover"></span><span><b><i data-i="upload" class="sm"></i>อัปโหลดปกใหม่</b><span class="small" id="upl-n">JPG หรือ PNG ไม่เกิน 2 MB · สัดส่วน 2:3</span></span><input type="file" accept="image/png,image/jpeg" id="upl" aria-label="อัปโหลดภาพปก"></label>
+        </div>
+        <div class="fld"><label for="ne-t">ชื่อเรื่อง</label><input class="in" id="ne-t" value="เงาจันทร์ใต้ผืนน้ำ" maxlength="80"></div>
+        <div class="fld"><label for="ne-s">เรื่องย่อ</label><textarea class="in" id="ne-s" maxlength="600">ข้าวฟ่างเติบโตมากับคำเตือนของยายว่าห้ามมองดวงจันทร์ใต้บึงหลังบ้านนานเกินไป จนกระทั่งคืนครบรอบสิบปีที่แม่ของเธอหายตัวไป เสียงระฆังประหลาดก็ดังขึ้นจากใต้ผืนน้ำ</textarea><div class="hint" id="ne-sc"></div></div>
+        <div class="fld"><label for="ne-c">หมวดหมู่</label><select class="in" id="ne-c"></select></div>
+        <div class="fld"><label for="tag-in">แท็ก</label><div class="tagbox" id="tagbox"><input id="tag-in" placeholder="พิมพ์แล้วกด Enter" autocomplete="off"></div><div class="hint">เพิ่มได้สูงสุด 10 แท็ก</div></div>
+        <div class="fld"><span class="lb" id="rate-l">เรตเนื้อหา</span>
+          <div class="rates" role="radiogroup" aria-labelledby="rate-l">
+            <label><input type="radio" name="rate" value="all"><b>ทั่วไป</b><span>ทุกวัย</span></label>
+            <label><input type="radio" name="rate" value="13" checked><b>13+</b><span>มีฉากรุนแรงเล็กน้อย</span></label>
+            <label><input type="radio" name="rate" value="18"><b>18+</b><span>ต้องรออนุมัติ</span></label>
+          </div>
+          <div class="note18" id="note18" role="note"><i data-i="info" class="sm"></i><span>เรื่องเรต 18+ จะยังไม่แสดงต่อสาธารณะจนกว่าแอดมินจะตรวจและอนุมัติ (ปกติภายใน 1–2 วัน) ระหว่างนี้สถานะจะเป็น “รออนุมัติ 18+” และผู้อ่านที่ไม่ได้เข้าสู่ระบบจะเห็นปกแบบเบลอ</span></div>
+        </div>
+        <div style="margin-top:18px"><button class="btn pri" style="width:100%" type="submit">บันทึกข้อมูลเรื่อง</button></div>
+      </form>
+      <div class="sh"><h2>ไทม์ไลน์ตอน</h2><span class="small" id="wch-n"></span></div>
+      <p class="small" style="padding:0 16px 10px">ลากที่จับ หรือโฟกัสแล้วกดลูกศรขึ้น/ลง เพื่อจัดลำดับ · แสดงตอนล่าสุด</p>
+      <ul class="tl" id="wch"></ul>
+      <button class="btn ghost addch" type="button" id="addch"><i data-i="plus"></i>เพิ่มตอนใหม่</button>
+    </section>
+
+    <!-- CHAPTER EDIT -->
+    <section class="scr studio" id="s-chapter-edit" aria-label="เขียนตอน" style="padding-bottom:48px">
+      <div class="edtop">
+        <div class="edbar">
+          <a class="ib" href="#novel-edit" aria-label="กลับไปจัดการเรื่อง"><i data-i="back"></i></a>
+          <span class="save" id="ed-save" role="status"><i data-i="check" class="sm"></i><span>บันทึกแล้ว 10:42</span></span>
+          <button class="ib" type="button" id="ed-focus" aria-pressed="false" aria-label="โหมดโฟกัส" title="โหมดโฟกัส"><i data-i="focus"></i></button>
+          <button class="ib" type="button" id="ed-prev" aria-pressed="false" aria-label="ดูตัวอย่าง" title="ดูตัวอย่าง"><i data-i="eye"></i></button>
+          <button class="pubbtn" type="button" data-open="sh-pub">เผยแพร่</button>
+        </div>
+        <div class="tb" id="tb" role="toolbar" aria-label="จัดรูปแบบข้อความ">
+          <button type="button" data-cmd="bold" aria-pressed="false"><i data-i="bold" class="sm"></i>ตัวหนา</button>
+          <button type="button" data-cmd="italic" aria-pressed="false"><i data-i="italic" class="sm"></i>เอียง</button>
+          <button type="button" data-cmd="h" aria-pressed="false"><i data-i="heading" class="sm"></i>หัวข้อ</button>
+          <button type="button" data-cmd="q" aria-pressed="false"><i data-i="quote" class="sm"></i>คำพูด</button>
+          <button type="button" data-cmd="hr"><i data-i="divider" class="sm"></i>คั่นฉาก</button>
+          <button type="button" data-cmd="center" aria-pressed="false"><i data-i="center" class="sm"></i>กึ่งกลาง</button>
+        </div>
+      </div>
+      <div class="edwrap">
+        <div class="pvbadge">กำลังดูตัวอย่าง: ผู้อ่านจะเห็นแบบนี้</div>
+        <div class="edk">เงาจันทร์ใต้ผืนน้ำ · ตอนที่ 26</div>
+        <label class="sr" for="ed-t">ชื่อตอน</label>
+        <input class="edtitle" id="ed-t" value="เสียงเพลงจากหอระฆัง">
+        <div class="ed" id="ed" contenteditable="true" role="textbox" aria-multiline="true" aria-label="เนื้อหาตอน" spellcheck="false">
+          <p>เช้าวันรุ่งขึ้น หมู่บ้านริมบึงเงียบผิดปกติ ไม่มีเสียงเรือหางยาวแล่นผ่าน ไม่มีเสียงแม่ค้าตะโกนเรียกลูกค้าจากท่าน้ำ มีเพียงหมอกบาง ๆ ที่ลอยต่ำเหนือผิวน้ำเหมือนผ้าห่มที่ยังไม่มีใครพับเก็บ</p>
+          <p>ข้าวฟ่างตื่นขึ้นมาพร้อมโคลนเปียกที่ปลายผม เธอจำไม่ได้ว่ากลับขึ้นมาจากท่าน้ำได้อย่างไร จำได้เพียงเสียงสุดท้ายก่อนทุกอย่างจะมืดลง เสียงของแม่ที่เรียกให้กลับบ้าน</p>
+          <hr>
+          <p>“เธอหลับไปสองวัน” ภูผาบอกขณะรินน้ำชาร้อนใส่แก้ว มือของเขาสั่นจนน้ำกระฉอกออกมาเล็กน้อย “และตลอดสองวันนั้น ระฆังไม่ได้หยุดดังเลย”</p>
+          <p>เธอหันไปมองหน้าต่าง หอระฆังเก่าบนเนินที่ร้างมากว่าสามสิบปียืนนิ่งอยู่ท่ามกลางหมอก แต่ลึกลงไปใต้บึง เสียงนั้นยังคงดังเป็นจังหวะช้า ๆ สม่ำเสมอ เหมือนหัวใจของใครบางคนที่ยังไม่ยอมหยุดเต้น</p>
+        </div>
+      </div>
+    </section>
+    <div class="edcount"><span id="ed-count">0 คำ</span><span>ฉบับร่าง · ตอนที่ 26</span></div>
+
+    <!-- reading chrome -->
+    <div class="rprog" id="rd-prog" aria-hidden="true"></div>
+    <div class="rc rc-top">
+      <a class="ib" href="#novel" aria-label="กลับหน้าเรื่อง"><i data-i="back"></i></a>
+      <div class="rc-t"><b id="rd-book">เงาจันทร์ใต้ผืนน้ำ</b><span id="rd-ep">ตอนที่ 12</span></div>
+      <button class="ib" type="button" data-open="sh-toc" aria-label="สารบัญ"><i data-i="list"></i></button>
+      <button class="ib" type="button" data-open="sh-set" aria-label="ตั้งค่าการอ่าน"><i data-i="sliders"></i></button>
+    </div>
+    <div class="rc rc-bot">
+      <button type="button" id="rd-prev"><i data-i="back" class="sm"></i>ตอนก่อนหน้า</button>
+      <span class="rc-t"><span id="rd-pct">0%</span></span>
+      <button type="button" id="rd-next">ตอนถัดไป<i data-i="next" class="sm"></i></button>
+    </div>
+
+    <!-- tabs -->
+    <nav class="tabs" id="tabs-r" aria-label="เมนูผู้อ่าน">
+      <a href="#home" data-tab="home novel"><i data-i="home"></i>หน้าแรก</a>
+      <a href="#search" data-tab="search"><i data-i="search"></i>ค้นหา</a>
+      <a href="#library" data-tab="library"><i data-i="shelf"></i>ชั้นหนังสือ</a>
+      <a href="#dash" data-tab="dash"><i data-i="pen"></i>เขียน</a>
+      <a href="#profile" data-tab="profile"><i data-i="user"></i>โปรไฟล์</a>
+    </nav>
+    <nav class="tabs" id="tabs-w" aria-label="เมนูนักเขียน" hidden>
+      <a href="#dash" data-tab="dash"><i data-i="grid"></i>ภาพรวม</a>
+      <a href="#novel-edit" data-tab="novel-edit"><i data-i="book"></i>จัดการเรื่อง</a>
+      <a href="#chapter-edit" data-tab="chapter-edit"><i data-i="pen"></i>เขียนตอน</a>
+      <a href="#home" data-tab="x"><i data-i="eye"></i>ฝั่งผู้อ่าน</a>
+    </nav>
+
+    <!-- sheets -->
+    <div class="scrim" id="scrim" data-close></div>
+    <div class="sheet" id="sh-set" role="dialog" aria-modal="true" aria-labelledby="set-h" aria-hidden="true">
+      <div class="grab"></div>
+      <div class="sh-h"><h2 id="set-h">ตั้งค่าการอ่าน</h2><button class="ib" type="button" data-close aria-label="ปิด"><i data-i="x"></i></button></div>
+      <div class="fld"><span class="lb">ขนาดตัวอักษร</span><div class="stepper"><button type="button" id="fs-dn" aria-label="ลดขนาดตัวอักษร">A-</button><output id="fs-val" aria-live="polite">18</output><button type="button" id="fs-up" aria-label="เพิ่มขนาดตัวอักษร">A+</button></div></div>
+      <div class="fld"><span class="lb">ระยะห่างบรรทัด</span><div class="seg"><button type="button" data-lh="1.65">แน่น</button><button type="button" data-lh="1.9">ปกติ</button><button type="button" data-lh="2.2">โปร่ง</button></div></div>
+      <div class="fld"><span class="lb">ธีมหน้าอ่าน</span><div class="thm">
+        <button type="button" data-th="light"><i style="background:#f8f4f0;color:#2b2329">ก</i>สว่าง</button>
+        <button type="button" data-th="sepia"><i style="background:#f2e6d3;color:#3b2e25">ก</i>ซีเปีย</button>
+        <button type="button" data-th="night"><i style="background:#17121c;color:#ebe2da">ก</i>กลางคืน</button>
+        <button type="button" data-th="auto"><i style="background:linear-gradient(135deg,#f8f4f0 50%,#17121c 50%);color:#ef7a6a">ก</i>ตามเครื่อง</button>
+      </div></div>
+    </div>
+    <div class="sheet" id="sh-toc" role="dialog" aria-modal="true" aria-labelledby="toc-h" aria-hidden="true">
+      <div class="grab"></div>
+      <div class="sh-h"><h2 id="toc-h">สารบัญ</h2><button class="ib" type="button" data-close aria-label="ปิด"><i data-i="x"></i></button></div>
+      <ul class="toc" id="toc"></ul>
+    </div>
+    <div class="sheet" id="sh-pub" role="dialog" aria-modal="true" aria-labelledby="pub-h" aria-hidden="true">
+      <div class="grab"></div>
+      <div class="sh-h"><h2 id="pub-h">เผยแพร่ตอนที่ 26</h2><button class="ib" type="button" data-close aria-label="ปิด"><i data-i="x"></i></button></div>
+      <form id="pubform">
+        <label class="opt"><input type="radio" name="pub" value="draft"><span><b>บันทึกร่าง</b><span>เก็บไว้แก้ต่อ ผู้อ่านยังมองไม่เห็น</span></span></label>
+        <label class="opt"><input type="radio" name="pub" value="now" checked><span><b>เผยแพร่ทันที</b><span>ผู้ติดตาม 2,081 คนจะได้รับแจ้งเตือน</span></span></label>
+        <label class="opt"><input type="radio" name="pub" value="sch"><span><b>ตั้งเวลาเผยแพร่</b><span>เลือกวันและเวลาที่ต้องการ</span></span></label>
+        <div class="schf" id="schf"><div class="fld" style="margin:0"><label for="pd">วันที่</label><input class="in" type="date" id="pd" value="2026-12-01"></div><div class="fld" style="margin:0"><label for="pt">เวลา</label><input class="in" type="time" id="pt" value="20:00"></div><p class="hint" id="sch-h" style="grid-column:1/-1"></p></div>
+        <button class="btn pri" style="width:100%;margin-top:16px" type="submit" id="pub-go">เผยแพร่ทันที</button>
+      </form>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </div>
+  </div>
+</div>
+
+<script>
+{
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const app=$('#app');
+const I={
+home:'<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>',
+search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+shelf:'<path d="M4 4h4v16H4zM10 4h4v16h-4z"/><path d="m16 5.2 3.4-.9 3.1 15.4-3.4.9z"/>',
+pen:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>',
+user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',
+back:'<path d="M15 5l-7 7 7 7"/>',next:'<path d="M9 5l7 7-7 7"/>',
+heart:'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
+bookmark:'<path d="M6 3h12v18l-6-4-6 4z"/>',
+share:'<circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4"/>',
+sliders:'<path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/>',
+list:'<path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/>',
+lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+plus:'<path d="M12 5v14M5 12h14"/>',
+grip:'<path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01" stroke-width="3"/>',
+bold:'<path d="M7 5h6a3.5 3.5 0 0 1 0 7H7zM7 12h7a3.5 3.5 0 0 1 0 7H7z"/>',
+italic:'<path d="M14 5h5M5 19h5M15 5 9 19"/>',
+heading:'<path d="M6 5v14M18 5v14M6 12h12"/>',
+quote:'<path d="M5 11h4v6H5zM5 11c0-3 1-5 4-6M14 11h4v6h-4zM14 11c0-3 1-5 4-6"/>',
+divider:'<path d="M3 12h4M17 12h4M12 9l2 3-2 3-2-3z"/>',
+center:'<path d="M4 6h16M7 10h10M4 14h16M7 18h10"/>',
+eye:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+focus:'<path d="M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4"/><circle cx="12" cy="12" r="2.5"/>',
+clock:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+check:'<path d="m5 12.5 4.5 4.5L19 7.5"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',
+comment:'<path d="M4 5h16v11H9l-5 4z"/>',send:'<path d="M4 12 20 4l-6 16-3-7z"/>',
+info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.01"/>',
+upload:'<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>',
+grid:'<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
+book:'<path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5zM5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/>',
+bell:'<path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
+play:'<path d="M8 5v14l11-7z"/>'
+};
+const ic=(n,c='')=>'<svg class="ico '+c+'" viewBox="0 0 24 24" aria-hidden="true">'+(I[n]||'')+'</svg>';
+const hydrate=(r=document)=>$$('i[data-i]',r).forEach(e=>{e.outerHTML=ic(e.dataset.i,e.className)});
+
+/* ---------- data ---------- */
+const CATS=['โรแมนติก','แฟนตาซี','ดราม่า','สืบสวน / ลึกลับ','สยองขวัญ','แอ็กชัน / ผจญภัย','ไซไฟ','วาย','ยูริ','ตลก','แฟนฟิค','อื่น ๆ'];
+const B={
+moon:{t:'เงาจันทร์ใต้ผืนน้ำ',l:['เงาจันทร์','ใต้ผืนน้ำ'],a:'ปลายฟ้า',cat:'แฟนตาซี',r:'13+',st:'กำลังเขียน',ch:24,reads:'1.2 แสน',likes:8431,m:'moon',c:['#1c3442','#7b4a5c','#f6cdb4'],d:'#0b1219',seed:3,tags:['เวทมนตร์','หมู่บ้านริมน้ำ','ความลับครอบครัว','ตำนานพื้นบ้าน'],
+ syn:['ข้าวฟ่างเติบโตมากับคำเตือนของยายว่าห้ามมองดวงจันทร์ใต้บึงหลังบ้านนานเกินไป จนกระทั่งคืนครบรอบสิบปีที่แม่ของเธอหายตัวไปอย่างไร้ร่องรอย เสียงระฆังประหลาดก็ดังขึ้นจากใต้ผืนน้ำ','เมื่อเงาของเธอเริ่มไหลลงไปในบึงทีละน้อย ข้าวฟ่างต้องร่วมมือกับภูผา ลูกชายผู้เฝ้าศาลเจ้าริมน้ำที่ดูเหมือนจะรู้มากกว่าที่ยอมพูด เพื่อตามหาความจริงของตำนานที่ทั้งหมู่บ้านพยายามลืม','แฟนตาซีพื้นบ้านอบอุ่นปนหลอน ว่าด้วยครอบครัว การปล่อยวาง และราคาของการได้คนที่รักกลับคืนมา']},
+city:{t:'เมืองที่ไม่เคยหลับ',l:['เมืองที่','ไม่เคยหลับ'],a:'นที วาริน',cat:'สืบสวน / ลึกลับ',r:'13+',st:'จบแล้ว',ch:40,reads:'3.4 แสน',likes:21980,m:'city',c:['#1a1418','#5a2e2a','#f0a070'],d:'#0d0a0c',seed:11,tags:['นักสืบ','กรุงเทพฯ ยามค่ำ','ฆาตกรรมต่อเนื่อง'],syn:['ทุกคืนวันพฤหัส ไฟในตึกร้างย่านเจริญกรุงจะสว่างขึ้นหนึ่งห้อง และเช้าวันรุ่งขึ้นจะมีคนหายไปหนึ่งคน สารวัตรหญิงหมาดใหม่ต้องไขปริศนาก่อนไฟดวงต่อไปจะเปิดขึ้น']},
+forest:{t:'ป่าหลังบ้านยาย',l:['ป่าหลัง','บ้านยาย'],a:'ม่านหมอก',cat:'สยองขวัญ',r:'13+',st:'กำลังเขียน',ch:17,reads:'6.8 หมื่น',likes:4102,m:'forest',c:['#0f1d19','#2b4a3a','#cfe3c0'],d:'#07100c',seed:21,tags:['ผีป่า','ชนบท','ปิดเทอม'],syn:['ปิดเทอมใหญ่ปีนั้น สี่พี่น้องถูกส่งไปอยู่บ้านยายที่เชียงดาว ยายมีกฎข้อเดียว ห้ามเข้าป่าหลังบ้านหลังพระอาทิตย์ตก']},
+wind:{t:'สายลมฤดูที่สิบสาม',l:['สายลม','ฤดูที่สิบสาม'],a:'ชบาแก้ว',cat:'โรแมนติก',r:'ทั่วไป',st:'กำลังเขียน',ch:9,reads:'2.1 หมื่น',likes:1288,m:'field',c:['#f3cfae','#e3866f','#5b2f3d'],d:'#4a2532',seed:5,stars:0,fs:19,tags:['รักแรก','ทุ่งดอกไม้','ฟีลกู๊ด'],syn:['เธอกลับมาเมืองเล็กริมทุ่งทานตะวันเพื่อขายบ้านของพ่อ แต่กลับเจอเพื่อนสมัยเด็กที่ยังรอคำตอบจากจดหมายฉบับเดียวเมื่อสิบสามปีก่อน']},
+planet:{t:'สถานีปลายขอบฟ้า',l:['สถานี','ปลายขอบฟ้า'],a:'ธาราวดี',cat:'ไซไฟ',r:'ทั่วไป',st:'จบแล้ว',ch:52,reads:'4.5 แสน',likes:30214,m:'planet',c:['#0a1c20','#1f5458','#ecc891'],d:'#050d0f',seed:31,tags:['อวกาศ','ปัญญาประดิษฐ์','เอาชีวิตรอด'],syn:['วิศวกรหนุ่มคนสุดท้ายบนสถานีขุดแร่ ต้องสอนปัญญาประดิษฐ์ที่เพิ่งตื่นให้รู้จักคำว่าบ้าน ก่อนยานกู้ภัยลำสุดท้ายจะผ่านไป']},
+flame:{t:'เพลิงในม่านฝน',l:['เพลิงใน','ม่านฝน'],a:'ไอริน',cat:'โรแมนติก',r:'18+',st:'กำลังเขียน',ch:28,reads:'9.7 หมื่น',likes:6530,m:'silk',c:['#1c0f12','#6e2a30','#f08a74'],d:'#120709',seed:41,tags:['ผู้ใหญ่','รักต้องห้าม'],syn:['เรื่องราวความรักของคนสองคนที่พบกันในคืนฝนตกหนัก เนื้อหาสำหรับผู้อ่านอายุ 18 ปีขึ้นไป']},
+seven:{t:'หัวใจหมายเลขเจ็ด',l:['หัวใจ','หมายเลขเจ็ด'],a:'ทะเลสาบ',cat:'วาย',r:'13+',st:'กำลังเขียน',ch:41,reads:'2.6 แสน',likes:19870,m:'lamp',c:['#17222b','#3e5260','#f2d7a6'],d:'#0a1015',seed:51,tags:['มหาลัย','รูมเมท','ฟีลกู๊ด'],syn:['รูมเมทห้องเจ็ดที่ไม่เคยคุยกันเกินสามประโยค ต้องจับคู่ทำโปรเจกต์จบที่ทั้งคณะจับตามอง']},
+cafe:{t:'ร้านกาแฟตอนตีสาม',l:['ร้านกาแฟ','ตอนตีสาม'],a:'ขนมปังปิ้ง',cat:'ตลก',r:'ทั่วไป',st:'กำลังเขียน',ch:18,reads:'5.3 หมื่น',likes:3911,m:'window',c:['#2a1a14','#6e4029','#f7c67a'],d:'#140c09',seed:61,tags:['ร้านกาแฟ','ลูกค้าแปลก ๆ','ฮีลใจ'],syn:['ร้านกาแฟที่เปิดเฉพาะตีหนึ่งถึงตีห้า ลูกค้าแต่ละคนมีเรื่องเล่าแปลกประหลาดพอ ๆ กับเมนูของร้าน']},
+blade:{t:'ดาบสุดท้ายแห่งหุบเขาเมฆ',l:['ดาบสุดท้าย','แห่งหุบเขาเมฆ'],a:'อัศวินกระดาษ',cat:'แอ็กชัน / ผจญภัย',r:'13+',st:'กำลังเขียน',ch:66,reads:'1.9 แสน',likes:12007,m:'mountain',c:['#ecd9c2','#a8705e','#2c2230'],d:'#241a24',seed:71,stars:0,fs:18,tags:['กำลังภายใน','ล้างแค้น','ศิษย์อาจารย์'],syn:['เด็กเลี้ยงแพะจากหุบเขาเมฆได้รับดาบหักเล่มหนึ่ง พร้อมคำสั่งเสียให้ส่งคืนเจ้าของที่ตายไปแล้วเมื่อร้อยปีก่อน']},
+tattoo:{t:'รอยสักแห่งราตรี',l:['รอยสัก','แห่งราตรี'],a:'ปลายฟ้า',cat:'ดราม่า',r:'18+',st:'กำลังเขียน',ch:6,reads:'-',likes:0,m:'silk',c:['#141017','#4a2733','#e7a08f'],d:'#0b080d',seed:81,tags:[],syn:['']},
+mapx:{t:'แผนที่ของคนหลงทาง',l:['แผนที่ของ','คนหลงทาง'],a:'ปลายฟ้า',cat:'ดราม่า',r:'ทั่วไป',st:'กำลังเขียน',ch:2,reads:'-',likes:0,m:'mountain',c:['#cfe0dc','#5f8f8c','#1d2b2f'],d:'#17252a',seed:91,stars:0,fs:19,tags:[],syn:['']},
+night:{t:'คืนที่เราไม่ได้นับ',l:['คืนที่เรา','ไม่ได้นับ'],a:'ปลายฟ้า',cat:'โรแมนติก',r:'13+',st:'กำลังเขียน',ch:3,reads:'-',likes:0,m:'lamp',c:['#1b1216','#5a2f3a','#f2b49c'],d:'#0d0809',seed:97,tags:[],syn:['']}
+};
+const MOON_CH=['คืนที่จันทร์มีสองดวง','ท่าน้ำหลังบ้าน','จดหมายที่ไม่มีผู้ส่ง','เด็กชายถือตะเกียง','ตลาดน้ำยามรุ่งสาง','ตำนานบึงร้าง','เงาที่ไม่ยอมตาม','ห้องใต้หลังคาของยาย','บทสวดที่ถูกลืม','ฝนแรกของฤดู','แผนที่ใต้เปลือกหอย','เสียงระฆังจากก้นบึง','คนที่ยืนอยู่อีกฝั่ง','ราคาของความทรงจำ','หิ่งห้อยนำทาง','สัญญาใต้ต้นไทร','ประตูน้ำ','คืนเดือนดับ','ชื่อจริงของภูผา','สิ่งที่แม่ทิ้งไว้','กระจกเงาแตก','ทางกลับบ้าน','ผู้เฝ้าบึง','จันทร์ดวงที่สาม'];
+const GEN=['จุดเริ่มต้น','คนแปลกหน้า','ความลับแรก','คืนที่ฝนตก','คำสัญญา','รอยเท้าบนทราย','เสียงเรียกจากที่ไกล','ประตูบานที่สอง','แสงสุดท้าย','ทางแยก'];
+const PROG={moon:12,city:31,cafe:5,seven:41};
+const TM=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const thd=d=>d.getDate()+' '+TM[d.getMonth()]+' '+(d.getFullYear()+543);
+const chDate=(k,n)=>thd(new Date(2026,10,28-Math.round((B[k].ch-n)*3.5)));
+const chTitle=(k,n)=>k==='moon'?MOON_CH[n-1]:GEN[(n-1)%GEN.length];
+const fmt=n=>n.toLocaleString('en-US');
+
+const S={cur:'moon',ep:12,logged:false,shelf:new Set(['moon','city','cafe','seven']),liked:new Set(),fs:18,lh:1.9,th:'night',chip:'ทั้งหมด',schip:'ทั้งหมด',epLiked:false,prev:false};
+try{const v=JSON.parse(localStorage.getItem('readable-c')||'{}');if(v.fs)S.fs=v.fs;if(v.lh)S.lh=v.lh;if(v.th)S.th=v.th;}catch(e){}
+const save=()=>{try{localStorage.setItem('readable-c',JSON.stringify({fs:S.fs,lh:S.lh,th:S.th}))}catch(e){}};
+
+/* ---------- covers ---------- */
+let gid=0;
+const rnd=seed=>{let s=seed*7919%233280;return()=>(s=(s*9301+49297)%233280)/233280};
+const f1=n=>n.toFixed(1);
+const MOT={
+moon(b,id,R,c,d){let s=`<circle cx="128" cy="92" r="78" fill="url(#${id}g)" opacity=".6"/><circle cx="128" cy="92" r="30" fill="${c[2]}"/><path d="M0 176C40 160 70 170 100 164S160 152 200 166V300H0Z" fill="${d}" opacity=".55"/><rect y="186" width="200" height="114" fill="${d}" opacity=".78"/>`;
+ for(let i=0;i<8;i++){const w=48-i*5+(i%2?6:0);s+=`<rect x="${128-w/2}" y="${194+i*8}" width="${w}" height="2" rx="1" fill="${c[2]}" opacity="${(.75-i*.08).toFixed(2)}"/>`}
+ return s+`<path d="M10 188h56v3H10zM18 191v18M38 191v18M58 191v18" stroke="${d}" stroke-width="2.5"/><path d="M40 183c2-6 6-8 8-8s3 3 2 8z" fill="${d}"/>`},
+city(b,id,R,c,d){let s=`<circle cx="100" cy="150" r="90" fill="url(#${id}g)" opacity=".7"/><circle cx="100" cy="150" r="46" fill="${c[2]}" opacity=".9"/>`,x=-4;
+ while(x<204){const w=14+R()*18|0,h=50+R()*110|0,y=228-h;s+=`<rect x="${x}" y="${y}" width="${w}" height="${h+80}" fill="${d}"/>`;for(let wy=y+6;wy<222;wy+=9)for(let wx=x+3;wx<x+w-3;wx+=6)if(R()>.8)s+=`<rect x="${wx}" y="${wy}" width="2.4" height="3.6" fill="${c[2]}" opacity=".85"/>`;x+=w+1}
+ return s},
+forest(b,id,R,c,d){let s=`<circle cx="100" cy="110" r="96" fill="url(#${id}g)" opacity=".55"/><circle cx="100" cy="96" r="20" fill="${c[2]}" opacity=".9"/>`;
+ [[196,46,74,.35],[228,56,88,.62],[266,64,104,1]].forEach(([base,hmin,hmax,o],li)=>{let x=-10;while(x<214){const h=hmin+R()*(hmax-hmin);s+=`<path d="M${f1(x)} ${f1(base-h)}L${f1(x+h*.26)} ${base}H${f1(x-h*.26)}Z" fill="${d}" opacity="${o}"/>`;x+=12+R()*16}
+  s+=`<rect y="${base-2}" width="200" height="${304-base}" fill="${d}" opacity="${o}"/>`;if(li===1)s+=`<rect y="${base-16}" width="200" height="22" fill="${c[2]}" opacity=".08"/>`});
+ return s+`<rect x="58" y="244" width="16" height="14" fill="${d}"/><path d="M55 245l11-9 11 9z" fill="${d}"/><rect x="63" y="249" width="5" height="5" fill="${c[2]}"/>`},
+field(b,id,R,c,d){return `<circle cx="140" cy="132" r="80" fill="url(#${id}g)" opacity=".7"/><circle cx="140" cy="132" r="32" fill="#fff4e6"/><path d="M0 196C50 176 110 186 200 170V300H0Z" fill="${d}" opacity=".35"/><path d="M0 220C60 196 130 214 200 200V300H0Z" fill="${d}" opacity=".6"/><path d="M0 246C70 226 120 240 200 232V300H0Z" fill="${d}"/>
+<g fill="${d}" opacity=".75"><circle cx="66" cy="183" r="4.5"/><path d="M62 188h8l3 20h-14z"/><path d="M62 181c-8 2-14 0-20 3 6-6 13-6 20-6z"/></g><path d="M26 64q5-5 10 0q5-5 10 0M50 82q4-4 8 0q4-4 8 0" stroke="${d}" stroke-width="1.6" fill="none" opacity=".6"/>`},
+planet(b,id,R,c,d){return `<circle cx="146" cy="78" r="60" fill="url(#${id}g)" opacity=".5"/><circle cx="146" cy="78" r="24" fill="${c[2]}"/><ellipse cx="146" cy="78" rx="44" ry="9" fill="none" stroke="${c[2]}" stroke-width="2" opacity=".75" transform="rotate(-18 146 78)"/><circle cx="100" cy="440" r="250" fill="${d}"/><circle cx="100" cy="440" r="250" fill="none" stroke="${c[2]}" stroke-width="1.4" opacity=".6"/>
+<g fill="${d}"><rect x="52" y="176" width="26" height="16"/><rect x="58" y="166" width="10" height="10"/><path d="M63 166V146" stroke="${d}" stroke-width="1.5"/><rect x="80" y="184" width="30" height="8"/></g><circle cx="63" cy="146" r="1.8" fill="${c[2]}"/><rect x="61" y="181" width="3" height="3" fill="${c[2]}"/>`},
+silk(b,id,R,c,d){let s=`<circle cx="100" cy="104" r="88" fill="url(#${id}g)" opacity=".6"/><circle cx="100" cy="104" r="36" fill="${c[2]}" opacity=".85"/>`;
+ for(let i=0;i<6;i++){const x=i*40-10;s+=`<path d="M${x} -5C${x+30} 80 ${x-20} 160 ${x+14} 305H${x+44}C${x+10} 160 ${x+60} 80 ${x+30} -5Z" fill="${d}" opacity="${(.35+i%3*.18).toFixed(2)}"/>`}
+ for(let i=0;i<12;i++)s+=`<ellipse cx="${f1(R()*200)}" cy="${f1(120+R()*120)}" rx="3" ry="1.6" fill="${c[2]}" opacity=".7" transform="rotate(${R()*180|0})"/>`;return s},
+lamp(b,id,R,c,d){let s='';for(let i=0;i<46;i++){const x=R()*220,y=R()*260;s+=`<path d="M${f1(x)} ${f1(y)}l-4 12" stroke="${c[2]}" stroke-width=".8" opacity=".28"/>`}
+ return s+`<circle cx="118" cy="126" r="86" fill="url(#${id}g)" opacity=".6"/><path d="M134 262V112h-18" stroke="${d}" stroke-width="4" fill="none"/><path d="M106 112h20l-4 10h-12z" fill="${d}"/><circle cx="116" cy="124" r="4" fill="${c[2]}"/>
+<g fill="${d}"><circle cx="96" cy="212" r="6.5"/><path d="M86 222q10-6 20 0l3 40H83z"/><circle cx="114" cy="210" r="6.5"/><path d="M104 220q10-6 20 0l3 42h-26z"/></g><rect y="262" width="200" height="40" fill="${d}"/><rect x="80" y="266" width="50" height="2" fill="${c[2]}" opacity=".35"/>`},
+window(b,id,R,c,d){return `<rect width="200" height="300" fill="${d}" opacity=".55"/><circle cx="100" cy="116" r="100" fill="url(#${id}g)" opacity=".55"/><rect x="46" y="52" width="108" height="128" rx="54" fill="${c[2]}" opacity=".92"/><circle cx="124" cy="86" r="11" fill="${c[0]}" opacity=".7"/><path d="M100 52v128M46 116h108" stroke="${d}" stroke-width="4"/>
+<rect x="30" y="180" width="140" height="6" fill="${d}"/><path d="M80 196h40l-4 30h-32z" fill="${d}"/><path d="M120 202h6a6 6 0 0 1 0 12h-8" stroke="${d}" stroke-width="3" fill="none"/><path d="M92 192c-6-8 6-12 0-20M104 190c-6-8 6-12 0-20" stroke="${c[2]}" stroke-width="1.6" fill="none" opacity=".7"/>`},
+mountain(b,id,R,c,d){return `<circle cx="132" cy="92" r="70" fill="url(#${id}g)" opacity=".6"/><circle cx="132" cy="92" r="26" fill="#fff6ea" opacity=".95"/><path d="M-10 190 40 120 70 150 108 92 150 150 172 128 210 176V300H-10Z" fill="${d}" opacity=".28"/><rect y="168" width="200" height="16" fill="#fff" opacity=".12"/><path d="M-10 230 30 176 66 206 100 160 140 214 176 186 210 222V300H-10Z" fill="${d}" opacity=".55"/><path d="M-10 262 50 216 92 246 130 220 210 260V300H-10Z" fill="${d}"/>
+<g fill="${d}" opacity=".55"><circle cx="108" cy="83" r="2.4"/><path d="M106 86h4l1 7h-6z"/><path d="M110 80l6-10" stroke="${d}" stroke-width="1.2"/></g>`}
+};
+function cover(b,o={}){
+  const id='cg'+(gid++),c=b.c,d=b.d||'#0d0a10',R=rnd(b.seed||7);
+  let st='';const n=b.stars===undefined?26:b.stars;
+  for(let i=0;i<n;i++)st+=`<circle cx="${f1(R()*200)}" cy="${f1(R()*160)}" r="${(R()*1.1+.3).toFixed(2)}" fill="#fff" opacity="${(R()*.6+.2).toFixed(2)}"/>`;
+  let tt='';
+  if(o.text!==false){const fs=b.fs||21,L=b.l;tt=`<rect width="200" height="300" fill="url(#${id}s)"/>`+L.map((ln,i)=>`<text x="100" y="${(L.length>1?236:254)+i*(fs+6)}" text-anchor="middle" font-family="Mitr,'Noto Sans Thai',sans-serif" font-weight="500" font-size="${fs}" fill="#fff6ef">${ln}</text>`).join('')+`<text x="100" y="287" text-anchor="middle" font-family="'Noto Sans Thai',sans-serif" font-size="9.5" fill="#fff6ef" opacity=".75">${b.a}</text>`}
+  return `<svg viewBox="0 0 200 300" preserveAspectRatio="xMidYMid slice" role="img" aria-label="ปกเรื่อง ${b.t}"><defs><linearGradient id="${id}b" x1="0" y1="0" x2=".3" y2="1"><stop offset="0" stop-color="${c[0]}"/><stop offset="1" stop-color="${c[1]}"/></linearGradient><radialGradient id="${id}g"><stop offset="0" stop-color="${c[2]}" stop-opacity=".9"/><stop offset="1" stop-color="${c[2]}" stop-opacity="0"/></radialGradient><linearGradient id="${id}s" x1="0" y1="0" x2="0" y2="1"><stop offset=".5" stop-color="#0a0609" stop-opacity="0"/><stop offset="1" stop-color="#0a0609" stop-opacity=".72"/></linearGradient></defs><rect width="200" height="300" fill="url(#${id}b)"/>${st}${MOT[b.m](b,id,R,c,d)}${tt}</svg>`;
+}
+const rcls=b=>b.r==='18+'?'r18':b.r==='13+'?'r13':'r0';
+const badge=b=>`<span class="rt ${rcls(b)}">${b.r}</span>`;
+const locked=k=>B[k].r==='18+'&&!S.logged;
+function cv(k,cls=''){const L=locked(k);return `<span class="cv ${cls}${L?' lock':''}">${cover(B[k])}${badge(B[k])}${L?`<span class="lockov">${ic('lock','sm')}<span>เข้าสู่ระบบ<br>เพื่อดูเรื่อง 18+</span></span>`:''}</span>`}
+const lk=k=>locked(k)?' data-locked="1"':'';
+
+/* ---------- home ---------- */
+function chipsHTML(sel){return ['ทั้งหมด',...CATS].map(c=>`<button class="chip" type="button" aria-pressed="${c===sel}" data-c="${c}">${c}</button>`).join('')}
+function renderPop(){
+  const keys=['moon','flame','forest','wind','seven','blade','planet','cafe','city'].filter(k=>S.chip==='ทั้งหมด'||B[k].cat===S.chip);
+  $('#pop-h').textContent=S.chip==='ทั้งหมด'?'ยอดนิยมและแนะนำ':'ยอดนิยมในหมวด'+S.chip;
+  $('#pop').innerHTML=keys.length?keys.map(k=>`<a class="card" href="#novel" data-book="${k}"${lk(k)}>${cv(k)}<b class="ct">${B[k].t}</b><span class="ca">${B[k].a}</span></a>`).join(''):`<p class="empty">ยังไม่มีเรื่องในหมวด${S.chip} ลองหมวดอื่นดูนะ</p>`;
+}
+function renderHome(){
+  $('#hero').innerHTML=['moon','planet','city','blade'].map(k=>{const b=B[k];return `<a class="hero-i" href="#novel" data-book="${k}"><span class="hero-art">${cover(b,{text:false})}</span><span class="hero-tx"><span class="pill">${b.cat}</span><span class="pill">${b.st}</span><h3>${b.t}</h3><p>${b.a} · ${b.ch} ตอน · อ่าน ${b.reads}</p></span><span class="hero-go" aria-hidden="true">${ic('play')}</span></a>`}).join('');
+  $('#chips-home').innerHTML=chipsHTML(S.chip);
+  $('#cont').innerHTML=['moon','city','cafe'].map(k=>`<a class="cont" href="#read" data-book="${k}" data-ep="${PROG[k]}">${cv(k)}<span class="cont-b"><b>${B[k].t}</b><span class="small">ตอนที่ ${PROG[k]} จาก ${B[k].ch}</span><span class="bar"><i style="width:${Math.round(PROG[k]/B[k].ch*100)}%"></i></span></span></a>`).join('');
+  renderPop();
+  const L=[['forest',17,'5 นาทีที่แล้ว',1],['seven',41,'32 นาทีที่แล้ว',1],['moon',24,'2 ชั่วโมงที่แล้ว',1],['flame',28,'4 ชั่วโมงที่แล้ว',0],['wind',9,'เมื่อวาน',0],['blade',66,'2 วันที่แล้ว',0]];
+  $('#latest').innerHTML=L.map(([k,n,t,nw])=>`<li><a href="#novel" data-book="${k}"${lk(k)}>${cv(k)}<span class="li-b"><b>${B[k].t}</b><span class="ep">ตอนที่ ${n} ${locked(k)?'':chTitle(k,n)}</span><span class="small">${B[k].a} · ${t}</span>${nw?'<span class="new">ใหม่</span>':''}</span></a></li>`).join('');
+}
+function renderSearch(){
+  const q=$('#q').value.trim();
+  $('#chips-search').innerHTML=chipsHTML(S.schip);
+  const keys=['moon','city','forest','wind','planet','flame','seven','cafe','blade'].filter(k=>{const b=B[k];return (S.schip==='ทั้งหมด'||b.cat===S.schip)&&(!q||(b.t+b.a+b.tags.join(' ')).includes(q))});
+  $('#sres').innerHTML=keys.length?keys.map(k=>`<li><a href="#novel" data-book="${k}"${lk(k)}>${cv(k)}<span class="li-b"><b>${B[k].t}</b><span class="ep">${B[k].cat} · ${B[k].ch} ตอน · ${B[k].st}</span><span class="small">${B[k].a} · อ่าน ${B[k].reads}</span></span></a></li>`).join(''):`<li class="empty">ไม่พบเรื่องที่ตรงกับ “${q.replace(/[<>&"]/g,'')}”</li>`;
+}
+
+/* ---------- novel ---------- */
+function syncNv(){const k=S.cur,b=B[k];
+  $('#nv-shelf').setAttribute('aria-pressed',S.shelf.has(k));$('#nv-shelf span').textContent=S.shelf.has(k)?'อยู่ในชั้นแล้ว':'เก็บเข้าชั้น';
+  $('#nv-like').setAttribute('aria-pressed',S.liked.has(k));
+  $('#nv-stats').innerHTML=`<div><b>${b.ch}</b><span>ตอน</span></div><div><b>${b.reads}</b><span>ยอดอ่าน</span></div><div><b>${fmt(b.likes+(S.liked.has(k)?1:0))}</b><span>ถูกใจ</span></div>`;
+}
+function renderNovel(){const k=S.cur,b=B[k];
+  $('#nv-bg').innerHTML=cover(b,{text:false});
+  $('#nv-cover').innerHTML=cover(b)+badge(b);
+  $('#nv-title').textContent=b.t;$('#nv-author').textContent=b.a;
+  $('#nv-meta').innerHTML=`<span class="tag">${b.cat}</span><span class="tag ${rcls(b)}">${b.r==='ทั่วไป'?'ทั่วไป':'เรต '+b.r}</span><span class="tag ${b.st==='จบแล้ว'?'done':''}">${b.st}</span>`;
+  $('#nv-syn').innerHTML=b.syn.map(p=>`<p>${p}</p>`).join('');
+  $('#syn').classList.remove('open');$('#syn-btn').textContent='อ่านเพิ่มเติม';$('#syn-btn').setAttribute('aria-expanded','false');
+  $('#syn-btn').hidden=b.syn.join('').length<120;
+  $('#nv-tags').innerHTML=b.tags.map(t=>`<span>#${t}</span>`).join('');
+  const p=PROG[k]||0,cont=$('#nv-cont');
+  cont.dataset.ep=p||1;$('span',cont).textContent=p?'อ่านต่อ ตอนที่ '+p:'เริ่มอ่านตอนที่ 1';
+  $('#nv-chh').textContent='ตอนทั้งหมด '+b.ch+' ตอน';
+  let h='';for(let n=b.ch;n>Math.max(0,b.ch-6);n--){h+=`<li><a href="#read" data-ep="${n}" class="${n<p?'read':''}"><span class="n">${n}</span><span class="t"><b>${chTitle(k,n)}</b><span>${chDate(k,n)}${n===p?' · <span class="here">อ่านถึงตรงนี้</span>':''}</span></span>${n>b.ch-2&&b.st!=='จบแล้ว'?'<span class="new">ใหม่</span>':''}${ic('next','sm')}</a></li>`}
+  if(p&&p<=b.ch-6)h+=`<li><a href="#read" data-ep="${p}"><span class="n">${p}</span><span class="t"><b>${chTitle(k,p)}</b><span>${chDate(k,p)} · <span class="here">อ่านถึงตรงนี้</span></span></span>${ic('next','sm')}</a></li>`;
+  $('#nv-ch').innerHTML=h;
+  syncNv();renderToc();
+}
+function renderToc(){const k=S.cur,b=B[k];let h='';for(let n=1;n<=b.ch;n++)h+=`<li><a href="#read" data-ep="${n}" aria-current="${n===S.ep&&app.dataset.route==='read'}"><span class="n">${n}</span>${chTitle(k,n)}</a></li>`;$('#toc').innerHTML=h}
+
+/* ---------- read ---------- */
+const mq=window.matchMedia?matchMedia('(prefers-color-scheme: light)'):{matches:false};
+function applyRead(){const a=$('#rd-art');a.style.setProperty('--fs',S.fs+'px');a.style.setProperty('--lh',S.lh);
+  app.dataset.rth=S.th==='auto'?(mq.matches?'light':'night'):S.th;$('#fs-val').textContent=S.fs+' px';
+  $$('[data-lh]').forEach(x=>x.setAttribute('aria-pressed',+x.dataset.lh===S.lh));$$('[data-th]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.th===S.th));
+  $('#fs-dn').disabled=S.fs<=14;$('#fs-up').disabled=S.fs>=26;}
+if(mq.addEventListener)mq.addEventListener('change',applyRead);
+function renderRead(){const k=S.cur,b=B[k];if(S.ep>b.ch)S.ep=b.ch;
+  $('#rd-book').textContent=b.t;$('#rd-k').textContent=b.t;$('#rd-ep').textContent='ตอนที่ '+S.ep+' จาก '+b.ch;
+  $('#rd-h').textContent='ตอนที่ '+S.ep+' '+chTitle(k,S.ep);
+  $('#rd-prev').disabled=S.ep<=1;$('#rd-next').disabled=S.ep>=b.ch;$('#end-next').disabled=S.ep>=b.ch;
+  S.epLiked=false;$('#ep-like').setAttribute('aria-pressed','false');$('#ep-likes').textContent='1,204';
+  app.classList.remove('rc-hide');$('#rd-prog').style.transform='scaleX(0)';$('#rd-pct').textContent='0%';
+  applyRead();renderToc();
+}
+const rs=$('#s-read');let lastY=0;
+rs.addEventListener('scroll',()=>{const y=rs.scrollTop,max=rs.scrollHeight-rs.clientHeight,p=max>0?Math.min(1,y/max):0;
+  $('#rd-prog').style.transform='scaleX('+p+')';$('#rd-pct').textContent='อ่านแล้ว '+Math.round(p*100)+'%';
+  if(y>lastY+6&&y>80)app.classList.add('rc-hide');else if(y<lastY-6||y<40)app.classList.remove('rc-hide');lastY=y},{passive:true});
+$('#rd-art').addEventListener('click',e=>{if(e.target.closest('a,button'))return;app.classList.toggle('rc-hide')});
+function goEp(n){const b=B[S.cur];if(n<1||n>b.ch)return;S.ep=n;renderRead();rs.scrollTop=0;toast('ตอนที่ '+n+' '+chTitle(S.cur,n))}
+$('#rd-prev').onclick=()=>goEp(S.ep-1);$('#rd-next').onclick=()=>goEp(S.ep+1);$('#end-next').onclick=()=>goEp(S.ep+1);
+$('#fs-dn').onclick=()=>{S.fs=Math.max(14,S.fs-1);applyRead();save()};
+$('#fs-up').onclick=()=>{S.fs=Math.min(26,S.fs+1);applyRead();save()};
+$$('[data-lh]').forEach(x=>x.onclick=()=>{S.lh=+x.dataset.lh;applyRead();save()});
+$$('[data-th]').forEach(x=>x.onclick=()=>{S.th=x.dataset.th;applyRead();save()});
+$('#ep-like').onclick=()=>{S.epLiked=!S.epLiked;$('#ep-like').setAttribute('aria-pressed',S.epLiked);$('#ep-likes').textContent=S.epLiked?'1,205':'1,204';toast(S.epLiked?'ถูกใจตอนนี้แล้ว':'ยกเลิกการถูกใจแล้ว')};
+$('#cm-form').addEventListener('submit',e=>{e.preventDefault();const v=$('#cm-in').value.trim();if(!v){toast('พิมพ์ความคิดเห็นก่อนส่งนะ');return}
+  const li=document.createElement('li');li.className='cm';li.innerHTML=`<span class="av" style="background:#ef7a6a">ฉ</span><div class="cm-b"><b>${S.logged?'ข้าวหอมอ่านเพลิน':'ผู้อ่าน'}</b><span class="small">เมื่อสักครู่</span><p></p></div>`;$('p',li).textContent=v;
+  $('#cm-list').prepend(li);$('#cm-in').value='';$('#cm-n').textContent=+$('#cm-n').textContent+1;toast('ส่งความคิดเห็นแล้ว')});
+
+/* ---------- library / profile ---------- */
+function renderLib(){const ks=[...S.shelf];$('#lib-n').textContent=ks.length+' เรื่อง';
+  $('#shelf').innerHTML=ks.length?ks.map(k=>{const b=B[k],p=PROG[k]||0,done=p>=b.ch&&b.st==='จบแล้ว';return `<li><a href="#novel" data-book="${k}"${lk(k)} aria-label="${b.t}">${cv(k)}</a><span class="li-b"><b>${b.t}</b><span class="small">${b.a} · ${b.st}</span><span class="bar"><i style="width:${Math.round(p/b.ch*100)}%"></i></span><span class="small">${p?'อ่านถึงตอนที่ '+p+' จาก '+b.ch:'ยังไม่เริ่มอ่าน'}</span><br><a class="btn sec" href="#read" data-book="${k}" data-ep="${p||1}">${p?'อ่านต่อ':'เริ่มอ่าน'}</a></span></li>`}).join(''):'<li class="empty">ชั้นหนังสือยังว่างอยู่ ลองเก็บเรื่องที่ชอบจากหน้าเรื่องดูนะ</li>';}
+function renderProfile(){$('#pf-av').textContent=S.logged?'ข':'?';$('#pf-av').style.background=S.logged?'#e8bd84':'';$('#pf-name').textContent=S.logged?'ข้าวหอมอ่านเพลิน':'ยังไม่ได้เข้าสู่ระบบ';
+  $('#pf-sub').textContent=S.logged?'ยืนยันอายุแล้ว · ดูเรื่องเรต 18+ ได้':'เข้าสู่ระบบเพื่อเก็บชั้นหนังสือ แสดงความคิดเห็น และดูเรื่องเรต 18+';$('#login').textContent=S.logged?'ออกจากระบบ':'เข้าสู่ระบบ (จำลอง)';}
+$('#login').onclick=()=>{S.logged=!S.logged;renderProfile();toast(S.logged?'เข้าสู่ระบบแล้ว เรื่อง 18+ ไม่ถูกเบลออีกต่อไป':'ออกจากระบบแล้ว')};
+
+/* ---------- writer ---------- */
+const MINE=[['moon','pub','24 ตอน · อัปเดต 28 พ.ย. 2569 · อ่าน 1.2 แสน'],['tattoo','pend','6 ตอน · ส่งตรวจเมื่อ 26 พ.ย. 2569'],['mapx','draft','2 ตอน · แก้ไขล่าสุดเมื่อวาน'],['night','rej','3 ตอน · ตรวจเมื่อ 20 พ.ย. 2569','ภาพปกและฉากในตอนที่ 3 มีเนื้อหาเกินเรต 13+ กรุณาเปลี่ยนเรตเป็น 18+ หรือปรับเนื้อหา แล้วส่งตรวจใหม่']];
+const SB={pub:'เผยแพร่แล้ว',draft:'ฉบับร่าง',pend:'รออนุมัติ 18+',rej:'ถูกปฏิเสธ',sch:'ตั้งเวลา'};
+$('#mine').innerHTML=MINE.map(([k,s,m,r])=>`<li><a href="#novel-edit" aria-label="จัดการ ${B[k].t}"><span class="cv">${cover(B[k])}${badge(B[k])}</span></a><span class="li-b"><b>${B[k].t}</b><span class="small">${m}</span><br><span class="sb ${s}">${SB[s]}</span>${r?`<div class="reason"><b>เหตุผล:</b> ${r}</div>`:''}<span class="row-a"><a class="mini" href="#novel-edit">${ic('pen','sm')}แก้ไข</a><a class="mini" href="#chapter-edit">${ic('plus','sm')}เขียนตอนใหม่</a></span></span></li>`).join('');
+$('#ne-cover').innerHTML=cover(B.moon);
+$('#ne-c').innerHTML=CATS.map(c=>`<option${c==='แฟนตาซี'?' selected':''}>${c}</option>`).join('');
+const sc=()=>$('#ne-sc').textContent=$('#ne-s').value.length+' / 600 ตัวอักษร';$('#ne-s').addEventListener('input',sc);sc();
+$('#upl').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(f){$('#upl-n').textContent=f.name;toast('เลือกไฟล์ปกแล้ว จะอัปโหลดเมื่อกดบันทึก')}});
+let TAGS=B.moon.tags.slice();
+function renderTags(){$$('.tc',$('#tagbox')).forEach(x=>x.remove());const inp=$('#tag-in');
+  TAGS.forEach((t,i)=>{const s=document.createElement('span');s.className='tc';s.innerHTML=`<span></span><button type="button" aria-label="ลบแท็ก ${t}" data-rm="${i}">${ic('x','sm')}</button>`;$('span',s).textContent=t;$('#tagbox').insertBefore(s,inp)})}
+renderTags();
+$('#tag-in').addEventListener('keydown',e=>{const v=e.target.value.trim().replace(/^#/,'');
+  if((e.key==='Enter'||e.key===',')){e.preventDefault();if(!v)return;if(TAGS.includes(v)){toast('มีแท็กนี้แล้ว');return}if(TAGS.length>=10){toast('เพิ่มแท็กได้สูงสุด 10 แท็ก');return}TAGS.push(v);e.target.value='';renderTags()}
+  else if(e.key==='Backspace'&&!e.target.value&&TAGS.length){TAGS.pop();renderTags()}});
+$('#tagbox').addEventListener('click',e=>{const b=e.target.closest('[data-rm]');if(b){const t=TAGS.splice(+b.dataset.rm,1)[0];renderTags();$('#tag-in').focus();toast('ลบแท็ก “'+t+'” แล้ว')}});
+$$('input[name=rate]').forEach(r=>r.addEventListener('change',()=>$('#note18').classList.toggle('on',r.value==='18'&&r.checked)));
+$('#nform').addEventListener('submit',e=>{e.preventDefault();toast($('input[name=rate]:checked').value==='18'?'บันทึกแล้ว ส่งคำขอเรต 18+ ให้แอดมินตรวจแล้ว':'บันทึกข้อมูลเรื่องแล้ว')});
+
+const WCH=[{t:'กระจกเงาแตก',s:'pub',d:'18 พ.ย. 2569'},{t:'ทางกลับบ้าน',s:'pub',d:'21 พ.ย. 2569'},{t:'ผู้เฝ้าบึง',s:'pub',d:'25 พ.ย. 2569'},{t:'จันทร์ดวงที่สาม',s:'pub',d:'28 พ.ย. 2569'},{t:'ประตูที่ไม่มีบานพับ',s:'sch',d:'30 พ.ย. 2569 · 20:00 น.'},{t:'เสียงเพลงจากหอระฆัง',s:'draft',d:'แก้ไขล่าสุด 10:42'}];
+const BASE=21,ul=$('#wch');
+function renderWch(fi){$('#wch-n').textContent=(BASE-1+WCH.length)+' ตอน';
+  ul.innerHTML=WCH.map((c,i)=>`<li draggable="true" data-idx="${i}" class="st-${c.s}"><button class="grip" type="button" aria-label="จัดลำดับตอนที่ ${BASE+i} ${c.t} ใช้ลูกศรขึ้นหรือลง">${ic('grip')}</button><span class="dot" aria-hidden="true"></span><a class="wc" href="#chapter-edit"><span class="small">ตอนที่ ${BASE+i}</span><b>${c.t}</b><span class="sb ${c.s}">${SB[c.s]}${c.s==='sch'?' · '+c.d:''}</span>${c.s!=='sch'?`<span class="small"> ${c.s==='pub'?'เผยแพร่ '+c.d:c.d}</span>`:''}</a></li>`).join('');
+  if(fi!=null){const g=$$('.grip',ul)[fi];g&&g.focus()}}
+function move(a,b){if(b<0||b>=WCH.length||a===b)return;const[x]=WCH.splice(a,1);WCH.splice(b,0,x);renderWch(b);toast('ย้าย “'+x.t+'” เป็นตอนที่ '+(BASE+b))}
+let dragI=null;
+ul.addEventListener('dragstart',e=>{const li=e.target.closest('li');if(!li)return;dragI=+li.dataset.idx;li.classList.add('dragging');try{e.dataTransfer.setData('text/plain',String(dragI));e.dataTransfer.effectAllowed='move'}catch(_){}});
+ul.addEventListener('dragover',e=>{e.preventDefault();const li=e.target.closest('li');$$('.over',ul).forEach(x=>x.classList.remove('over'));li&&li.classList.add('over')});
+ul.addEventListener('drop',e=>{e.preventDefault();const li=e.target.closest('li');if(li&&dragI!==null){const a=dragI;dragI=null;move(a,+li.dataset.idx)}});
+ul.addEventListener('dragend',()=>{dragI=null;$$('.dragging,.over',ul).forEach(x=>x.classList.remove('dragging','over'))});
+ul.addEventListener('keydown',e=>{const g=e.target.closest('.grip');if(!g)return;const i=+g.closest('li').dataset.idx;if(e.key==='ArrowUp'){e.preventDefault();move(i,i-1)}else if(e.key==='ArrowDown'){e.preventDefault();move(i,i+1)}});
+ul.addEventListener('click',e=>{if(e.target.closest('.grip'))toast('ลากที่จับ หรือกดลูกศรขึ้น/ลงเพื่อย้ายตอน')});
+renderWch();
+$('#addch').onclick=()=>{WCH.push({t:'ตอนใหม่ (ยังไม่ตั้งชื่อ)',s:'draft',d:'เพิ่งสร้าง'});renderWch();toast('เพิ่มตอนที่ '+(BASE-1+WCH.length)+' เป็นฉบับร่างแล้ว')};
+
+/* editor */
+const ed=$('#ed'),scE=$('#s-chapter-edit');
+try{document.execCommand('defaultParagraphSeparator',false,'p')}catch(e){}
+const seg=(window.Intl&&Intl.Segmenter)?new Intl.Segmenter('th',{granularity:'word'}):null;
+function counts(){const tx=ed.innerText||'';const ch=tx.replace(/\s/g,'').length;let w=0;if(seg){for(const s of seg.segment(tx))if(s.isWordLike)w++}else w=tx.split(/\s+/).filter(Boolean).length;$('#ed-count').textContent=fmt(w)+' คำ · '+fmt(ch)+' ตัวอักษร'}
+let asT;const hhmm=d=>String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+function dirty(){const s=$('#ed-save');s.classList.add('busy');$('span',s).textContent='กำลังบันทึก…';clearTimeout(asT);asT=setTimeout(()=>{s.classList.remove('busy');$('span',s).textContent='บันทึกแล้ว '+hhmm(new Date())},900)}
+ed.addEventListener('input',()=>{counts();dirty()});$('#ed-t').addEventListener('input',dirty);counts();
+function curBlock(){const sel=getSelection();if(!sel.rangeCount)return null;let n=sel.anchorNode;if(!n||!ed.contains(n)||n===ed)return n===ed?ed.children[Math.min(sel.anchorOffset,ed.children.length-1)]||null:null;while(n&&n.parentNode!==ed)n=n.parentNode;return n&&n.nodeType===1?n:null}
+function syncTb(){const b=curBlock();$$('.cur',ed).forEach(x=>x!==b&&x.classList.remove('cur'));if(b)b.classList.add('cur');
+  const q=c=>{try{return document.queryCommandState(c)}catch(e){return false}};
+  $('[data-cmd=bold]').setAttribute('aria-pressed',!!b&&q('bold'));$('[data-cmd=italic]').setAttribute('aria-pressed',!!b&&q('italic'));
+  $('[data-cmd=h]').setAttribute('aria-pressed',!!b&&b.tagName==='H3');$('[data-cmd=q]').setAttribute('aria-pressed',!!b&&b.tagName==='BLOCKQUOTE');$('[data-cmd=center]').setAttribute('aria-pressed',!!b&&q('justifyCenter'))}
+document.addEventListener('selectionchange',()=>{if(app.dataset.route==='chapter-edit')syncTb()});
+function caretIn(){const sel=getSelection();if(sel.rangeCount&&ed.contains(sel.anchorNode))return;const r=document.createRange();r.selectNodeContents(ed.lastElementChild||ed);r.collapse(false);sel.removeAllRanges();sel.addRange(r)}
+$$('#tb button').forEach(btn=>{btn.addEventListener('mousedown',e=>e.preventDefault());btn.addEventListener('click',()=>{if(S.prev)return;ed.focus();caretIn();const c=btn.dataset.cmd,b=curBlock();
+  if(c==='h')document.execCommand('formatBlock',false,b&&b.tagName==='H3'?'<p>':'<h3>');
+  else if(c==='q')document.execCommand('formatBlock',false,b&&b.tagName==='BLOCKQUOTE'?'<p>':'<blockquote>');
+  else if(c==='hr')document.execCommand('insertHorizontalRule');
+  else if(c==='center')document.execCommand(document.queryCommandState('justifyCenter')?'justifyLeft':'justifyCenter');
+  else document.execCommand(c);
+  syncTb();counts();dirty()})});
+$('#ed-focus').onclick=()=>{const on=!scE.classList.contains('focus');scE.classList.toggle('focus',on);$('#ed-focus').setAttribute('aria-pressed',on);if(on&&!$('.cur',ed)){const p=ed.querySelector('p:last-of-type');p&&p.classList.add('cur')}toast(on?'โหมดโฟกัส: หรี่ทุกอย่างยกเว้นย่อหน้าที่กำลังเขียน':'ปิดโหมดโฟกัสแล้ว')};
+$('#ed-prev').onclick=()=>{S.prev=!S.prev;scE.classList.toggle('preview',S.prev);ed.contentEditable=S.prev?'false':'true';$('#ed-t').readOnly=S.prev;$('#ed-prev').setAttribute('aria-pressed',S.prev);$('#ed-prev').setAttribute('aria-label',S.prev?'กลับไปแก้ไข':'ดูตัวอย่าง');toast(S.prev?'โหมดดูตัวอย่าง':'กลับมาแก้ไขแล้ว')};
+const PUBL={draft:'บันทึกร่าง',now:'เผยแพร่ทันที',sch:'ตั้งเวลาเผยแพร่'};
+function schH(){const d=$('#pd').value,t=$('#pt').value;if(!d){$('#sch-h').textContent='';return ''}const[y,m,dd]=d.split('-').map(Number);const s=dd+' '+TM[m-1]+' '+(y+543)+' เวลา '+(t||'--:--')+' น.';$('#sch-h').textContent='จะเผยแพร่ '+s;return s}
+function syncPub(){const v=$('input[name=pub]:checked').value;$('#schf').classList.toggle('on',v==='sch');$('#pub-go').textContent=PUBL[v];schH()}
+$$('input[name=pub]').forEach(r=>r.addEventListener('change',syncPub));$('#pd').addEventListener('input',schH);$('#pt').addEventListener('input',schH);syncPub();
+$('#pubform').addEventListener('submit',e=>{e.preventDefault();const v=$('input[name=pub]:checked').value;
+  if(v==='sch'&&(!$('#pd').value||!$('#pt').value)){toast('เลือกวันและเวลาก่อนนะ');return}
+  closeSheets();const w=WCH[WCH.length-1];
+  if(v==='draft')toast('บันทึกร่างตอนที่ 26 แล้ว');
+  else if(v==='now'){w.s='pub';w.d='28 พ.ย. 2569';toast('เผยแพร่ตอนที่ 26 แล้ว แจ้งผู้ติดตาม 2,081 คน')}
+  else{w.s='sch';w.d=schH().replace(' เวลา ',' · ');toast('ตั้งเวลาเผยแพร่ '+schH()+' แล้ว')}
+  renderWch()});
+
+/* ---------- sheets & toast ---------- */
+let lastF=null,tT;
+function openSheet(id){closeSheets(true);const s=$('#'+id);if(!s)return;lastF=document.activeElement;s.classList.add('open');s.setAttribute('aria-hidden','false');$('#scrim').classList.add('on');
+  if(id==='sh-toc'){const a=$('[aria-current=true]',s);setTimeout(()=>{a&&a.scrollIntoView({block:'center'})},50)}
+  setTimeout(()=>{const f=$('button,input,a',s);f&&f.focus({preventScroll:true})},80)}
+function closeSheets(silent){$$('.sheet.open').forEach(s=>{s.classList.remove('open');s.setAttribute('aria-hidden','true')});$('#scrim').classList.remove('on');
+  if(!silent&&lastF&&document.contains(lastF)){try{lastF.focus({preventScroll:true})}catch(e){}}if(!silent)lastF=null}
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('on'),2600)}
+const about=$('#about');
+function openAbout(){about.classList.add('open');$('#aboutScrim').classList.add('on');$('.x',about).focus()}
+function closeAbout(){if(!about.classList.contains('open'))return;about.classList.remove('open');$('#aboutScrim').classList.remove('on')}
+$$('.aboutbtn').forEach(b=>b.addEventListener('click',openAbout));
+$$('[data-aclose]').forEach(b=>b.addEventListener('click',closeAbout));
+$$('.scrlist a').forEach(a=>a.addEventListener('click',closeAbout));
+
+document.addEventListener('click',e=>{
+  const L=e.target.closest('[data-locked]');if(L){e.preventDefault();toast('เรื่องนี้เรต 18+ เข้าสู่ระบบและยืนยันอายุก่อนนะ (ลองที่แท็บโปรไฟล์)');return}
+  const bk=e.target.closest('[data-book]');if(bk){S.cur=bk.dataset.book;if(location.hash==='#novel'&&bk.getAttribute('href')==='#novel'){renderNovel();$('#s-novel').scrollTop=0}}
+  const ep=e.target.closest('[data-ep]');if(ep){S.ep=+ep.dataset.ep;if(location.hash==='#read'){e.preventDefault();closeSheets(true);renderRead();rs.scrollTop=0}}
+  const op=e.target.closest('[data-open]');if(op){e.preventDefault();openSheet(op.dataset.open);return}
+  if(e.target.closest('[data-close]'))closeSheets();
+  const t=e.target.closest('[data-toast]');if(t)toast(t.dataset.toast);
+  const ch=e.target.closest('.chip');if(ch){const box=ch.parentNode;if(box.id==='chips-home'){S.chip=ch.dataset.c;$$('.chip',box).forEach(x=>x.setAttribute('aria-pressed',x===ch));renderPop()}else{S.schip=ch.dataset.c;renderSearch()}}
+});
+$('#q').addEventListener('input',renderSearch);
+$('#syn-btn').onclick=()=>{const o=$('#syn').classList.toggle('open');$('#syn-btn').textContent=o?'ย่อเรื่องย่อ':'อ่านเพิ่มเติม';$('#syn-btn').setAttribute('aria-expanded',o)};
+$('#nv-shelf').onclick=()=>{const k=S.cur;if(S.shelf.has(k)){S.shelf.delete(k);toast('นำออกจากชั้นหนังสือแล้ว')}else{S.shelf.add(k);toast('เก็บ “'+B[k].t+'” เข้าชั้นแล้ว')}syncNv()};
+$('#nv-like').onclick=()=>{const k=S.cur;if(S.liked.has(k)){S.liked.delete(k);toast('ยกเลิกการถูกใจแล้ว')}else{S.liked.add(k);toast('ถูกใจเรื่องนี้แล้ว')}syncNv()};
+const share=()=>{try{navigator.clipboard&&navigator.clipboard.writeText(location.href.split('#')[0]+'#novel').catch(()=>{})}catch(e){}toast('คัดลอกลิงก์เรื่องแล้ว พร้อมแชร์')};
+$('#nv-share').onclick=share;$('#nv-share2').onclick=share;
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSheets();closeAbout()}});
+
+/* ---------- router ---------- */
+const READER=['home','search','novel','library','profile'],WRITER=['dash','novel-edit'];
+function route(){let h=location.hash.slice(1)||'home';if(!$('#s-'+h))h='home';
+  closeSheets(true);
+  $$('.scr').forEach(s=>s.classList.toggle('on',s.id==='s-'+h));
+  app.dataset.route=h;app.classList.remove('rc-hide');
+  $('#tabs-r').hidden=!READER.includes(h);$('#tabs-w').hidden=!WRITER.includes(h);
+  $$('.tabs a').forEach(a=>{if(a.dataset.tab.split(' ').includes(h))a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+  if(h==='home')renderHome();if(h==='search')renderSearch();if(h==='novel')renderNovel();if(h==='read')renderRead();if(h==='library')renderLib();if(h==='profile')renderProfile();
+  if(h==='chapter-edit')counts();
+  $('#s-'+h).scrollTop=0;lastY=0;
+}
+hydrate();
+window.addEventListener('hashchange',route);
+route();
+}
+</script>
+</body>
+</html>

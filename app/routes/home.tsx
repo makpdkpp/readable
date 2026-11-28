@@ -45,23 +45,23 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   const { latest } = loaderData;
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">อัปเดตล่าสุด</h1>
+      <h1 className="section-title mb-6">อัปเดตล่าสุด</h1>
       {latest.length === 0 ? (
-        <p className="text-stone-500">ยังไม่มีนิยายในระบบ</p>
+        <p className="text-muted">ยังไม่มีนิยายในระบบ</p>
       ) : (
-        <ul className="grid gap-4 sm:grid-cols-2">
+        <ul className="card-list grid gap-4 sm:grid-cols-2">
           {latest.map((n) => (
             <li key={n.id}>
               <Link
                 to={`/novel/${n.id}`}
-                className="flex gap-4 rounded-lg border border-stone-200 dark:border-stone-800 p-4 hover:bg-stone-50 dark:hover:bg-stone-900"
+                className="card flex gap-4 p-4"
               >
                 <Cover coverKey={n.coverKey} title={n.title} className="w-20" />
                 <div className="min-w-0">
-                  <h2 className="flex items-center gap-2 font-semibold">
+                  <h2 className="flex items-center gap-2 text-lg font-semibold leading-snug">
                     {n.title} <RatingBadge rating={n.rating} />
                   </h2>
-                  <p className="text-sm text-stone-500">โดย {n.author}</p>
+                  <p className="text-sm text-muted">โดย {n.author}</p>
                   <p className="mt-2 text-sm line-clamp-3">{n.synopsis}</p>
                 </div>
               </Link>

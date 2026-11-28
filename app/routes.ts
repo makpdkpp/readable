@@ -5,6 +5,7 @@ export default [
   route("login", "routes/login.tsx"),
   route("signup", "routes/signup.tsx"),
   route("logout", "routes/logout.tsx"),
+  route("theme", "routes/theme.ts"),
   route("profile", "routes/profile.tsx"),
   route("auth/:provider", "routes/auth.$provider.tsx"),
   route("auth/:provider/callback", "routes/auth.$provider.callback.tsx"),

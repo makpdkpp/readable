@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>readable · หน้ากระดาษ (Paper Quiet)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=Noto+Serif+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#ffffff; --paper-2:#f6f7f9; --ink:#16171c; --ink-2:#4f525c; --ink-3:#6b6e78;
+  --rule:#e6e7eb; --rule-2:#d2d4db; --accent:#2b3a8f; --accent-2:#1f2b70; --tint:#eceffa;
+  --danger:#a12a2a; --danger-tint:#fbefee;
+  --serif:"Noto Serif Thai","Noto Serif",Georgia,serif; --sans:"IBM Plex Sans Thai",system-ui,sans-serif;
+  --r-bg:#ffffff; --r-ink:#1b1c21; --r-mute:#6b6e78; --r-rule:#e6e7eb; --r-accent:#2b3a8f;
+  --r-size:19px; --r-lh:1.95; --r-font:var(--serif);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:var(--sans);color:var(--ink);background:#eef0f3;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+h1,h2,h3,p{margin:0}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* ---------- shell ---------- */
+.shell{min-height:100%}
+.info{display:none}
+.phone{position:relative;width:100%;height:100vh;height:100dvh;background:var(--paper);overflow:hidden;display:flex;flex-direction:column}
+@media (min-width:900px){
+  .shell{display:grid;grid-template-columns:minmax(360px,470px) 1fr;height:100vh}
+  .info{display:block;overflow-y:auto;background:#fff;border-right:1px solid var(--rule);padding:52px 44px 60px}
+  .stage{display:flex;align-items:center;justify-content:center;padding:24px}
+  .phone{width:390px;height:min(844px,calc(100vh - 48px));border-radius:36px;box-shadow:0 0 0 1px #d7d9df,0 0 0 9px #fff,0 0 0 10px #d7d9df,0 40px 70px -30px rgba(22,23,28,.35)}
+  .about-btn{display:none!important}
+}
+.scroller{flex:1;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain}
+.screen{display:none;min-height:100%;padding-bottom:28px}
+.screen.active{display:block}
+
+/* ---------- info panel ---------- */
+.info .kicker{font-size:13px;color:var(--ink-3)}
+.info h1{font-family:var(--serif);font-size:40px;font-weight:600;line-height:1.3;margin-top:6px}
+.info h1 small{display:block;font-family:var(--sans);font-size:16px;font-weight:400;color:var(--accent);margin-top:2px}
+.info p.concept{font-family:var(--serif);font-size:16px;line-height:1.95;margin:22px 0 0;color:var(--ink)}
+.info h2{font-size:13.5px;font-weight:600;color:var(--ink-2);margin:34px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)}
+.sw{display:grid;grid-template-columns:repeat(4,1fr);gap:14px 10px}
+.sw div{font-size:12px;line-height:1.4;color:var(--ink-2)}
+.sw i{display:block;height:44px;border-radius:6px;margin-bottom:6px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.sw b{display:block;font-weight:500;color:var(--ink)}
+.typo div{padding:10px 0;border-bottom:1px solid var(--rule)}
+.typo .ts{font-family:var(--serif);font-size:24px;font-weight:600;line-height:1.5}
+.typo .tbody{font-family:var(--serif);font-size:16px;line-height:1.9}
+.typo .tu{font-size:15px}
+.typo small{display:block;font-size:12px;color:var(--ink-3);font-family:var(--sans);font-weight:400}
+.scr{list-style:none;padding:0;margin:0;columns:2;column-gap:16px}
+.scr a{display:flex;align-items:center;min-height:40px;font-size:14px;border-bottom:1px solid var(--rule);break-inside:avoid}
+.scr a code{font-size:12px;color:var(--ink-3);margin-left:auto;font-family:ui-monospace,monospace}
+.scr a[aria-current="true"]{color:var(--accent);font-weight:600}
+.sample{font-size:12.5px;color:var(--ink-3);margin-top:26px}
+
+/* ---------- bars & buttons ---------- */
+.bar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:2px;height:56px;padding:0 8px;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.bar.ruled{border-bottom:1px solid var(--rule)}
+.bar h1{flex:1;min-width:0;font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px}
+.ib{width:44px;height:44px;display:inline-grid;place-items:center;border:0;background:none;border-radius:999px;cursor:pointer;color:var(--ink);flex:none}
+.ib:hover{background:var(--paper-2)}
+.ib[aria-pressed="true"]{color:var(--accent);background:var(--tint)}
+.wordmark{font-family:var(--serif);font-weight:600;font-size:23px;letter-spacing:-.01em;padding:0 12px;flex:1}
+.wordmark span{color:var(--accent)}
+.textbtn{min-height:44px;padding:0 12px;border:0;background:none;border-radius:999px;font-size:13.5px;color:var(--ink-2);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.textbtn:hover{background:var(--paper-2)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 20px;border-radius:999px;border:1px solid var(--ink);background:#fff;font-weight:600;font-size:15px;cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--paper-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:var(--accent-2)}
+.btn.ghost{border-color:var(--rule-2)}
+.btn.block{width:100%}
+.btn svg.i{width:20px;height:20px}
+.linkbtn{background:none;border:0;color:var(--accent);font-weight:600;min-height:44px;padding:0;cursor:pointer;font-size:14px}
+.pad{padding:0 20px}
+.muted{color:var(--ink-3)}
+
+/* tabs */
+.tabs{display:flex;border-top:1px solid var(--rule);background:#fff;padding-bottom:env(safe-area-inset-bottom);flex:none}
+.tabs a{flex:1;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11.5px;color:var(--ink-3)}
+.tabs a[aria-current="page"]{color:var(--accent);font-weight:600}
+.tabs a[aria-current="page"] svg{stroke-width:2}
+.phone.mode-writer .tabs-reader,.phone:not(.mode-writer) .tabs-writer,.phone.on-read .tabs,.phone.on-focus .tabs{display:none}
+
+/* section heads */
+.sh{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:38px 20px 4px;padding-bottom:10px;border-bottom:1px solid var(--ink)}
+.sh h2{font-family:var(--serif);font-size:20px;font-weight:600}
+.sh a,.sh .linkbtn{font-size:13.5px;color:var(--accent);font-weight:500;min-height:0}
+
+/* search entry & chips */
+.search-entry{display:flex;align-items:center;gap:10px;margin:6px 20px 0;min-height:52px;border-bottom:1px solid var(--ink);color:var(--ink-3);font-family:var(--serif);font-size:16px}
+.search-entry svg{color:var(--ink)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:16px 20px 2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;min-height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--rule-2);background:#fff;font-size:14px;cursor:pointer;white-space:nowrap}
+.chip:hover{border-color:var(--ink-3)}
+.chip[aria-pressed="true"]{background:var(--tint);border-color:var(--tint);color:var(--accent);font-weight:600}
+
+/* covers */
+.cover{position:relative;aspect-ratio:2/3;border-radius:3px;overflow:hidden;flex:none;background:#ddd;box-shadow:0 1px 2px rgba(22,23,28,.1),0 8px 16px -10px rgba(22,23,28,.4)}
+.cover svg{display:block;width:100%;height:100%}
+.cover::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.16),rgba(255,255,255,.1) 3%,transparent 7%);pointer-events:none}
+.cover.locked svg{filter:blur(8px) saturate(.5);transform:scale(1.2)}
+.lock{position:absolute;inset:0;z-index:1;display:grid;place-content:center;justify-items:center;gap:2px;color:#fff;background:rgba(22,23,28,.42);font-size:11px;font-weight:600;text-align:center;padding:4px}
+.lock svg.i{width:18px;height:18px}
+
+.rt{display:inline-flex;align-items:center;height:20px;padding:0 7px;border-radius:4px;font-size:11.5px;font-weight:600;border:1px solid var(--rule-2);color:var(--ink-2);vertical-align:middle;white-space:nowrap;line-height:1}
+.rt.t13{background:var(--tint);border-color:var(--tint);color:var(--accent)}
+.rt.t18{background:var(--ink);border-color:var(--ink);color:#fff}
+
+/* continue row */
+.hrow{display:flex;gap:18px;overflow-x:auto;padding:16px 20px 6px;scroll-snap-type:x mandatory;scroll-padding-inline:20px;scrollbar-width:none}
+.hrow::-webkit-scrollbar{display:none}
+.cont{flex:none;width:232px;display:flex;gap:12px;scroll-snap-align:start;align-items:flex-start}
+.cont .cover{width:62px}
+.cont h3{font-family:var(--serif);font-size:15px;font-weight:600;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cont .meta{margin-top:2px}
+.prog{height:2px;background:var(--rule);margin-top:10px;border-radius:2px;overflow:hidden}
+.prog span{display:block;height:100%;background:var(--accent)}
+.meta{font-size:13px;color:var(--ink-3);line-height:1.5}
+
+/* lists */
+.list{list-style:none;margin:0;padding:0 20px}
+.row{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid var(--rule);align-items:flex-start}
+.row:last-child{border-bottom:0}
+.row .cover{width:58px}
+.row .tx{flex:1;min-width:0}
+.row h3{font-family:var(--serif);font-size:16px;font-weight:600;line-height:1.5}
+.row .latest{font-size:13.5px;color:var(--ink-2);margin-top:6px;display:flex;gap:8px;justify-content:space-between}
+.row .latest span:last-child{color:var(--ink-3);white-space:nowrap}
+.empty{padding:28px 0;text-align:center;color:var(--ink-3);font-family:var(--serif)}
+
+.feature{display:flex;gap:16px;padding:18px 0 20px;border-bottom:1px solid var(--rule)}
+.feature .cover{width:112px}
+.feature .no{font-family:var(--serif);color:var(--accent);font-size:14px}
+.feature h3{font-family:var(--serif);font-size:20px;font-weight:600;line-height:1.45;margin:2px 0 4px}
+.feature p{font-family:var(--serif);font-size:14.5px;line-height:1.85;color:var(--ink-2);margin-top:8px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.rank{display:flex;gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--rule)}
+.rank .n{font-family:var(--serif);font-size:24px;color:var(--accent);width:22px;text-align:center;flex:none}
+.rank .cover{width:40px}
+.rank h3{font-family:var(--serif);font-size:15.5px;font-weight:600;line-height:1.5}
+.footnote{font-size:12px;color:var(--ink-3);text-align:center;padding:28px 20px 8px}
+
+/* novel page */
+.nhero{text-align:center;padding:16px 28px 0}
+.nhero .cover{width:156px;margin:0 auto}
+.nhero h1{font-family:var(--serif);font-size:27px;font-weight:600;line-height:1.45;margin-top:22px}
+.nhero .by{margin-top:4px;color:var(--ink-2)}
+.nhero .by a{color:var(--accent);font-weight:500}
+.nmeta{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px 10px;margin-top:12px;font-size:13.5px;color:var(--ink-2)}
+.dot{width:3px;height:3px;border-radius:50%;background:var(--ink-3)}
+.status{display:inline-flex;align-items:center;gap:6px}
+.status i{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+.tags{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:14px}
+.tag{font-size:13px;color:var(--ink-2);padding:3px 10px;border-radius:999px;background:var(--paper-2)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);margin:24px 20px 0;padding:14px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.stat{text-align:center}
+.stat+.stat{border-left:1px solid var(--rule)}
+.stat b{display:block;font-family:var(--serif);font-size:20px;font-weight:600;line-height:1.4}
+.stat span{font-size:12.5px;color:var(--ink-3)}
+.cta{display:grid;gap:10px;padding:20px 20px 0}
+.acts{display:flex;margin:12px 20px 0}
+.act{flex:1;min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:0;font-size:12.5px;color:var(--ink-2);cursor:pointer;border-radius:12px}
+.act:hover{background:var(--paper-2)}
+.act[aria-pressed="true"]{color:var(--accent);font-weight:600}
+.act[aria-pressed="true"] svg{fill:currentColor}
+.syn{font-family:var(--serif);font-size:16px;line-height:1.95;margin-top:16px}
+.syn p+p{margin-top:.8em}
+.syn.clamp{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.chs{list-style:none;margin:0;padding:0 20px}
+.chs a,.chs button.chrow{display:flex;align-items:center;gap:12px;min-height:62px;padding:10px 0;border-bottom:1px solid var(--rule);width:100%;background:none;border-left:0;border-right:0;border-top:0;text-align:left;cursor:pointer}
+.chn{font-family:var(--serif);color:var(--ink-3);width:26px;font-size:14px;flex:none;text-align:right}
+.cht{flex:1;min-width:0}
+.cht b{display:block;font-weight:500;font-size:15px;line-height:1.5}
+.cht small{color:var(--ink-3);font-size:12.5px}
+.new{font-size:11.5px;color:var(--accent);background:var(--tint);padding:1px 9px;border-radius:999px;font-weight:600;flex:none}
+.here{font-size:11.5px;color:var(--ink-2);border:1px solid var(--rule-2);padding:0 8px;border-radius:999px;flex:none}
+.cm{display:flex;gap:12px;padding:16px 0;border-bottom:1px solid var(--rule)}
+.av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--tint);color:var(--accent);font-weight:600;flex:none;font-size:14px}
+.cm .who{font-size:13.5px;font-weight:600}
+.cm .who span{font-weight:400;color:var(--ink-3);margin-left:6px}
+.cm p{margin-top:2px;font-size:14.5px;line-height:1.7}
+
+/* ---------- reader ---------- */
+.phone[data-rt="sepia"]{--r-bg:#f3ead7;--r-ink:#3a2e20;--r-mute:#7a6a55;--r-rule:#e2d5b9;--r-accent:#6a4a1f}
+.phone[data-rt="night"]{--r-bg:#14151a;--r-ink:#d0d2d9;--r-mute:#8b8e98;--r-rule:#2a2c33;--r-accent:#a7b5ff}
+.phone.on-read .scroller{background:var(--r-bg)}
+.rprog{position:absolute;top:0;left:0;height:2px;width:0;background:var(--r-accent);z-index:8;display:none}
+.rtop,.rbot{position:absolute;left:0;right:0;z-index:6;display:none;align-items:center;background:var(--r-bg);color:var(--r-ink);transition:transform .28s ease,background .2s}
+.rtop{top:0;height:56px;padding:0 6px;border-bottom:1px solid var(--r-rule)}
+.rtop .ttl{flex:1;min-width:0;text-align:center;font-size:13.5px;line-height:1.35}
+.rtop .ttl b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rtop .ttl span{color:var(--r-mute);font-size:12px}
+.rbot{bottom:0;padding:4px 8px calc(4px + env(safe-area-inset-bottom));border-top:1px solid var(--r-rule);justify-content:space-between}
+.rbot button{min-height:52px;min-width:56px;border:0;background:none;color:var(--r-ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:11.5px;cursor:pointer;border-radius:12px;padding:0 8px}
+.rbot button:disabled{opacity:.35;cursor:default}
+.rtop .ib,.rbot .ib{color:var(--r-ink)}
+.rtop .ib:hover,.rbot button:hover{background:color-mix(in srgb,var(--r-ink) 7%,transparent)}
+.aa{font-family:var(--serif);font-size:17px;font-weight:600;line-height:22px}
+.phone.on-read .rtop,.phone.on-read .rbot{display:flex}
+.phone.on-read .rprog{display:block}
+.phone.chrome-hidden .rtop{transform:translateY(-100%)}
+.phone.chrome-hidden .rbot{transform:translateY(100%)}
+.s-read{background:var(--r-bg);color:var(--r-ink);padding:88px 26px 120px;transition:background .2s,color .2s}
+.rhead{text-align:center;margin-bottom:40px}
+.rhead .nv{font-size:13px;color:var(--r-mute)}
+.rhead .no{font-family:var(--serif);color:var(--r-accent);font-size:15px;margin-top:20px}
+.rhead h1{font-family:var(--r-font);font-size:calc(var(--r-size) + 8px);line-height:1.5;font-weight:600;margin-top:4px}
+.rhead .rule{width:36px;height:1px;background:var(--r-ink);opacity:.5;margin:22px auto 0}
+.prose{font-family:var(--r-font);font-size:var(--r-size);line-height:var(--r-lh);max-width:34em;margin:0 auto;cursor:text}
+.prose p{margin:0 0 1.05em}
+.endc{max-width:34em;margin:48px auto 0;text-align:center}
+.orn{display:flex;justify-content:center;gap:10px;color:var(--r-mute)}
+.orn i{width:4px;height:4px;border-radius:50%;background:currentColor}
+.endc .done{font-family:var(--r-font);font-size:15px;color:var(--r-mute);margin-top:14px}
+.likebig{width:72px;height:72px;border-radius:50%;border:1px solid var(--r-rule);background:none;color:var(--r-ink);display:grid;place-items:center;margin:24px auto 8px;cursor:pointer;transition:transform .15s}
+.likebig svg.i{width:28px;height:28px}
+.likebig[aria-pressed="true"]{color:var(--r-accent);border-color:var(--r-accent)}
+.likebig[aria-pressed="true"] svg{fill:currentColor}
+.likebig:active{transform:scale(.94)}
+.endc .cnt{font-size:13px;color:var(--r-mute)}
+.pn{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:28px}
+.pn .btn{background:transparent;color:var(--r-ink);border-color:var(--r-rule);font-weight:500}
+.pn .btn.primary{background:var(--r-accent);border-color:var(--r-accent);color:var(--r-bg)}
+.rcm{text-align:left;margin-top:40px}
+.rcm h2{font-family:var(--serif);font-size:18px;font-weight:600;padding-bottom:10px;border-bottom:1px solid var(--r-ink)}
+.rcm .cm{border-color:var(--r-rule)}
+.rcm .cm .who span{color:var(--r-mute)}
+.cform{display:flex;gap:8px;align-items:flex-end;margin-top:16px}
+.cform textarea{flex:1;font-size:16px;min-height:48px;max-height:140px;padding:11px 14px;border:1px solid var(--r-rule);border-radius:14px;background:transparent;color:var(--r-ink);resize:none;line-height:1.5}
+.cform textarea:focus{outline:2px solid var(--r-accent);outline-offset:0}
+.cform .ib{background:var(--r-accent);color:var(--r-bg);width:48px;height:48px}
+
+/* ---------- sheets / toast ---------- */
+.sheet-wrap{position:absolute;inset:0;z-index:20;display:none}
+.sheet-wrap.open{display:block}
+.scrim{position:absolute;inset:0;background:rgba(22,23,28,.34);animation:fade .2s ease}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:88%;overflow-y:auto;background:#fff;border-radius:22px 22px 0 0;padding:6px 20px calc(24px + env(safe-area-inset-bottom));animation:up .28s cubic-bezier(.2,.8,.2,1);color:var(--ink)}
+.grab{width:36px;height:4px;border-radius:4px;background:var(--rule-2);margin:6px auto 6px}
+.sheet .sh-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.sheet .sh-h h2{font-family:var(--serif);font-size:19px;font-weight:600}
+.sheet .grp{padding:14px 0;border-top:1px solid var(--rule)}
+.sheet .grp:first-of-type{border-top:0}
+.sheet .lbl{font-size:13.5px;color:var(--ink-2);margin-bottom:10px;display:flex;justify-content:space-between}
+@keyframes fade{from{opacity:0}}
+@keyframes up{from{transform:translateY(100%)}}
+.toast{position:absolute;left:50%;bottom:84px;transform:translate(-50%,16px);background:var(--ink);color:#fff;padding:11px 18px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:30;width:max-content;max-width:calc(100% - 40px);text-align:center;line-height:1.45}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+.seg{display:flex;border:1px solid var(--rule-2);border-radius:14px;padding:3px;gap:3px}
+.seg label{flex:1;position:relative}
+.seg input{position:absolute;inset:0;opacity:0;margin:0;width:100%;height:100%;cursor:pointer}
+.seg span{display:flex;align-items:center;justify-content:center;gap:6px;min-height:42px;border-radius:11px;font-size:14px;text-align:center;padding:0 6px}
+.seg input:checked+span{background:var(--tint);color:var(--accent);font-weight:600}
+.seg input:focus-visible+span{outline:2px solid var(--accent)}
+.sizer{display:flex;align-items:center;gap:10px}
+.sizer .btn{min-width:64px;padding:0 14px;border-color:var(--rule-2);font-family:var(--serif)}
+.sizer output{flex:1;text-align:center;font-family:var(--serif);font-size:18px}
+.themes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.themes label{position:relative;text-align:center;font-size:12.5px;color:var(--ink-2)}
+.themes input{position:absolute;inset:0;opacity:0;margin:0;width:100%;height:100%;cursor:pointer}
+.themes .sw2{display:grid;place-items:center;height:54px;border-radius:12px;font-family:var(--serif);font-size:18px;font-weight:600;border:1px solid var(--rule-2);margin-bottom:4px}
+.themes input:checked+.sw2{box-shadow:0 0 0 2px var(--accent);border-color:transparent}
+.themes input:checked~em{color:var(--accent);font-weight:600}
+.themes input:focus-visible+.sw2{outline:2px solid var(--accent);outline-offset:3px}
+.themes em{font-style:normal}
+.toc{list-style:none;margin:0;padding:0}
+.toc .chrow{padding-left:0}
+.toc .chrow[aria-current="true"] b{color:var(--accent);font-weight:600}
+
+/* ---------- library / search / profile ---------- */
+.segtabs{margin:14px 20px 0}
+.shelf{display:grid;grid-template-columns:repeat(3,1fr);gap:26px 16px;padding:22px 20px 0}
+.shelf a{display:block;min-width:0}
+.shelf h3{font-family:var(--serif);font-size:13.5px;font-weight:600;line-height:1.5;margin-top:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.shelf .meta{font-size:12px}
+.qwrap{display:flex;align-items:center;gap:8px;flex:1;border-bottom:1px solid var(--ink);margin-right:8px}
+.qwrap input{flex:1;min-width:0;border:0;background:none;font-size:16px;min-height:44px;font-family:var(--serif)}
+.qwrap input:focus{outline:none}
+.qwrap:focus-within{border-bottom-color:var(--accent);box-shadow:0 1px 0 var(--accent)}
+.recent{display:flex;flex-wrap:wrap;gap:8px;padding:18px 20px 0}
+.prof{padding:28px 20px 0;text-align:center}
+.prof .av{width:80px;height:80px;font-size:30px;margin:0 auto;font-family:var(--serif)}
+.prof h1{font-family:var(--serif);font-size:23px;font-weight:600;margin-top:14px}
+.menu{list-style:none;margin:24px 20px 0;padding:0;border-top:1px solid var(--rule)}
+.menu a,.menu button{display:flex;align-items:center;gap:14px;width:100%;min-height:56px;border:0;border-bottom:1px solid var(--rule);background:none;cursor:pointer;font-size:15px;text-align:left;padding:0 2px}
+.menu .chev{margin-left:auto;color:var(--ink-3)}
+
+/* ---------- writer ---------- */
+.mode{display:flex;gap:3px;padding:3px;border:1px solid var(--rule-2);border-radius:999px;margin-left:auto}
+.mode a{min-height:38px;padding:0 14px;display:flex;align-items:center;border-radius:999px;font-size:13px;color:var(--ink-2)}
+.mode a[aria-current="page"]{background:var(--ink);color:#fff;font-weight:600}
+.desk{padding:18px 20px 0}
+.desk .date{font-size:13px;color:var(--ink-3)}
+.desk h1{font-family:var(--serif);font-size:26px;font-weight:600;line-height:1.45;margin-top:2px}
+.desk p{font-family:var(--serif);color:var(--ink-2);font-size:15px;margin-top:4px}
+.dstats{display:grid;grid-template-columns:repeat(3,1fr);margin:22px 20px 0;border-top:1px solid var(--ink);border-bottom:1px solid var(--rule)}
+.dstats div{padding:14px 10px 14px 0}
+.dstats div+div{padding-left:12px;border-left:1px solid var(--rule)}
+.dstats span{font-size:12.5px;color:var(--ink-3);display:block;line-height:1.4}
+.dstats b{font-family:var(--serif);font-size:22px;font-weight:600;display:block;line-height:1.5}
+.dstats small{font-size:12px;color:var(--accent);font-weight:500}
+.st{font-size:12px;font-weight:600;padding:2px 10px;border-radius:999px;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;line-height:1.5}
+.st.draft{box-shadow:inset 0 0 0 1px var(--rule-2);color:var(--ink-2)}
+.st.pending{background:var(--tint);color:var(--accent)}
+.st.pub{background:var(--accent);color:#fff}
+.st.rej{background:var(--danger-tint);color:var(--danger)}
+.st.sched{box-shadow:inset 0 0 0 1px var(--accent);color:var(--accent)}
+.st svg.i{width:14px;height:14px}
+.reason{margin-top:8px;font-size:13px;line-height:1.6;color:var(--danger);display:flex;gap:6px}
+.reason svg.i{width:16px;height:16px;margin-top:2px}
+.act-list{list-style:none;margin:0;padding:0 20px}
+.act-list li{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid var(--rule);font-size:14px;line-height:1.6}
+.act-list li svg.i{width:18px;height:18px;color:var(--accent);margin-top:3px}
+.act-list time{display:block;font-size:12.5px;color:var(--ink-3)}
+.field{margin:0 20px 26px}
+.field .l{display:block;font-size:13.5px;color:var(--ink-2);margin-bottom:4px;font-weight:500}
+.field .hint{font-size:12.5px;color:var(--ink-3);margin-top:6px}
+.in{width:100%;font-size:16px;min-height:48px;padding:10px 0;border:0;border-bottom:1px solid var(--rule-2);background:transparent;border-radius:0}
+.in:focus{outline:none;border-bottom-color:var(--accent);box-shadow:0 1px 0 var(--accent)}
+.in.title{font-family:var(--serif);font-size:21px;font-weight:600}
+textarea.in{min-height:132px;line-height:1.9;font-family:var(--serif);resize:vertical}
+.selwrap{position:relative}
+.selwrap select{appearance:none;-webkit-appearance:none;padding-right:32px;cursor:pointer}
+.selwrap svg{position:absolute;right:4px;top:13px;pointer-events:none;transform:rotate(90deg);width:18px;height:18px;color:var(--ink-3)}
+.upload{display:flex;gap:16px;align-items:center;padding:4px 0}
+.upload .cover{width:84px}
+.upload label{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:126px;border:1px dashed var(--rule-2);border-radius:10px;text-align:center;font-size:13.5px;color:var(--ink-2);cursor:pointer;padding:10px}
+.upload label:hover{border-color:var(--accent);color:var(--accent)}
+.upload label:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+.upload input{position:absolute;opacity:0;width:1px;height:1px}
+.tagbox{display:flex;flex-wrap:wrap;gap:6px;align-items:center;border-bottom:1px solid var(--rule-2);padding:8px 0}
+.tagbox:focus-within{border-bottom-color:var(--accent);box-shadow:0 1px 0 var(--accent)}
+.tagbox input{flex:1;min-width:120px;border:0;background:none;font-size:16px;min-height:40px}
+.tagbox input:focus{outline:none}
+.tchip{display:inline-flex;align-items:center;gap:2px;padding-left:12px;border-radius:999px;background:var(--tint);color:var(--accent);font-size:14px}
+.tchip button{width:34px;height:34px;border:0;background:none;color:inherit;display:grid;place-items:center;border-radius:999px;cursor:pointer}
+.tchip button svg.i{width:15px;height:15px}
+.note{display:flex;gap:10px;padding:12px 14px;background:var(--tint);border-radius:12px;color:var(--accent-2);font-size:13.5px;line-height:1.65;margin-top:12px}
+.note svg.i{width:18px;height:18px;margin-top:2px}
+.note[hidden]{display:none}
+.wch{list-style:none;margin:0;padding:0 20px}
+.wch li{display:flex;align-items:center;gap:6px;min-height:68px;border-bottom:1px solid var(--rule);background:#fff}
+.wch li.dragging{box-shadow:0 10px 24px -12px rgba(22,23,28,.4);position:relative;z-index:2;border-radius:8px}
+.grip{width:40px;height:44px;border:0;background:none;color:var(--ink-3);display:grid;place-items:center;cursor:grab;touch-action:none;border-radius:8px;flex:none}
+.grip:active{cursor:grabbing}
+.wch a{flex:1;min-width:0;display:flex;align-items:center;gap:10px;min-height:60px}
+.wch .cht small{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:2px}
+.wch .num{font-family:var(--serif);color:var(--ink-3);font-size:13px}
+.savebar{position:sticky;bottom:0;padding:12px 20px;background:rgba(255,255,255,.96);border-top:1px solid var(--rule);display:flex;gap:10px}
+.savebar .btn{flex:1}
+
+/* editor */
+.on-focus .bar,.on-focus .toolbar{transition:opacity .4s}
+.phone.typing .bar,.phone.typing .toolbar,.phone.typing .ed-foot{opacity:.18}
+.autosave{flex:1;text-align:center;font-size:12.5px;color:var(--ink-3);display:flex;align-items:center;justify-content:center;gap:6px;min-width:0;white-space:nowrap}
+.autosave i{width:6px;height:6px;border-radius:50%;background:#3d8b5a;flex:none}
+.autosave.saving i{background:var(--accent);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.25}}
+.pubbtn{min-height:40px;padding:0 16px;font-size:14px}
+.ed-head{padding:20px 24px 4px}
+.ed-head .no{font-family:var(--serif);color:var(--accent);font-size:14px}
+.ed-title{width:100%;border:0;background:none;font-family:var(--serif);font-size:24px;font-weight:600;padding:4px 0;min-height:48px;border-bottom:1px solid transparent}
+.ed-title:focus{outline:none;border-bottom-color:var(--accent)}
+.toolbar{position:sticky;top:56px;z-index:4;display:flex;gap:2px;overflow-x:auto;padding:4px 14px;background:rgba(255,255,255,.97);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);scrollbar-width:none}
+.toolbar::-webkit-scrollbar{display:none}
+.tb{min-width:44px;height:44px;border:0;background:none;border-radius:10px;display:grid;place-items:center;cursor:pointer;color:var(--ink);flex:none}
+.tb:hover{background:var(--paper-2)}
+.tb[aria-pressed="true"]{background:var(--tint);color:var(--accent)}
+.tb svg.i{width:20px;height:20px}
+.tsep{width:1px;background:var(--rule);margin:8px 4px;flex:none}
+.editor{font-family:var(--serif);font-size:18px;line-height:2;min-height:56vh;padding:22px 24px 80px;outline:none;caret-color:var(--accent)}
+.editor:focus{box-shadow:inset 2px 0 0 var(--tint)}
+.editor p{margin:0 0 1em}
+.editor h3{font-size:20px;font-weight:600;margin:1.2em 0 .5em;line-height:1.6}
+.editor blockquote{margin:1.2em 0;padding:0 0 0 18px;border-left:1px solid var(--ink-3);color:var(--ink-2);font-style:italic}
+.editor hr,.prose hr{border:0;height:auto;margin:1.8em 0;text-align:center;overflow:visible}
+.editor hr::after,.prose hr::after{content:"*   *   *";white-space:pre;color:var(--ink-3);font-size:15px}
+.wrap-ed.preview .toolbar{display:none}
+.wrap-ed.preview .editor{font-size:var(--r-size);line-height:var(--r-lh);box-shadow:none}
+.wrap-ed.preview .pv-badge{display:flex}
+.pv-badge{display:none;margin:12px 24px 0;font-size:12.5px;color:var(--accent);gap:6px;align-items:center}
+.ed-foot{position:sticky;bottom:0;display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--ink-3);padding:12px 24px calc(12px + env(safe-area-inset-bottom));background:rgba(255,255,255,.97);border-top:1px solid var(--rule)}
+.s-chapter-edit{padding-bottom:0}
+.popt{display:grid;gap:8px}
+.popt label{position:relative;display:flex;gap:12px;align-items:flex-start;padding:14px;border:1px solid var(--rule-2);border-radius:14px;cursor:pointer}
+.popt input{margin:4px 0 0;width:20px;height:20px;accent-color:var(--accent);flex:none}
+.popt label:has(input:checked){border-color:var(--accent);background:var(--tint)}
+.popt b{display:block;font-weight:600}
+.popt small{color:var(--ink-2);font-size:13px}
+.when{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.when[hidden]{display:none}
+.when label{font-size:13px;color:var(--ink-2)}
+.when input{width:100%;font-size:16px;min-height:48px;border:1px solid var(--rule-2);border-radius:10px;padding:0 10px;background:#fff;margin-top:4px}
+.when input:focus{outline:2px solid var(--accent);outline-offset:0}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3.5 10.5 12 3.5l8.5 7V20a1 1 0 0 1-1 1H15v-6H9v6H4.5a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></symbol>
+  <symbol id="i-shelf" viewBox="0 0 24 24"><path d="M4.5 4h4v16h-4zM10.5 4h4v16h-4z"/><path d="m16.6 5.2 3.6 1-3.9 14.6-3.6-1"/></symbol>
+  <symbol id="i-pen" viewBox="0 0 24 24"><path d="M15 4.5 19.5 9 9 19.5 4 20l.5-5z"/><path d="m13 6.5 4.5 4.5"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c.6-3.8 3.7-6.5 7.5-6.5s6.9 2.7 7.5 6.5"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7.4-4.5-8.9-9.4C2.1 7.2 4.3 4.5 7.3 4.5c2 0 3.6 1.1 4.7 2.9 1.1-1.8 2.7-2.9 4.7-2.9 3 0 5.2 2.7 4.2 6.1C19.4 15.5 12 20 12 20z"/></symbol>
+  <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M6.5 3.5h11V21L12 17l-5.5 4z"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 3.5v12M7.5 8 12 3.5 16.5 8"/><path d="M5 13v6a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 19 19v-6"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6.5h11M9 12h11M9 17.5h11M4.5 6.5h.01M4.5 12h.01M4.5 17.5h.01"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-grip" viewBox="0 0 24 24"><path stroke-width="2.6" d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01"/></symbol>
+  <symbol id="i-bold" viewBox="0 0 24 24"><path stroke-width="2" d="M7 5h5.5a3.5 3.5 0 0 1 0 7H7zM7 12h6.5a3.5 3.5 0 0 1 0 7H7z"/></symbol>
+  <symbol id="i-italic" viewBox="0 0 24 24"><path d="M10.5 5h7M6.5 19h7M14 5l-4 14"/></symbol>
+  <symbol id="i-heading" viewBox="0 0 24 24"><path d="M6 5v14M16 5v14M6 12h10"/><path d="M19 14.5l1.5-1V19"/></symbol>
+  <symbol id="i-quote" viewBox="0 0 24 24"><path d="M10 7H6.5a1 1 0 0 0-1 1v4H10V7zM10 12c0 3-1.6 5-4.5 5.5M19 7h-3.5a1 1 0 0 0-1 1v4H19V7zM19 12c0 3-1.6 5-4.5 5.5"/></symbol>
+  <symbol id="i-scene" viewBox="0 0 24 24"><path d="M3.5 12h3M10.5 12h3M17.5 12h3"/></symbol>
+  <symbol id="i-center" viewBox="0 0 24 24"><path d="M4 6h16M7.5 10h9M4 14h16M7.5 18h9"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.8h.01"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4.5 5.5h15v10.5H10l-5.5 4z"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M4 11.5 20 4l-6.5 16-2.5-6.5z"/><path d="M11 13.5 20 4"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m4.5 18 5-5 4 4 2.5-2.5 3.5 3.5"/></symbol>
+  <symbol id="i-trend" viewBox="0 0 24 24"><path d="M3.5 16.5l5.5-5.5 4 4 7.5-7.5M15 7.5h5.5V13"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5.5M12 16.2h.01"/></symbol>
+</svg>
+
+<div class="shell">
+  <aside class="info" id="info" aria-label="เกี่ยวกับแนวทางการออกแบบนี้">
+    <div class="info-body">
+      <p class="kicker">readable · แนวทาง A</p>
+      <h1>หน้ากระดาษ<small>Paper Quiet</small></h1>
+      <p class="concept">แอปที่ถอยออกมาให้ตัวหนังสือได้พูดเอง พื้นขาวสะอาดเหมือนกระดาษเนื้อดี หมึกดำเกือบสนิท และสีน้ำเงินครามเพียงสีเดียวแบบหมึกปากกาหมึกซึมที่คนไทยคุ้นมือ เราใช้เส้นบางแทนกล่อง เว้นที่ว่างให้สายตาได้พัก และจัดตัวอักษรไทยด้วยระยะบรรทัดที่โปร่ง ฝั่งผู้อ่านจึงเรียบเหมือนหนังสือที่จัดหน้าอย่างประณีต ส่วนฝั่งนักเขียนเงียบเหมือนโต๊ะเขียนต้นฉบับยามดึก ที่มีเพียงคุณกับหน้ากระดาษ</p>
+      <h2>ชุดสี</h2>
+      <div class="sw">
+        <div><i style="background:#ffffff"></i><b>กระดาษ</b>#FFFFFF</div>
+        <div><i style="background:#16171c"></i><b>หมึก</b>#16171C</div>
+        <div><i style="background:#4f525c"></i><b>หมึกรอง</b>#4F525C</div>
+        <div><i style="background:#e6e7eb"></i><b>เส้นบาง</b>#E6E7EB</div>
+        <div><i style="background:#2b3a8f"></i><b>น้ำเงินหมึก</b>#2B3A8F</div>
+        <div><i style="background:#eceffa"></i><b>น้ำเงินจาง</b>#ECEFFA</div>
+        <div><i style="background:#f3ead7"></i><b>อ่าน: ซีเปีย</b>#F3EAD7</div>
+        <div><i style="background:#14151a"></i><b>อ่าน: กลางคืน</b>#14151A</div>
+      </div>
+      <h2>ตัวอักษร</h2>
+      <div class="typo">
+        <div class="ts">เงาจันทร์ในสวนกล้วยไม้<small>Noto Serif Thai 600 · ชื่อเรื่องและหัวข้อ</small></div>
+        <div class="tbody">ฝนเริ่มตกตอนห้าโมงเย็น เร็วกว่าที่พยากรณ์อากาศบอกไว้<small>Noto Serif Thai 400 · เนื้อหาสำหรับอ่าน ระยะบรรทัด 1.95</small></div>
+        <div class="tu">เก็บเข้าชั้น · อ่านต่อ ตอนที่ 13 · บันทึกแล้ว<small>IBM Plex Sans Thai 400–600 · ส่วนติดต่อผู้ใช้</small></div>
+      </div>
+      <h2>หน้าจอ</h2>
+      <ul class="scr">
+        <li><a href="#home">หน้าแรก<code>#home</code></a></li>
+        <li><a href="#search">ค้นหา<code>#search</code></a></li>
+        <li><a href="#novel">หน้าเรื่อง<code>#novel</code></a></li>
+        <li><a href="#read">อ่านตอน<code>#read</code></a></li>
+        <li><a href="#library">ชั้นหนังสือ<code>#library</code></a></li>
+        <li><a href="#profile">โปรไฟล์<code>#profile</code></a></li>
+        <li><a href="#dash">แดชบอร์ด<code>#dash</code></a></li>
+        <li><a href="#novel-edit">จัดการเรื่อง<code>#novel-edit</code></a></li>
+        <li><a href="#chapter-edit">เขียนตอน<code>#chapter-edit</code></a></li>
+      </ul>
+      <p class="sample">เนื้อหา ชื่อเรื่อง นามปากกา และตัวเลขทั้งหมดเป็นข้อมูลตัวอย่าง</p>
+    </div>
+  </aside>
+
+  <main class="stage">
+  <div class="phone" id="phone">
+    <div class="rprog" id="rprog"></div>
+    <div class="rtop" id="rtop">
+      <a class="ib" href="#novel" aria-label="กลับไปหน้าเรื่อง"><svg class="i"><use href="#i-back"/></svg></a>
+      <div class="ttl"><b>เงาจันทร์ในสวนกล้วยไม้</b><span id="rtopch">ตอนที่ 13</span></div>
+      <button class="ib" type="button" data-sheet="sh-toc" aria-label="สารบัญ"><svg class="i"><use href="#i-list"/></svg></button>
+    </div>
+
+    <div class="scroller" id="scroller">
+
+      <!-- HOME -->
+      <section class="screen" id="s-home" aria-label="หน้าแรก">
+        <div class="bar">
+          <span class="wordmark">readable<span>.</span></span>
+          <a class="textbtn" href="#dash"><svg class="i"><use href="#i-pen"/></svg>ฝั่งนักเขียน</a>
+          <button class="ib about-btn" type="button" data-sheet="sh-info" aria-label="เกี่ยวกับแบบนี้"><svg class="i"><use href="#i-info"/></svg></button>
+        </div>
+        <a class="search-entry" href="#search"><svg class="i"><use href="#i-search"/></svg>ค้นหาชื่อเรื่อง นามปากกา หรือแท็ก</a>
+        <div class="chips" id="cats" role="group" aria-label="หมวดหมู่"></div>
+        <div class="sh"><h2>อ่านต่อ</h2><a href="#library">ชั้นหนังสือ</a></div>
+        <div class="hrow" id="cont"></div>
+        <div class="sh"><h2>อัปเดตล่าสุด</h2><span class="meta" id="catlabel">ทุกหมวด</span></div>
+        <ul class="list" id="updates"></ul>
+        <div class="sh"><h2>ยอดนิยมสัปดาห์นี้</h2><a href="#search">ดูทั้งหมด</a></div>
+        <div class="pad" id="popular"></div>
+        <p class="footnote">ข้อมูลตัวอย่าง · ชื่อเรื่องและนามปากกาทั้งหมดสมมติขึ้น</p>
+      </section>
+
+      <!-- SEARCH -->
+      <section class="screen" id="s-search" aria-label="ค้นหา">
+        <div class="bar ruled">
+          <a class="ib" href="#home" aria-label="กลับ"><svg class="i"><use href="#i-back"/></svg></a>
+          <label class="qwrap"><span class="sr">ค้นหา</span><input id="q" type="search" placeholder="ชื่อเรื่อง นามปากกา แท็ก" autocomplete="off"><svg class="i"><use href="#i-search"/></svg></label>
+        </div>
+        <div class="recent" id="recent"></div>
+        <div class="sh"><h2 id="qtitle">เรื่องทั้งหมด</h2><span class="meta" id="qcount"></span></div>
+        <ul class="list" id="results"></ul>
+      </section>
+
+      <!-- NOVEL -->
+      <section class="screen" id="s-novel" aria-label="หน้าเรื่อง">
+        <div class="bar">
+          <a class="ib" href="#home" aria-label="กลับหน้าแรก"><svg class="i"><use href="#i-back"/></svg></a>
+          <h1></h1>
+          <button class="ib" type="button" data-share aria-label="แชร์"><svg class="i"><use href="#i-share"/></svg></button>
+        </div>
+        <div class="nhero">
+          <div id="ncover"></div>
+          <h1>เงาจันทร์ในสวนกล้วยไม้</h1>
+          <p class="by">โดย <a href="#search">ปลายฝน</a></p>
+          <div class="nmeta"><span>โรแมนติก</span><i class="dot"></i><span class="status"><i></i>กำลังเขียน</span><i class="dot"></i><span class="rt">ทั่วไป</span></div>
+          <div class="tags"><span class="tag">สวนกล้วยไม้</span><span class="tag">ชนบท</span><span class="tag">ครอบครัว</span><span class="tag">รักช้า ๆ</span><span class="tag">ฟีลกู้ด</span></div>
+        </div>
+        <div class="stats">
+          <div class="stat"><b>24</b><span>ตอน</span></div>
+          <div class="stat"><b>48.2K</b><span>ยอดอ่าน</span></div>
+          <div class="stat"><b id="likeN">3,126</b><span>ถูกใจ</span></div>
+        </div>
+        <div class="cta">
+          <a class="btn primary" href="#read">อ่านต่อ ตอนที่ 13</a>
+          <a class="btn ghost" href="#read" data-ch="1">อ่านตอนแรก</a>
+        </div>
+        <div class="acts">
+          <button class="act" type="button" data-toggle="shelved" aria-pressed="false"><svg class="i"><use href="#i-bookmark"/></svg><span>เก็บเข้าชั้น</span></button>
+          <button class="act" type="button" data-toggle="liked" aria-pressed="false"><svg class="i"><use href="#i-heart"/></svg><span>ถูกใจ</span></button>
+          <button class="act" type="button" data-share><svg class="i"><use href="#i-share"/></svg><span>แชร์</span></button>
+        </div>
+        <div class="sh"><h2>เรื่องย่อ</h2></div>
+        <div class="pad">
+          <div class="syn clamp" id="syn">
+            <p>มินตรา นักออกแบบกราฟิกวัยสามสิบที่เหนื่อยล้ากับชีวิตในกรุงเทพฯ ต้องกลับบ้านเกิดที่ดำเนินสะดวกหลังยายจากไป มรดกที่รอเธออยู่คือสวนกล้วยไม้เก่าที่ใกล้ล้มละลาย กับหนี้ก้อนโตที่ไม่มีใครเคยพูดถึง เธอตั้งใจจะขายที่ดินให้เร็วที่สุดแล้วกลับไปใช้ชีวิตเดิม</p>
+            <p>จนกระทั่งได้พบภาคิน นักพฤกษศาสตร์หนุ่มข้างบ้านที่ดูแลสวนแทนยายมาตลอดหลายปี และสมุดบันทึกเล่มหนึ่งที่ยายทิ้งไว้ ซึ่งเล่าเรื่องรักครั้งหนึ่งที่ไม่มีใครในครอบครัวเคยรู้ ตลอดฤดูฝนที่กล้วยไม้ทยอยผลิดอก มินตราต้องเลือกระหว่างชีวิตที่สร้างไว้ในเมือง กับรากที่เธอพยายามลืมมาทั้งชีวิต</p>
+          </div>
+          <button class="linkbtn" type="button" id="synbtn" aria-expanded="false" aria-controls="syn">อ่านเพิ่มเติม</button>
+        </div>
+        <div class="sh"><h2>สารบัญ</h2><button class="linkbtn" type="button" id="chsort">ใหม่สุดก่อน</button></div>
+        <ul class="chs" id="chlist"></ul>
+        <div class="pad"><button class="btn ghost block" type="button" id="chall" style="margin-top:16px">ดูทั้งหมด 24 ตอน</button></div>
+        <div class="sh"><h2>ความคิดเห็น</h2><span class="meta">186 ความคิดเห็น</span></div>
+        <div class="pad">
+          <div class="cm"><span class="av">ข</span><div><p class="who">ขนมชั้นสีฟ้า<span>2 ชม.ที่แล้ว</span></p><p>อ่านแล้วได้กลิ่นดินหลังฝนจริง ๆ ค่ะ ตอนยายเขียนโน้ตบนโต๊ะผสมดินนี่น้ำตาซึมเลย</p></div></div>
+          <div class="cm"><span class="av">ป</span><div><p class="who">ปอนด์ อ่านก่อนนอน<span>เมื่อวาน</span></p><p>ภาคินพูดน้อยแต่ทุกประโยคมีน้ำหนัก ชอบจังหวะเรื่องที่ไม่รีบแบบนี้มาก</p></div></div>
+          <a class="btn ghost block" href="#read" style="margin-top:16px">ดูความคิดเห็นทั้งหมด</a>
+        </div>
+      </section>
+
+      <!-- READ -->
+      <section class="screen s-read" id="s-read" aria-label="หน้าอ่าน">
+        <header class="rhead">
+          <p class="nv">เงาจันทร์ในสวนกล้วยไม้ · ปลายฝน</p>
+          <p class="no" id="rno">ตอนที่ 13</p>
+          <h1 id="rtitle">กลิ่นฝนบนหลังคาสังกะสี</h1>
+          <div class="rule"></div>
+        </header>
+        <article class="prose" id="prose">
+          <p>ฝนเริ่มตกตอนห้าโมงเย็น เร็วกว่าที่พยากรณ์อากาศบอกไว้เกือบชั่วโมง มินตรายืนอยู่ใต้ชายคาโรงเรือนหลังที่สาม มือยังถือกรรไกรตัดแต่งกิ่งที่เปื้อนยางไม้ เสียงเม็ดฝนกระทบหลังคาสังกะสีดังเป็นจังหวะเดียวกับหัวใจที่เต้นไม่เป็นส่ำ เธอไม่ได้ยินเสียงแบบนี้มานานเกือบสิบปีแล้ว นับตั้งแต่วันที่ขึ้นรถทัวร์เข้ากรุงเทพฯ พร้อมกระเป๋าใบเดียวกับคำสัญญาว่าจะกลับมาบ่อย ๆ</p>
+          <p>“ยายเคยบอกว่ากล้วยไม้ชอบฝนแรกของปลายฝน” เสียงทุ้มดังขึ้นจากด้านหลัง เธอไม่ต้องหันไปก็รู้ว่าเป็นใคร ภาคินชอบเดินเข้ามาโดยไม่ให้สุ้มให้เสียงแบบนี้เสมอ เหมือนแมวที่คุ้นทางในบ้านคนอื่นดีกว่าเจ้าของ</p>
+          <p>“ยายบอกคุณอย่างนั้นเหรอ” มินตราถามโดยไม่ละสายตาจากกระถางตรงหน้า “ยายไม่เคยบอกฉันเลย”</p>
+          <p>“ก็คุณไม่เคยอยู่ฟังนี่” เขาตอบเรียบ ๆ ไม่ได้ตั้งใจให้เจ็บ แต่ประโยคนั้นก็ปักลงกลางอกเธออย่างแม่นยำ ราวกับเข็มที่หาตำแหน่งชีพจรเจอตั้งแต่ครั้งแรก</p>
+          <p>เธอวางกรรไกรลงบนโต๊ะไม้ผุ ๆ ที่ยายใช้ผสมดินมาตลอดชีวิต บนผิวโต๊ะยังมีรอยปากกาเมจิกจาง ๆ เขียนว่า “แวนด้าฟ้ามุ่ย รดน้ำเช้าเท่านั้น” ลายมือเอียงขวาแบบที่เธอจำได้ดีจากการ์ดวันเกิดทุกใบที่ส่งไปถึงหอพัก การ์ดที่เธอเคยอ่านแค่บรรทัดแรกแล้วเก็บลงลิ้นชักโดยไม่ได้คิดอะไร</p>
+          <p>“ฉันรู้ว่าตัวเองกลับมาช้าไป” มินตราพูดเบา ๆ เสียงของเธอแทบจมหายไปในเสียงฝน “แต่ฉันไม่ได้กลับมาเพื่อขายที่นี่อย่างที่ทุกคนคิด”</p>
+          <p>ภาคินเงียบไปครู่หนึ่ง เขาเดินเข้ามาใกล้จนเธอได้กลิ่นดินเปียกปนกลิ่นสบู่จากเสื้อเชิ้ตผ้าฝ้ายของเขา แล้วยื่นสมุดปกแข็งสีน้ำเงินเข้มเล่มหนึ่งมาให้ ขอบกระดาษบวมน้ำเล็กน้อย มุมหนึ่งมีคราบโคลนแห้งติดอยู่</p>
+          <p>“ยายฝากไว้ก่อนเข้าโรงพยาบาลครั้งสุดท้าย” เขาบอก “ท่านว่าถ้าวันไหนหลานกลับมาแล้วยืนอยู่ในโรงเรือนตอนฝนตก ให้เอาเล่มนี้ให้ ถ้าไม่กลับ ก็ให้ผมเผาทิ้งไปพร้อมกับใบไม้แห้ง”</p>
+          <hr>
+          <p>มินตรารับสมุดมาถือไว้ด้วยมือที่สั่นเล็กน้อย หน้าแรกไม่มีชื่อ ไม่มีวันที่ มีเพียงภาพวาดดินสอของกล้วยไม้ดอกเดียว กลีบบางเฉียบราวกับจะปลิวออกจากหน้ากระดาษ ใต้ภาพนั้นยายเขียนไว้สั้น ๆ ว่า “สำหรับมินตรา เมื่อหลานพร้อมจะฟัง”</p>
+          <p>ข้างนอก ฝนยังคงตกไม่หยุด และเป็นครั้งแรกในรอบหลายปีที่เธอไม่อยากให้มันหยุด</p>
+        </article>
+        <footer class="endc">
+          <div class="orn" aria-hidden="true"><i></i><i></i><i></i></div>
+          <p class="done" id="rdone">จบตอนที่ 13</p>
+          <button class="likebig" type="button" id="chlike" aria-pressed="false" aria-label="ถูกใจตอนนี้"><svg class="i"><use href="#i-heart"/></svg></button>
+          <p class="cnt" id="chlikeN">1,284 คนถูกใจตอนนี้</p>
+          <div class="pn">
+            <button class="btn" type="button" data-step="-1">ตอนก่อนหน้า</button>
+            <button class="btn primary" type="button" data-step="1">ตอนถัดไป</button>
+          </div>
+          <section class="rcm" aria-label="ความคิดเห็นท้ายตอน">
+            <h2>ความคิดเห็นท้ายตอน <span class="meta" style="font-family:var(--sans);font-weight:400">(42)</span></h2>
+            <div id="rcomments">
+              <div class="cm"><span class="av">ม</span><div><p class="who">มะปรางหวาน<span>40 นาทีที่แล้ว</span></p><p>“เมื่อหลานพร้อมจะฟัง” ประโยคเดียวแต่หนักมากเลยค่ะไรท์</p></div></div>
+              <div class="cm"><span class="av">ต</span><div><p class="who">ต้นกล้า<span>3 ชม.ที่แล้ว</span></p><p>ฉากฝนตกบนหลังคาสังกะสีเขียนดีมาก ได้ยินเสียงตามไปด้วย</p></div></div>
+            </div>
+            <form class="cform" id="cform">
+              <label class="sr" for="ctext">เขียนความคิดเห็น</label>
+              <textarea id="ctext" rows="1" placeholder="เขียนความคิดเห็นถึงนักเขียน…"></textarea>
+              <button class="ib" type="submit" aria-label="ส่งความคิดเห็น"><svg class="i"><use href="#i-send"/></svg></button>
+            </form>
+          </section>
+        </footer>
+      </section>
+
+      <!-- LIBRARY -->
+      <section class="screen" id="s-library" aria-label="ชั้นหนังสือ">
+        <div class="bar"><h1 style="font-family:var(--serif);font-size:21px;padding-left:12px">ชั้นหนังสือ</h1></div>
+        <div class="seg segtabs" role="radiogroup" aria-label="กรองชั้นหนังสือ">
+          <label><input type="radio" name="lib" value="reading" checked><span>กำลังอ่าน</span></label>
+          <label><input type="radio" name="lib" value="saved"><span>เก็บไว้อ่าน</span></label>
+          <label><input type="radio" name="lib" value="done"><span>อ่านจบ</span></label>
+        </div>
+        <div class="shelf" id="shelf"></div>
+      </section>
+
+      <!-- PROFILE -->
+      <section class="screen" id="s-profile" aria-label="โปรไฟล์">
+        <div class="bar"><h1 style="font-family:var(--serif);font-size:21px;padding-left:12px">โปรไฟล์</h1></div>
+        <div class="prof">
+          <span class="av" id="pav">?</span>
+          <h1 id="pname">ยังไม่ได้เข้าสู่ระบบ</h1>
+          <p class="muted" id="pdesc">เข้าสู่ระบบเพื่อเก็บชั้นหนังสือข้ามอุปกรณ์ และดูเรื่องเรต 18+</p>
+          <button class="btn primary" type="button" id="loginbtn" style="margin-top:18px">เข้าสู่ระบบ (จำลอง)</button>
+        </div>
+        <ul class="menu">
+          <li><a href="#library"><svg class="i"><use href="#i-shelf"/></svg>ชั้นหนังสือของฉัน<svg class="i chev"><use href="#i-chev"/></svg></a></li>
+          <li><a href="#dash"><svg class="i"><use href="#i-pen"/></svg>สลับไปฝั่งนักเขียน<svg class="i chev"><use href="#i-chev"/></svg></a></li>
+          <li><button type="button" data-sheet="sh-info"><svg class="i"><use href="#i-info"/></svg>เกี่ยวกับแบบนี้<svg class="i chev"><use href="#i-chev"/></svg></button></li>
+        </ul>
+        <p class="footnote">readable · อ่านฟรีทุกเรื่อง · ข้อมูลตัวอย่าง</p>
+      </section>
+
+      <!-- DASH -->
+      <section class="screen" id="s-dash" aria-label="แดชบอร์ดนักเขียน">
+        <div class="bar">
+          <span class="wordmark" style="flex:none">readable<span>.</span></span>
+          <nav class="mode" aria-label="สลับฝั่ง"><a href="#home">นักอ่าน</a><a href="#dash" aria-current="page">นักเขียน</a></nav>
+        </div>
+        <div class="desk">
+          <p class="date">วันเสาร์ที่ 28 พฤศจิกายน 2569</p>
+          <h1>สวัสดีตอนเช้า ปลายฝน</h1>
+          <p>ตอนที่ 25 รออยู่บนโต๊ะ เขียนไปแล้ว 1,240 คำ</p>
+          <div style="display:flex;gap:10px;margin-top:18px">
+            <a class="btn primary" href="#novel-edit" data-newnovel style="flex:1"><svg class="i"><use href="#i-plus"/></svg>สร้างเรื่องใหม่</a>
+            <a class="btn ghost" href="#chapter-edit" style="flex:1"><svg class="i"><use href="#i-pen"/></svg>เขียนต่อ</a>
+          </div>
+        </div>
+        <div class="dstats">
+          <div><span>ยอดอ่าน 7 วัน</span><b>6,482</b><small>+12%</small></div>
+          <div><span>ถูกใจ</span><b>412</b><small>+38</small></div>
+          <div><span>ผู้ติดตาม</span><b>1,208</b><small>+21</small></div>
+        </div>
+        <div class="sh"><h2>เรื่องของฉัน</h2><span class="meta">4 เรื่อง</span></div>
+        <ul class="list" id="mine"></ul>
+        <div class="sh"><h2>ความเคลื่อนไหวล่าสุด</h2></div>
+        <ul class="act-list">
+          <li><svg class="i"><use href="#i-chat"/></svg><div>มะปรางหวาน แสดงความคิดเห็นใน ตอนที่ 13<time>40 นาทีที่แล้ว</time></div></li>
+          <li><svg class="i"><use href="#i-heart"/></svg><div>มีผู้ถูกใจ ตอนที่ 24 เพิ่ม 57 คน<time>2 ชม.ที่แล้ว</time></div></li>
+          <li><svg class="i"><use href="#i-user"/></svg><div>ผู้ติดตามใหม่ 6 คน<time>วันนี้</time></div></li>
+          <li><svg class="i"><use href="#i-clock"/></svg><div>ตอนที่ 25 ตั้งเวลาเผยแพร่ 30 พ.ย. 2569 เวลา 20:00 น.<time>เมื่อวาน</time></div></li>
+          <li><svg class="i"><use href="#i-alert"/></svg><div>ผู้ดูแลตรวจเรื่อง ร้านกาแฟหลังเที่ยงคืน แล้ว ต้องแก้ไขก่อนเผยแพร่<time>26 พ.ย. 2569</time></div></li>
+        </ul>
+      </section>
+
+      <!-- NOVEL EDIT -->
+      <section class="screen" id="s-novel-edit" aria-label="จัดการเรื่อง">
+        <form id="nform" novalidate>
+          <div class="bar ruled">
+            <a class="ib" href="#dash" aria-label="กลับแดชบอร์ด"><svg class="i"><use href="#i-back"/></svg></a>
+            <h1>จัดการเรื่อง</h1>
+            <a class="textbtn" href="#novel"><svg class="i"><use href="#i-eye"/></svg>ดูหน้าเรื่อง</a>
+          </div>
+          <div style="height:18px"></div>
+          <div class="field">
+            <label class="l" for="ntitle">ชื่อเรื่อง</label>
+            <input class="in title" id="ntitle" value="เงาจันทร์ในสวนกล้วยไม้">
+          </div>
+          <div class="field">
+            <span class="l">ภาพปก</span>
+            <div class="upload">
+              <div id="ecover"></div>
+              <label><svg class="i"><use href="#i-image"/></svg><b style="font-weight:600">อัปโหลดภาพปกใหม่</b><span class="muted" style="font-size:12.5px">JPG หรือ PNG แนวตั้ง 2:3 ไม่เกิน 2 MB</span><input type="file" id="coverfile" accept="image/png,image/jpeg"></label>
+            </div>
+          </div>
+          <div class="field">
+            <label class="l" for="nsyn">เรื่องย่อ</label>
+            <textarea class="in" id="nsyn">มินตรา นักออกแบบกราฟิกวัยสามสิบที่เหนื่อยล้ากับชีวิตในกรุงเทพฯ ต้องกลับบ้านเกิดที่ดำเนินสะดวกหลังยายจากไป มรดกที่รอเธออยู่คือสวนกล้วยไม้เก่าที่ใกล้ล้มละลาย…</textarea>
+            <p class="hint">ไม่เกิน 600 ตัวอักษร · แสดงในหน้าเรื่องและผลการค้นหา</p>
+          </div>
+          <div class="field">
+            <label class="l" for="ncat">หมวดหมู่</label>
+            <div class="selwrap"><select class="in" id="ncat"></select><svg class="i"><use href="#i-chev"/></svg></div>
+          </div>
+          <div class="field">
+            <label class="l" for="tagin">แท็ก</label>
+            <div class="tagbox" id="tagbox"><input id="tagin" placeholder="พิมพ์แล้วกด Enter" enterkeyhint="done"></div>
+            <p class="hint">สูงสุด 8 แท็ก · กด Enter หรือจุลภาคเพื่อเพิ่ม</p>
+          </div>
+          <fieldset class="field" style="border:0;padding:0">
+            <legend class="l" style="padding:0">เรตเนื้อหา</legend>
+            <div class="seg" style="margin-top:6px">
+              <label><input type="radio" name="rating" value="ทั่วไป" checked><span>ทั่วไป</span></label>
+              <label><input type="radio" name="rating" value="13+"><span>13+</span></label>
+              <label><input type="radio" name="rating" value="18+"><span>18+</span></label>
+            </div>
+            <p class="note" id="note18" hidden><svg class="i"><use href="#i-lock"/></svg><span><b>เรต 18+ ต้องรอผู้ดูแลอนุมัติก่อน</b> เรื่องจะยังไม่แสดงต่อสาธารณะจนกว่าจะผ่านการตรวจ โดยปกติใช้เวลา 1–2 วัน และผู้อ่านต้องเข้าสู่ระบบจึงจะเห็นเรื่องนี้</span></p>
+          </fieldset>
+          <div class="sh" style="margin-top:12px"><h2>ตอนทั้งหมด</h2><span class="meta">26 ตอน</span></div>
+          <p class="pad meta" style="margin-top:8px">ลากที่จุดด้านซ้ายเพื่อจัดลำดับ หรือกดแล้วใช้ปุ่มลูกศรขึ้นลง</p>
+          <ul class="wch" id="wch"></ul>
+          <div class="pad" style="margin:16px 0 24px"><a class="btn ghost block" href="#chapter-edit" data-newch><svg class="i"><use href="#i-plus"/></svg>เพิ่มตอนใหม่</a></div>
+          <div class="savebar"><a class="btn ghost" href="#dash">ยกเลิก</a><button class="btn primary" type="submit">บันทึกการเปลี่ยนแปลง</button></div>
+        </form>
+      </section>
+
+      <!-- CHAPTER EDIT -->
+      <section class="screen s-chapter-edit" id="s-chapter-edit" aria-label="เขียนตอน">
+        <div class="wrap-ed" id="wraped">
+          <div class="bar ruled">
+            <a class="ib" href="#novel-edit" aria-label="กลับไปจัดการเรื่อง"><svg class="i"><use href="#i-back"/></svg></a>
+            <p class="autosave" id="autosave" role="status"><i></i><span>บันทึกแล้ว 10:42</span></p>
+            <button class="ib" type="button" id="pvbtn" aria-pressed="false" aria-label="แสดงตัวอย่าง"><svg class="i"><use href="#i-eye"/></svg></button>
+            <button class="btn primary pubbtn" type="button" data-sheet="sh-publish">เผยแพร่</button>
+          </div>
+          <div class="ed-head">
+            <p class="no">เงาจันทร์ในสวนกล้วยไม้ · ตอนที่ 25</p>
+            <label class="sr" for="edtitle">ชื่อตอน</label>
+            <input class="ed-title" id="edtitle" value="ปีที่ดอกไม้ไม่บาน" placeholder="ชื่อตอน">
+          </div>
+          <p class="pv-badge"><svg class="i" style="width:16px;height:16px"><use href="#i-eye"/></svg>กำลังแสดงตัวอย่างแบบที่ผู้อ่านจะเห็น</p>
+          <div class="toolbar" role="toolbar" aria-label="จัดรูปแบบข้อความ">
+            <button class="tb" type="button" data-cmd="bold" aria-pressed="false" aria-label="ตัวหนา"><svg class="i"><use href="#i-bold"/></svg></button>
+            <button class="tb" type="button" data-cmd="italic" aria-pressed="false" aria-label="ตัวเอียง"><svg class="i"><use href="#i-italic"/></svg></button>
+            <span class="tsep"></span>
+            <button class="tb" type="button" data-cmd="h3" aria-pressed="false" aria-label="หัวข้อ"><svg class="i"><use href="#i-heading"/></svg></button>
+            <button class="tb" type="button" data-cmd="quote" aria-pressed="false" aria-label="คำพูดหรือข้อความอ้างอิง"><svg class="i"><use href="#i-quote"/></svg></button>
+            <button class="tb" type="button" data-cmd="scene" aria-label="เส้นคั่นฉาก"><svg class="i"><use href="#i-scene"/></svg></button>
+            <button class="tb" type="button" data-cmd="center" aria-pressed="false" aria-label="จัดกึ่งกลาง"><svg class="i"><use href="#i-center"/></svg></button>
+          </div>
+          <div class="editor" id="editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="เนื้อหาตอน" spellcheck="false">
+            <p>ปีนั้นกล้วยไม้ทั้งสวนไม่ยอมออกดอกเลยแม้แต่ช่อเดียว ยายบอกว่ามันกำลังรอ แต่ไม่มีใครถามว่ารออะไร</p>
+            <p>มินตราเปิดสมุดปกแข็งสีน้ำเงินไปที่หน้าสิบสอง ลายมือของยายเปลี่ยนไปจากหน้าก่อน ๆ ตัวอักษรเล็กลงและเบียดกันแน่น เหมือนคนเขียนกลัวว่ากระดาษจะหมดก่อนเรื่องจะจบ</p>
+            <blockquote>“ถ้าเขาไม่กลับมาก่อนสงกรานต์ ฉันจะแต่งงานตามที่พ่อสั่ง”</blockquote>
+            <p>เธออ่านประโยคนั้นซ้ำสามรอบ ก่อนจะเงยหน้ามองโรงเรือนที่เงียบงันในแสงเช้า</p>
+          </div>
+          <div class="ed-foot"><span id="wc">0 คำ</span><span id="cc">0 ตัวอักษร</span></div>
+        </div>
+      </section>
+    </div>
+
+    <div class="rbot" id="rbot">
+      <button type="button" data-step="-1"><svg class="i"><use href="#i-back"/></svg>ก่อนหน้า</button>
+      <button type="button" data-sheet="sh-toc"><svg class="i"><use href="#i-list"/></svg>สารบัญ</button>
+      <button type="button" data-sheet="sh-reader"><span class="aa" aria-hidden="true">Aa</span>ตั้งค่าการอ่าน</button>
+      <button type="button" data-step="1"><svg class="i"><use href="#i-chev"/></svg>ถัดไป</button>
+    </div>
+
+    <nav class="tabs tabs-reader" aria-label="เมนูหลัก">
+      <a href="#home" data-tab="home"><svg class="i"><use href="#i-home"/></svg>หน้าแรก</a>
+      <a href="#search" data-tab="search"><svg class="i"><use href="#i-search"/></svg>ค้นหา</a>
+      <a href="#library" data-tab="library"><svg class="i"><use href="#i-shelf"/></svg>ชั้นหนังสือ</a>
+      <a href="#dash" data-tab="dash"><svg class="i"><use href="#i-pen"/></svg>เขียน</a>
+      <a href="#profile" data-tab="profile"><svg class="i"><use href="#i-user"/></svg>โปรไฟล์</a>
+    </nav>
+    <nav class="tabs tabs-writer" aria-label="เมนูนักเขียน">
+      <a href="#dash" data-tab="dash"><svg class="i"><use href="#i-trend"/></svg>แดชบอร์ด</a>
+      <a href="#novel-edit" data-tab="novel-edit"><svg class="i"><use href="#i-list"/></svg>จัดการเรื่อง</a>
+      <a href="#chapter-edit" data-tab="chapter-edit"><svg class="i"><use href="#i-pen"/></svg>เขียนตอน</a>
+      <a href="#home" data-tab="home"><svg class="i"><use href="#i-home"/></svg>ฝั่งนักอ่าน</a>
+    </nav>
+
+    <!-- sheets -->
+    <div class="sheet-wrap" id="sh-reader" role="dialog" aria-modal="true" aria-label="ตั้งค่าการอ่าน">
+      <div class="scrim" data-close></div>
+      <div class="sheet">
+        <div class="grab"></div>
+        <div class="sh-h"><h2>ตั้งค่าการอ่าน</h2><button class="ib" type="button" data-close aria-label="ปิด"><svg class="i"><use href="#i-x"/></svg></button></div>
+        <div class="grp"><p class="lbl"><span>ขนาดตัวอักษร</span></p>
+          <div class="sizer"><button class="btn" type="button" id="fminus" aria-label="ลดขนาดตัวอักษร">A−</button><output id="fsize">19</output><button class="btn" type="button" id="fplus" aria-label="เพิ่มขนาดตัวอักษร" style="font-size:19px">A+</button></div>
+        </div>
+        <div class="grp"><p class="lbl"><span>ระยะบรรทัด</span></p>
+          <div class="seg"><label><input type="radio" name="lh" value="1.7"><span>แน่น</span></label><label><input type="radio" name="lh" value="1.95"><span>พอดี</span></label><label><input type="radio" name="lh" value="2.25"><span>โปร่ง</span></label></div>
+        </div>
+        <div class="grp"><p class="lbl"><span>แบบอักษร</span></p>
+          <div class="seg"><label><input type="radio" name="rf" value="serif"><span style="font-family:var(--serif)">มีหัว</span></label><label><input type="radio" name="rf" value="sans"><span>ไม่มีหัว</span></label></div>
+        </div>
+        <div class="grp"><p class="lbl"><span>ธีม</span></p>
+          <div class="themes">
+            <label><input type="radio" name="theme" value="light"><span class="sw2" style="background:#fff;color:#16171c">ก</span><em>สว่าง</em></label>
+            <label><input type="radio" name="theme" value="sepia"><span class="sw2" style="background:#f3ead7;color:#3a2e20">ก</span><em>ซีเปีย</em></label>
+            <label><input type="radio" name="theme" value="night"><span class="sw2" style="background:#14151a;color:#d0d2d9">ก</span><em>กลางคืน</em></label>
+            <label><input type="radio" name="theme" value="system"><span class="sw2" style="background:linear-gradient(135deg,#fff 50%,#14151a 50%);color:#888">ก</span><em>ตามเครื่อง</em></label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sheet-wrap" id="sh-toc" role="dialog" aria-modal="true" aria-label="สารบัญ">
+      <div class="scrim" data-close></div>
+      <div class="sheet">
+        <div class="grab"></div>
+        <div class="sh-h"><h2>สารบัญ · 24 ตอน</h2><button class="ib" type="button" data-close aria-label="ปิด"><svg class="i"><use href="#i-x"/></svg></button></div>
+        <ul class="toc chs" id="toc" style="padding:0"></ul>
+      </div>
+    </div>
+
+    <div class="sheet-wrap" id="sh-publish" role="dialog" aria-modal="true" aria-label="ตัวเลือกการเผยแพร่">
+      <div class="scrim" data-close></div>
+      <form class="sheet" id="pform">
+        <div class="grab"></div>
+        <div class="sh-h"><h2>เผยแพร่ตอนที่ 25</h2><button class="ib" type="button" data-close aria-label="ปิด"><svg class="i"><use href="#i-x"/></svg></button></div>
+        <div class="popt">
+          <label><input type="radio" name="pub" value="draft"><span><b>บันทึกร่าง</b><small>เก็บไว้เขียนต่อ ผู้อ่านยังมองไม่เห็น</small></span></label>
+          <label><input type="radio" name="pub" value="now" checked><span><b>เผยแพร่ทันที</b><small>ผู้ติดตาม 1,208 คนจะได้รับแจ้งเตือน</small></span></label>
+          <label><input type="radio" name="pub" value="later"><span><b>ตั้งเวลาเผยแพร่</b><small>เลือกวันและเวลาที่ตอนนี้จะขึ้นอัตโนมัติ</small></span></label>
+        </div>
+        <div class="when" id="when" hidden>
+          <label>วันที่<input type="date" id="pdate" value="2026-11-30"></label>
+          <label>เวลา<input type="time" id="ptime" value="20:00"></label>
+        </div>
+        <button class="btn primary block" type="submit" id="pgo" style="margin-top:18px">เผยแพร่ทันที</button>
+      </form>
+    </div>
+
+    <div class="sheet-wrap" id="sh-info" role="dialog" aria-modal="true" aria-label="เกี่ยวกับแบบนี้">
+      <div class="scrim" data-close></div>
+      <div class="sheet info-sheet">
+        <div class="grab"></div>
+        <div class="sh-h"><h2>เกี่ยวกับแบบนี้</h2><button class="ib" type="button" data-close aria-label="ปิด"><svg class="i"><use href="#i-x"/></svg></button></div>
+        <div class="info" id="infocopy" style="display:block;padding:0;border:0"></div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </div>
+  </main>
+</div>
+
+<script>
+{
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const phone=$('#phone'), scroller=$('#scroller');
+const store={get(k,d){try{const v=localStorage.getItem('pq-'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('pq-'+k,JSON.stringify(v))}catch(e){}}};
+const S={logged:store.get('logged',false),liked:store.get('liked',false),shelved:store.get('shelved',true),cat:'ทั้งหมด',ch:13,chLiked:false,desc:true,all:false,lib:'reading',
+  rp:Object.assign({size:19,lh:'1.95',theme:'light',font:'serif'},store.get('rp',{}))};
+const ic=n=>`<svg class="i" aria-hidden="true"><use href="#i-${n}"/></svg>`;
+
+/* ---------- data ---------- */
+const N=[
+ {id:'moon',t:['เงาจันทร์','ในสวนกล้วยไม้'],a:'ปลายฝน',cat:'โรแมนติก',r:'ทั่วไป',bg:'#2b3a8f',fg:'#f4f2ec',ac:'#cfd6ff',m:'moon',last:'ตอนที่ 24 · ดอกไม้ที่บานตอนตีสี่',ago:'25 นาทีที่แล้ว',st:'กำลังเขียน',reads:'48.2K',b:'หลานสาวที่กลับบ้านเพื่อขายสวนกล้วยไม้ของยาย กลับพบสมุดบันทึกที่เล่าความรักซึ่งไม่มีใครในครอบครัวเคยรู้'},
+ {id:'gate',t:['ผู้เฝ้าประตู','หิมพานต์'],a:'ณ ลำน้ำ',cat:'แฟนตาซี',r:'13+',bg:'#1f4a40',fg:'#f0efe4',ac:'#d8b35e',m:'arch',last:'ตอนที่ 61 · ศึกที่สระอโนดาต',ago:'1 ชม.ที่แล้ว',st:'กำลังเขียน',reads:'212K',b:'เด็กหนุ่มร้านพระเครื่องย่านท่าพระจันทร์ได้รับมรดกเป็นกุญแจดอกเดียว กุญแจที่เปิดประตูสู่ป่าหิมพานต์ และปิดไม่ได้อีกเลย'},
+ {id:'canal',t:['บ้านริมคลอง','ที่ไม่มีใครกลับ'],a:'ครามสีเทา',cat:'สยองขวัญ',r:'18+',bg:'#23252a',fg:'#e7e7e7',ac:'#7d8899',m:'wave',last:'ตอนที่ 12 · เสียงพายเรือตอนตีสาม',ago:'2 ชม.ที่แล้ว',st:'กำลังเขียน',reads:'31.7K'},
+ {id:'script',t:['รักนี้','ไม่มีสคริปต์'],a:'มะลิซ้อน',cat:'ตลก',r:'ทั่วไป',bg:'#f1c9c3',fg:'#3a1f28',ac:'#e0574f',m:'stripe',last:'ตอนที่ 33 · บทพูดที่ลืมซ้อม',ago:'3 ชม.ที่แล้ว',st:'กำลังเขียน',reads:'96.4K'},
+ {id:'dorm',t:['คดีหอพัก','ชั้นเจ็ด'],a:'วิรุฬห์ จันทร์เพ็ญ',cat:'สืบสวน / ลึกลับ',r:'13+',bg:'#d8dde4',fg:'#1b1e25',ac:'#b3272d',m:'grid',last:'ตอนพิเศษ · บันทึกของนักสืบ',ago:'เมื่อวาน',st:'จบแล้ว',reads:'154K'},
+ {id:'shade',t:['ใต้ร่มไม้','เดียวกัน'],a:'ฟ้าหลังฝน',cat:'วาย',r:'18+',bg:'#5b7757',fg:'#f2f1e8',ac:'#c9d9b4',m:'leaf',last:'ตอนที่ 19 · ฝนตกที่ศาลาริมน้ำ',ago:'เมื่อวาน',st:'กำลังเขียน',reads:'77.0K'},
+ {id:'mars',t:['สถานีสุดท้าย','บนดาวอังคาร'],a:'ธีร์ ปัญญาวงศ์',cat:'ไซไฟ',r:'ทั่วไป',bg:'#d8653d',fg:'#fff4ea',ac:'#ffd9b8',m:'planet',last:'ตอนที่ 30 · ออกซิเจนสำรองสามวัน',ago:'27 พ.ย. 2569',st:'กำลังเขียน',reads:'22.9K'},
+ {id:'blade',t:['ดาบคู่','ลุ่มน้ำโขง'],a:'พยัคฆ์ราตรี',cat:'แอ็กชัน / ผจญภัย',r:'13+',bg:'#7d2a36',fg:'#f6ece6',ac:'#e9b8a0',m:'blades',last:'ตอนที่ 47 · คืนเดือนดับที่เชียงคาน',ago:'26 พ.ย. 2569',st:'กำลังเขียน',reads:'88.1K'},
+ {id:'letters',t:['จดหมายถึงเธอ','ในปี 2590'],a:'อักษรา',cat:'ยูริ',r:'ทั่วไป',bg:'#ebd47c',fg:'#2c2614',ac:'#2b3a8f',m:'dots',last:'ตอนที่ 8 · ฉบับที่แปด',ago:'25 พ.ย. 2569',st:'กำลังเขียน',reads:'12.3K'}
+];
+const W=[
+ {id:'moon',st:'pub',sub:'24 ตอน · อัปเดต 28 พ.ย. 2569'},
+ {id:'lh',t:['บันทึกคน','เฝ้าประภาคาร'],a:'ปลายฝน',cat:'ดราม่า',r:'ทั่วไป',bg:'#e3e8ee',fg:'#1d2a3a',ac:'#2b3a8f',m:'light',st:'draft',sub:'3 ตอน · แก้ไขล่าสุด 20 พ.ย. 2569'},
+ {id:'red',t:['ใต้แสงไฟ','สีแดง'],a:'ปลายฝน',cat:'ดราม่า',r:'18+',bg:'#9c2f2f',fg:'#fbeee8',ac:'#f0b9a7',m:'moon2',st:'pending',sub:'ส่งตรวจ 27 พ.ย. 2569'},
+ {id:'cafe',t:['ร้านกาแฟ','หลังเที่ยงคืน'],a:'ปลายฝน',cat:'โรแมนติก',r:'ทั่วไป',bg:'#3c3a36',fg:'#f2ede4',ac:'#c79a62',m:'dots2',st:'rej',sub:'ตรวจเมื่อ 26 พ.ย. 2569',reason:'เรื่องย่อและตอนที่ 2 มีเนื้อหาสำหรับผู้ใหญ่ แต่ตั้งเรตเป็น “ทั่วไป” กรุณาเปลี่ยนเป็น 18+ แล้วส่งตรวจใหม่'}
+];
+const byId=id=>N.find(n=>n.id===id);
+const CATS=['ทั้งหมด','โรแมนติก','แฟนตาซี','ดราม่า','สืบสวน / ลึกลับ','สยองขวัญ','แอ็กชัน / ผจญภัย','ไซไฟ','วาย','ยูริ','ตลก','แฟนฟิค','อื่น ๆ'];
+const CHT=['รถทัวร์เที่ยวสุดท้าย','บ้านที่ไม่มีใครเปิดไฟ','โรงเรือนหลังที่สาม','ชายที่ชื่อภาคิน','ตลาดน้ำตอนเช้ามืด','ราคาของที่ดินหนึ่งไร่','แวนด้าฟ้ามุ่ย','จดหมายจากธนาคาร','ข้าวต้มปลากับคำขอโทษ','ร่มคันเดียว','คนที่ยายรอ','รากที่ลอยอยู่กลางอากาศ','กลิ่นฝนบนหลังคาสังกะสี','สมุดปกแข็งสีน้ำเงิน','ปี 2512','ชื่อที่ถูกขีดฆ่า','งานวัดกลางเดือนสิบสอง','ผู้ซื้อจากกรุงเทพฯ','สิ่งที่ภาคินไม่ได้เล่า','ไฟดับทั้งหมู่บ้าน','หนี้ที่ไม่มีในบัญชี','เรือหางยาวลำสุดท้าย','คำตอบที่ไม่ได้ถาม','ดอกไม้ที่บานตอนตีสี่'];
+const TM=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const td=d=>`${d.getDate()} ${TM[d.getMonth()]} ${d.getFullYear()+543}`;
+const chDate=i=>{const d=new Date(2026,10,28);d.setDate(d.getDate()-(24-i)*4+(i===23?1:0));return td(d)};
+
+/* ---------- covers ---------- */
+function coverSVG(n){
+  const a=n.ac,f=n.fg,b=n.bg;let m='';
+  switch(n.m){
+    case 'moon':m=`<circle cx="80" cy="56" r="25" fill="${a}"/><circle cx="92" cy="48" r="23" fill="${b}"/><path d="M14 98h92" stroke="${f}" stroke-width=".6" opacity=".55"/><path d="M30 98c4-10 8-14 12-14M42 98c2-7 5-10 8-10" stroke="${a}" stroke-width=".9" fill="none" opacity=".8"/>`;break;
+    case 'moon2':m=`<circle cx="60" cy="62" r="34" fill="${a}" opacity=".25"/><circle cx="60" cy="62" r="20" fill="${a}"/><path d="M60 20v8M60 96v8M18 62h8M94 62h8" stroke="${f}" stroke-width=".8"/>`;break;
+    case 'arch':m=`<path d="M34 108V62a26 26 0 0 1 52 0v46" fill="none" stroke="${a}" stroke-width="4"/><path d="M46 108V66a14 14 0 0 1 28 0v42z" fill="${a}" opacity=".3"/><circle cx="60" cy="52" r="3" fill="${a}"/><path d="M22 108h76" stroke="${a}" stroke-width="1"/>`;break;
+    case 'grid':for(let r=0;r<5;r++)for(let c=0;c<4;c++){m+=`<rect x="${26+c*18}" y="${18+r*18}" width="10" height="12" fill="${(r===1&&c===2)?a:f}" opacity="${(r===1&&c===2)?1:.16}"/>`}break;
+    case 'wave':for(let k=0;k<6;k++){const y=50+k*10;m+=`<path d="M0 ${y}q15-6 30 0t30 0t30 0t30 0" fill="none" stroke="${a}" stroke-width="1" opacity="${1-k*.13}"/>`}m+=`<rect x="70" y="22" width="18" height="22" fill="none" stroke="${f}" stroke-width=".8"/><rect x="77" y="34" width="4" height="10" fill="${f}" opacity=".7"/>`;break;
+    case 'planet':m=`<circle cx="60" cy="62" r="28" fill="${a}"/><ellipse cx="60" cy="62" rx="46" ry="9" fill="none" stroke="${f}" stroke-width="1.2" transform="rotate(-18 60 62)"/><circle cx="96" cy="26" r="2" fill="${f}"/><circle cx="22" cy="40" r="1.2" fill="${f}"/>`;break;
+    case 'stripe':for(let k=0;k<5;k++){m+=`<rect x="${-30+k*30}" y="-20" width="12" height="160" fill="${a}" opacity=".85" transform="rotate(28 60 60)"/>`}m+=`<rect x="0" y="100" width="120" height="80" fill="${b}"/>`;break;
+    case 'leaf':m=`<circle cx="50" cy="60" r="28" fill="${a}" opacity=".55"/><circle cx="70" cy="60" r="28" fill="${a}" opacity=".55"/><path d="M60 36v80" stroke="${f}" stroke-width=".8"/>`;break;
+    case 'blades':m=`<path d="M28 100 92 24M92 100 28 24" stroke="${a}" stroke-width="2.2" stroke-linecap="round"/><path d="M36 92l8 8M84 92l-8 8" stroke="${f}" stroke-width="3" stroke-linecap="round"/><circle cx="60" cy="62" r="5" fill="${b}" stroke="${f}" stroke-width="1"/>`;break;
+    case 'dots':for(let r=0;r<6;r++)for(let c=0;c<6;c++){m+=`<circle cx="${25+c*14}" cy="${22+r*14}" r="${(r===2&&c===3)?5:2}" fill="${(r===2&&c===3)?a:f}" opacity="${(r===2&&c===3)?1:.35}"/>`}break;
+    case 'dots2':m=`<rect x="34" y="30" width="52" height="64" rx="26" fill="none" stroke="${a}" stroke-width="1.2"/><circle cx="60" cy="62" r="9" fill="${a}"/><path d="M56 40c0-4 4-4 4-8M64 40c0-4 4-4 4-8" stroke="${f}" stroke-width=".8" fill="none"/>`;break;
+    case 'light':m=`<path d="M60 30 20 18v24zM60 30l40-12v24z" fill="${a}" opacity=".18"/><rect x="54" y="30" width="12" height="70" fill="${f}"/><rect x="52" y="26" width="16" height="6" fill="${a}"/><path d="M14 100h92" stroke="${f}" stroke-width=".8"/>`;break;
+  }
+  const t=n.t.map((l,i)=>`<text x="12" y="${132+i*16}" font-family="Noto Serif Thai,serif" font-weight="600" font-size="12.5" fill="${f}">${l}</text>`).join('');
+  return `<svg viewBox="0 0 120 180" role="img" aria-label="ปก ${n.t.join('')}"><rect width="120" height="180" fill="${b}"/>${m}<path d="M12 116h18" stroke="${f}" stroke-width=".8"/>${t}<text x="12" y="170" font-family="IBM Plex Sans Thai,sans-serif" font-size="6.5" fill="${f}" opacity=".8">${n.a}</text></svg>`;
+}
+const locked=n=>n.r==='18+'&&!S.logged;
+const cover=(n,style='')=>`<div class="cover${locked(n)?' locked':''}" style="${style}">${coverSVG(n)}${locked(n)?`<div class="lock">${ic('lock')}<span>18+</span></div>`:''}</div>`;
+const rate=r=>`<span class="rt${r==='13+'?' t13':r==='18+'?' t18':''}">${r}</span>`;
+const lockAttr=n=>locked(n)?' data-locked="1"':'';
+
+/* ---------- home ---------- */
+function renderHome(){
+  $('#cats').innerHTML=CATS.map(c=>`<button class="chip" type="button" aria-pressed="${c===S.cat}">${c}</button>`).join('');
+  const CONT=[['moon',13,24],['gate',40,61],['mars',7,30]];
+  $('#cont').innerHTML=CONT.map(([id,c,o])=>{const n=byId(id);return `<a class="cont" href="${id==='moon'?'#read':'#novel'}">${cover(n)}<div style="flex:1;min-width:0"><h3>${n.t.join('')}</h3><p class="meta">ตอนที่ ${c} จาก ${o}</p><div class="prog" aria-label="อ่านแล้ว ${Math.round(c/o*100)}%"><span style="width:${Math.round(c/o*100)}%"></span></div></div></a>`}).join('');
+  const list=N.filter(n=>S.cat==='ทั้งหมด'||n.cat===S.cat);
+  $('#catlabel').textContent=S.cat==='ทั้งหมด'?'ทุกหมวด':S.cat;
+  $('#updates').innerHTML=list.length?list.map(rowHTML).join(''):`<li class="empty">ยังไม่มีเรื่องใหม่ในหมวด “${S.cat}”<br><span style="font-size:13px">ลองเลือกหมวดอื่นดูนะ</span></li>`;
+  const P=['gate','moon','dorm','script','blade'].map(byId), f=P[0];
+  $('#popular').innerHTML=`<a class="feature" href="#novel">${cover(f)}<div style="min-width:0"><p class="no">อันดับ 1</p><h3>${f.t.join('')}</h3><p class="meta">${f.a} · ${f.cat} ${rate(f.r)}</p><p>${f.b}</p></div></a>`+
+    P.slice(1).map((n,i)=>`<a class="rank" href="#novel"><span class="n">${i+2}</span>${cover(n)}<div style="min-width:0"><h3>${n.t.join('')}</h3><p class="meta">${n.a} · ยอดอ่าน ${n.reads}</p></div></a>`).join('');
+}
+function rowHTML(n){
+  return `<li><a class="row" href="${n.id==='moon'?'#novel':'#novel'}"${lockAttr(n)}>${cover(n)}<div class="tx"><h3>${n.t.join('')}</h3><p class="meta">${n.a} · ${n.cat} ${rate(n.r)}</p><p class="latest"><span>${locked(n)?'เข้าสู่ระบบเพื่ออ่านเรื่องเรต 18+':n.last}</span><span>${n.ago}</span></p></div></a></li>`;
+}
+$('#cats').addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)return;S.cat=b.textContent;renderHome();const nb=$$('#cats .chip').find(x=>x.textContent===S.cat);nb&&nb.focus({preventScroll:true})});
+document.addEventListener('click',e=>{const a=e.target.closest('[data-locked]');if(a&&!S.logged){e.preventDefault();toast('เรื่องนี้เป็นเรต 18+ กรุณาเข้าสู่ระบบก่อน');location.hash='#profile'}});
+
+/* ---------- search ---------- */
+const RECENT=['สวนกล้วยไม้','ปลายฝน','หิมพานต์','ฟีลกู้ด'];
+$('#recent').innerHTML=RECENT.map(r=>`<button class="chip" type="button">${r}</button>`).join('');
+function renderSearch(){
+  const q=$('#q').value.trim();
+  const tagHit=q&&'สวนกล้วยไม้ ฟีลกู้ด ชนบท ครอบครัว'.includes(q);
+  const res=N.filter(n=>!q||(n.t.join('')+n.a+n.cat).includes(q)||(tagHit&&n.id==='moon'));
+  $('#qtitle').textContent=q?`ผลการค้นหา “${q}”`:'เรื่องทั้งหมด';
+  $('#qcount').textContent=`${res.length} เรื่อง`;
+  $('#results').innerHTML=res.length?res.map(rowHTML).join(''):'<li class="empty">ไม่พบเรื่องที่ตรงกับคำค้น</li>';
+}
+$('#q').addEventListener('input',renderSearch);
+$('#recent').addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)return;$('#q').value=b.textContent;renderSearch()});
+
+/* ---------- novel ---------- */
+$('#ncover').innerHTML=cover(byId('moon'));
+$('#ecover').innerHTML=cover(byId('moon'));
+function chRow(i,inSheet){
+  const isNew=i>=23, here=i===S.ch;
+  const inner=`<span class="chn">${i}</span><span class="cht"><b>${CHT[i-1]}</b><small>${chDate(i)}</small></span>${isNew?'<span class="new">ใหม่</span>':''}${here&&!isNew?'<span class="here">อ่านถึงตรงนี้</span>':''}`;
+  return inSheet?`<li><button class="chrow" type="button" data-go="${i}"${here?' aria-current="true"':''}>${inner}</button></li>`:`<li><a href="#read" data-ch="${i}">${inner}</a></li>`;
+}
+function renderCh(){
+  let ids=[...Array(24)].map((_,i)=>i+1);if(S.desc)ids.reverse();
+  if(!S.all)ids=ids.slice(0,6);
+  $('#chlist').innerHTML=ids.map(i=>chRow(i,false)).join('');
+  $('#chall').textContent=S.all?'แสดงน้อยลง':'ดูทั้งหมด 24 ตอน';
+  $('#chsort').textContent=S.desc?'ใหม่สุดก่อน':'ตอนแรกก่อน';
+  $('#toc').innerHTML=[...Array(24)].map((_,i)=>chRow(i+1,true)).join('');
+}
+$('#chall').addEventListener('click',()=>{S.all=!S.all;renderCh()});
+$('#chsort').addEventListener('click',()=>{S.desc=!S.desc;renderCh()});
+$('#synbtn').addEventListener('click',e=>{const s=$('#syn'),open=s.classList.toggle('clamp')===false;e.currentTarget.textContent=open?'ย่อเรื่องย่อ':'อ่านเพิ่มเติม';e.currentTarget.setAttribute('aria-expanded',open)});
+function syncToggles(){
+  $$('[data-toggle]').forEach(b=>{const k=b.dataset.toggle;b.setAttribute('aria-pressed',S[k]);b.querySelector('span').textContent=k==='liked'?(S.liked?'ถูกใจแล้ว':'ถูกใจ'):(S.shelved?'อยู่ในชั้นแล้ว':'เก็บเข้าชั้น')});
+  $('#likeN').textContent=(3125+(S.liked?1:0)).toLocaleString('en-US');
+}
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-toggle]');
+  if(t){const k=t.dataset.toggle;S[k]=!S[k];store.set(k,S[k]);syncToggles();renderLib();
+    toast(k==='liked'?(S.liked?'ถูกใจเรื่องนี้แล้ว':'ยกเลิกการถูกใจแล้ว'):(S.shelved?'เก็บเข้าชั้นหนังสือแล้ว':'นำออกจากชั้นหนังสือแล้ว'))}
+  if(e.target.closest('[data-share]')){try{navigator.clipboard&&navigator.clipboard.writeText('https://readable.example/n/moon').catch(()=>{})}catch(err){}toast('คัดลอกลิงก์เรื่องแล้ว')}
+  const c=e.target.closest('a[data-ch]');if(c){setCh(+c.dataset.ch)}
+  const g=e.target.closest('[data-go]');if(g){setCh(+g.dataset.go);closeSheets();if(location.hash!=='#read')location.hash='#read';else scroller.scrollTop=0}
+  const st=e.target.closest('[data-step]');if(st){const n=S.ch+ +st.dataset.step;if(n>=1&&n<=24){setCh(n);scroller.scrollTop=0;phone.classList.remove('chrome-hidden');toast(`ตอนที่ ${n} · ${CHT[n-1]}`)}}
+});
+
+/* ---------- reader ---------- */
+function setCh(n){
+  S.ch=n;$('#rno').textContent=`ตอนที่ ${n}`;$('#rtitle').textContent=CHT[n-1];$('#rtopch').textContent=`ตอนที่ ${n} จาก 24`;$('#rdone').textContent=`จบตอนที่ ${n}`;
+  $$('[data-step="-1"]').forEach(b=>b.disabled=n<=1);$$('[data-step="1"]').forEach(b=>b.disabled=n>=24);
+  S.chLiked=false;syncChLike();renderCh();updProg();
+}
+function syncChLike(){const b=$('#chlike');b.setAttribute('aria-pressed',S.chLiked);$('#chlikeN').textContent=`${(1284+(S.chLiked?1:0)).toLocaleString('en-US')} คนถูกใจตอนนี้`}
+$('#chlike').addEventListener('click',()=>{S.chLiked=!S.chLiked;syncChLike();toast(S.chLiked?'ถูกใจตอนนี้แล้ว ขอบคุณที่ให้กำลังใจนักเขียน':'ยกเลิกการถูกใจแล้ว')});
+$('#cform').addEventListener('submit',e=>{e.preventDefault();const v=$('#ctext').value.trim();if(!v){toast('พิมพ์ความคิดเห็นก่อนส่งนะ');return}
+  const d=document.createElement('div');d.className='cm';d.innerHTML=`<span class="av">ฉ</span><div><p class="who">ฉัน<span>เมื่อสักครู่</span></p><p></p></div>`;d.querySelector('p:last-child').textContent=v;$('#rcomments').prepend(d);$('#ctext').value='';toast('ส่งความคิดเห็นแล้ว')});
+const mq=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):{matches:false,addEventListener(){}};
+function applyRP(){
+  const p=S.rp;phone.style.setProperty('--r-size',p.size+'px');phone.style.setProperty('--r-lh',p.lh);phone.style.setProperty('--r-font',p.font==='sans'?'var(--sans)':'var(--serif)');
+  phone.dataset.rt=p.theme==='system'?(mq.matches?'night':'light'):p.theme;
+  $('#fsize').textContent=p.size;$('#fminus').disabled=p.size<=15;$('#fplus').disabled=p.size>=26;
+  [['lh',p.lh],['rf',p.font],['theme',p.theme]].forEach(([n,v])=>{const r=$(`input[name="${n}"][value="${v}"]`);if(r)r.checked=true});
+  store.set('rp',p);
+}
+try{mq.addEventListener('change',applyRP)}catch(e){}
+$('#fminus').addEventListener('click',()=>{S.rp.size=Math.max(15,S.rp.size-1);applyRP()});
+$('#fplus').addEventListener('click',()=>{S.rp.size=Math.min(26,S.rp.size+1);applyRP()});
+$('#sh-reader').addEventListener('change',e=>{const t=e.target;if(t.name==='lh')S.rp.lh=t.value;if(t.name==='rf')S.rp.font=t.value;if(t.name==='theme')S.rp.theme=t.value;applyRP()});
+let lastY=0;
+function updProg(){if(!phone.classList.contains('on-read'))return;const h=scroller.scrollHeight-scroller.clientHeight;$('#rprog').style.width=(h>0?Math.min(100,scroller.scrollTop/h*100):0)+'%'}
+scroller.addEventListener('scroll',()=>{
+  const y=scroller.scrollTop;
+  if(phone.classList.contains('on-read')){
+    const d=y-lastY,end=y+scroller.clientHeight>=scroller.scrollHeight-40;
+    if(d>6&&y>80&&!end)phone.classList.add('chrome-hidden');else if(d<-6||end||y<40)phone.classList.remove('chrome-hidden');
+    updProg();
+  }
+  if(phone.classList.contains('typing'))phone.classList.remove('typing');
+  lastY=y;
+},{passive:true});
+$('#prose').addEventListener('click',()=>{if(!getSelection().toString())phone.classList.toggle('chrome-hidden')});
+
+/* ---------- library ---------- */
+function renderLib(){
+  const L={reading:[['moon',54],['gate',66],['mars',23],['shade',40]],saved:[['script',0],['letters',0],['canal',0]],done:[['dorm',100]]};
+  let items=L[S.lib];if(S.lib==='reading'&&!S.shelved)items=items.filter(x=>x[0]!=='moon');
+  $('#shelf').innerHTML=items.map(([id,p])=>{const n=byId(id);return `<a href="${id==='moon'?'#read':'#novel'}"${lockAttr(n)}>${cover(n)}<h3>${n.t.join('')}</h3><div class="prog"><span style="width:${p}%"></span></div><p class="meta" style="margin-top:4px">${p===100?'อ่านจบแล้ว':p===0?'ยังไม่เริ่มอ่าน':'อ่านแล้ว '+p+'%'}</p></a>`}).join('')||'<p class="empty" style="grid-column:1/-1">ชั้นนี้ยังว่างอยู่</p>';
+}
+$$('input[name="lib"]').forEach(r=>r.addEventListener('change',()=>{S.lib=r.value;renderLib()}));
+
+/* ---------- profile ---------- */
+function renderProfile(){
+  $('#pav').textContent=S.logged?'ม':'?';$('#pname').textContent=S.logged?'มะปรางหวาน':'ยังไม่ได้เข้าสู่ระบบ';
+  $('#pdesc').textContent=S.logged?'นักอ่าน · ยืนยันอายุแล้ว เห็นเรื่องเรต 18+ ได้':'เข้าสู่ระบบเพื่อเก็บชั้นหนังสือข้ามอุปกรณ์ และดูเรื่องเรต 18+';
+  const b=$('#loginbtn');b.textContent=S.logged?'ออกจากระบบ':'เข้าสู่ระบบ (จำลอง)';b.classList.toggle('primary',!S.logged);
+}
+$('#loginbtn').addEventListener('click',()=>{S.logged=!S.logged;store.set('logged',S.logged);renderProfile();renderHome();renderLib();renderSearch();toast(S.logged?'เข้าสู่ระบบแล้ว เรื่องเรต 18+ แสดงตามปกติ':'ออกจากระบบแล้ว')});
+
+/* ---------- writer: dash ---------- */
+const STL={pub:['pub','เผยแพร่แล้ว','check'],draft:['draft','ฉบับร่าง','pen'],pending:['pending','รออนุมัติ 18+','clock'],rej:['rej','ถูกปฏิเสธ','alert']};
+$('#mine').innerHTML=W.map(w=>{const n=w.t?w:byId(w.id),s=STL[w.st];return `<li><a class="row" href="#novel-edit">${cover(Object.assign({},n,{r:'ทั่วไป'}))}<div class="tx"><h3>${n.t.join('')}</h3><p class="meta">${n.cat} · ${w.sub}</p><p style="margin-top:8px"><span class="st ${s[0]}">${ic(s[2])}${s[1]}</span></p>${w.reason?`<p class="reason">${ic('info')}<span>เหตุผล: ${w.reason}</span></p>`:''}</div></a></li>`}).join('');
+document.addEventListener('click',e=>{if(e.target.closest('[data-newnovel]'))setTimeout(()=>toast('เริ่มจากรายละเอียดเรื่องได้เลย (ตัวอย่างแสดงเรื่องเดิม)'),60);if(e.target.closest('[data-newch]'))setTimeout(()=>toast('สร้างตอนที่ 27 เป็นฉบับร่างแล้ว'),60)});
+
+/* ---------- writer: novel edit ---------- */
+$('#ncat').innerHTML=CATS.slice(1).map(c=>`<option${c==='โรแมนติก'?' selected':''}>${c}</option>`).join('');
+let tags=['สวนกล้วยไม้','ชนบท','ครอบครัว','รักช้า ๆ','ฟีลกู้ด'];
+function renderTags(){
+  $$('#tagbox .tchip').forEach(x=>x.remove());
+  const inp=$('#tagin');
+  tags.forEach((t,i)=>{const s=document.createElement('span');s.className='tchip';s.innerHTML=`<span></span><button type="button" data-rm="${i}" aria-label="ลบแท็ก ${t}">${ic('x')}</button>`;s.firstChild.textContent=t;$('#tagbox').insertBefore(s,inp)});
+}
+function addTag(){const inp=$('#tagin'),v=inp.value.replace(/,/g,'').trim();if(!v)return;if(tags.includes(v)){toast('มีแท็กนี้แล้ว');inp.value='';return}if(tags.length>=8){toast('ใส่แท็กได้สูงสุด 8 แท็ก');return}tags.push(v);inp.value='';renderTags()}
+$('#tagin').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===','){e.preventDefault();addTag()}else if(e.key==='Backspace'&&!e.target.value&&tags.length){tags.pop();renderTags()}});
+$('#tagin').addEventListener('input',e=>{if(e.target.value.includes(','))addTag()});
+$('#tagbox').addEventListener('click',e=>{const b=e.target.closest('[data-rm]');if(b){const t=tags[+b.dataset.rm];tags.splice(+b.dataset.rm,1);renderTags();$('#tagin').focus();toast(`ลบแท็ก “${t}” แล้ว`)}else if(e.target===e.currentTarget)$('#tagin').focus()});
+$$('input[name="rating"]').forEach(r=>r.addEventListener('change',()=>{$('#note18').hidden=r.value!=='18+'||!r.checked}));
+$('#coverfile').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(f)toast(`เลือกไฟล์ ${f.name} แล้ว จะอัปโหลดเมื่อกดบันทึก`)});
+$('#nform').addEventListener('submit',e=>{e.preventDefault();const r=$('input[name="rating"]:checked').value;toast(r==='18+'?'บันทึกแล้ว ส่งให้ผู้ดูแลตรวจเรต 18+ เรียบร้อย':'บันทึกการเปลี่ยนแปลงแล้ว')});
+const WCH=[[26,'ทางกลับบ้าน (ชื่อชั่วคราว)','draft'],[25,'ปีที่ดอกไม้ไม่บาน','sched'],[24,CHT[23],'pub'],[23,CHT[22],'pub'],[22,CHT[21],'pub'],[21,CHT[20],'pub']];
+$('#wch').innerHTML=WCH.map(([n,t,s])=>{const b=s==='pub'?`<span class="st pub">เผยแพร่แล้ว</span><span>${chDate(n)}</span>`:s==='sched'?`<span class="st sched">${ic('clock')}ตั้งเวลา</span><span>30 พ.ย. 2569 · 20:00 น.</span>`:`<span class="st draft">ฉบับร่าง</span><span>แก้ไข 10:42</span>`;
+  return `<li><button class="grip" type="button" aria-label="จัดลำดับ ${t}">${ic('grip')}</button><a href="#chapter-edit"><span class="cht"><span class="num">ตอนที่ ${n}</span><b>${t}</b><small>${b}</small></span>${ic('chev')}</a></li>`}).join('');
+function renumber(){const rows=$$('#wch li'),top=26;rows.forEach((li,i)=>li.querySelector('.num').textContent=`ตอนที่ ${top-i}`)}
+const wch=$('#wch');
+wch.addEventListener('pointerdown',e=>{
+  const h=e.target.closest('.grip');if(!h)return;e.preventDefault();const row=h.closest('li');
+  try{h.setPointerCapture(e.pointerId)}catch(err){}row.classList.add('dragging');let moved=false;
+  const move=ev=>{const y=ev.clientY;const sib=[...wch.children].filter(r=>r!==row);let after=null;for(const s of sib){const b=s.getBoundingClientRect();if(y<b.top+b.height/2){after=s;break}}
+    if(after!==row.nextElementSibling||(!after&&row!==wch.lastElementChild)){after?wch.insertBefore(row,after):wch.appendChild(row);moved=true}};
+  const up=()=>{row.classList.remove('dragging');h.removeEventListener('pointermove',move);h.removeEventListener('pointerup',up);h.removeEventListener('pointercancel',up);if(moved){renumber();toast('จัดลำดับตอนใหม่แล้ว')}h.focus()};
+  h.addEventListener('pointermove',move);h.addEventListener('pointerup',up);h.addEventListener('pointercancel',up);
+});
+wch.addEventListener('keydown',e=>{const h=e.target.closest('.grip');if(!h||(e.key!=='ArrowUp'&&e.key!=='ArrowDown'))return;e.preventDefault();const row=h.closest('li');
+  if(e.key==='ArrowUp'&&row.previousElementSibling)wch.insertBefore(row,row.previousElementSibling);else if(e.key==='ArrowDown'&&row.nextElementSibling)wch.insertBefore(row.nextElementSibling,row);else return;
+  renumber();h.focus();toast('ย้ายเป็น '+row.querySelector('.num').textContent)});
+
+/* ---------- writer: chapter edit ---------- */
+const ed=$('#editor');
+const seg=(typeof Intl!=='undefined'&&Intl.Segmenter)?new Intl.Segmenter('th',{granularity:'word'}):null;
+function count(){
+  const t=ed.innerText||'';let w=0;
+  if(seg){for(const s of seg.segment(t))if(s.isWordLike)w++}else w=(t.trim().match(/\S+/g)||[]).length;
+  $('#wc').textContent=`${w.toLocaleString('en-US')} คำ`;$('#cc').textContent=`${t.replace(/\s/g,'').length.toLocaleString('en-US')} ตัวอักษร`;
+}
+let saveT;
+function dirty(){const a=$('#autosave');a.classList.add('saving');a.querySelector('span').textContent='กำลังบันทึก…';clearTimeout(saveT);
+  saveT=setTimeout(()=>{const d=new Date();a.classList.remove('saving');a.querySelector('span').textContent=`บันทึกแล้ว ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`},1100)}
+ed.addEventListener('input',()=>{count();dirty();phone.classList.add('typing');syncTB()});
+$('#edtitle').addEventListener('input',dirty);
+phone.addEventListener('pointermove',()=>phone.classList.remove('typing'));
+function inEd(){const s=getSelection();return s.rangeCount&&ed.contains(s.anchorNode)}
+function block(){const s=getSelection();if(!s.rangeCount)return '';let n=s.anchorNode;while(n&&n!==ed){if(n.nodeType===1&&/^(H3|BLOCKQUOTE|P|DIV)$/.test(n.tagName))return n.tagName.toLowerCase();n=n.parentNode}return ''}
+function syncTB(){if(!inEd())return;const b=block();
+  const st={bold:document.queryCommandState('bold'),italic:document.queryCommandState('italic'),h3:b==='h3',quote:b==='blockquote',center:document.queryCommandState('justifyCenter')};
+  $$('.tb[aria-pressed]').forEach(t=>t.setAttribute('aria-pressed',!!st[t.dataset.cmd]))}
+document.addEventListener('selectionchange',syncTB);
+$$('.tb').forEach(t=>{t.addEventListener('mousedown',e=>e.preventDefault());t.addEventListener('click',()=>{
+  if(!inEd()){ed.focus();const r=document.createRange();r.selectNodeContents(ed);r.collapse(false);const s=getSelection();s.removeAllRanges();s.addRange(r)}
+  const c=t.dataset.cmd,b=block();
+  try{
+    if(c==='bold'||c==='italic')document.execCommand(c);
+    else if(c==='h3')document.execCommand('formatBlock',false,b==='h3'?'<p>':'<h3>');
+    else if(c==='quote')document.execCommand('formatBlock',false,b==='blockquote'?'<p>':'<blockquote>');
+    else if(c==='scene')document.execCommand('insertHTML',false,'<hr><p><br></p>');
+    else if(c==='center')document.execCommand(document.queryCommandState('justifyCenter')?'justifyLeft':'justifyCenter');
+  }catch(err){}
+  count();dirty();syncTB();
+})});
+$('#pvbtn').addEventListener('click',e=>{const on=$('#wraped').classList.toggle('preview');ed.contentEditable=on?'false':'true';e.currentTarget.setAttribute('aria-pressed',on);e.currentTarget.setAttribute('aria-label',on?'กลับไปแก้ไข':'แสดงตัวอย่าง');toast(on?'โหมดตัวอย่าง · แสดงแบบที่ผู้อ่านเห็น':'กลับมาแก้ไขต่อ')});
+const PL={draft:'บันทึกร่าง',now:'เผยแพร่ทันที',later:'ตั้งเวลาเผยแพร่'};
+$('#pform').addEventListener('change',()=>{const v=$('input[name="pub"]:checked').value;$('#when').hidden=v!=='later';$('#pgo').textContent=PL[v]});
+$('#pform').addEventListener('submit',e=>{e.preventDefault();const v=$('input[name="pub"]:checked').value;closeSheets();
+  if(v==='later'){const [y,m,d]=$('#pdate').value.split('-').map(Number);toast(y?`ตั้งเวลาเผยแพร่ ${d} ${TM[m-1]} ${y+543} เวลา ${$('#ptime').value} น. แล้ว`:'กรุณาเลือกวันที่');}
+  else toast(v==='now'?'เผยแพร่ตอนที่ 25 แล้ว ผู้ติดตามจะได้รับแจ้งเตือน':'บันทึกร่างแล้ว')});
+
+/* ---------- sheets / toast ---------- */
+let lastFocus=null,tT;
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('show'),2400)}
+function openSheet(id){closeSheets(true);phone.classList.remove('typing');const w=$('#'+id);if(!w)return;lastFocus=document.activeElement;w.classList.add('open');const f=w.querySelector('.sheet button, .sheet input, .sheet a');f&&f.focus({preventScroll:true})}
+function closeSheets(quiet){const o=$$('.sheet-wrap.open');o.forEach(w=>w.classList.remove('open'));if(o.length&&!quiet&&lastFocus&&document.contains(lastFocus))lastFocus.focus({preventScroll:true})}
+document.addEventListener('click',e=>{const s=e.target.closest('[data-sheet]');if(s){e.preventDefault();openSheet(s.dataset.sheet)}if(e.target.closest('[data-close]'))closeSheets()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheets()});
+$('#infocopy').innerHTML=$('#info .info-body').innerHTML;
+
+/* ---------- router ---------- */
+const R={home:{t:'หน้าแรก'},search:{t:'ค้นหา'},novel:{t:'หน้าเรื่อง',tab:'home'},read:{t:'อ่านตอน'},library:{t:'ชั้นหนังสือ'},profile:{t:'โปรไฟล์'},dash:{t:'แดชบอร์ดนักเขียน',w:1},'novel-edit':{t:'จัดการเรื่อง',w:1},'chapter-edit':{t:'เขียนตอน',w:1}};
+function route(){
+  let h=location.hash.slice(1);if(!R[h])h='home';
+  $$('.screen').forEach(s=>s.classList.toggle('active',s.id==='s-'+h));
+  phone.classList.toggle('mode-writer',!!R[h].w);phone.classList.toggle('on-read',h==='read');phone.classList.toggle('on-focus',h==='chapter-edit');phone.classList.remove('chrome-hidden','typing');
+  const tab=R[h].tab||h;$$('.tabs a').forEach(a=>a.dataset.tab===tab?a.setAttribute('aria-current','page'):a.removeAttribute('aria-current'));
+  $$('.scr a').forEach(a=>a.setAttribute('aria-current',a.getAttribute('href')==='#'+h));
+  closeSheets(true);scroller.scrollTop=0;lastY=0;document.title=`${R[h].t} · readable · หน้ากระดาษ`;
+  if(h==='read')updProg();if(h==='search')renderSearch();if(h==='chapter-edit')count();
+}
+window.addEventListener('hashchange',route);
+
+renderHome();renderCh();syncToggles();renderLib();renderProfile();renderTags();applyRP();setCh(13);count();route();
+}
+</script>
+</body>
+</html>
