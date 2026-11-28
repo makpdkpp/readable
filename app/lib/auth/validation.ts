@@ -30,8 +30,10 @@ export function isValidBirthDate(value: string, today = new Date()): boolean {
 
 /** กันการส่งต่อไปเว็บอื่น (open redirect) ยอมเฉพาะ path ภายในเว็บเรา */
 export function safeRedirect(to: unknown, fallback = "/"): string {
-  if (typeof to !== "string" || !to.startsWith("/") || to.startsWith("//") || to.includes("\\")) {
-    return fallback;
-  }
+  if (typeof to !== "string" || to.length > 2000) return fallback;
+  // เบราว์เซอร์ตัด tab/ขึ้นบรรทัดทิ้งก่อนอ่าน URL: "/<tab>/evil.com" จะกลายเป็น "//evil.com"
+  // จึงไม่รับตัวอักษรควบคุมและช่องว่างเลย
+  if (/[\u0000-\u0020\u007f\\]/.test(to)) return fallback;
+  if (!to.startsWith("/") || to.startsWith("//")) return fallback;
   return to;
 }

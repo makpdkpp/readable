@@ -27,6 +27,7 @@ import {
 } from "~/lib/novel/content";
 import { formatThaiDateTime, parseBangkokLocal, toBangkokLocal } from "~/lib/novel/time";
 import { MAX_CHAPTER_TITLE, parseChapterTitle } from "~/lib/novel/validation";
+import { RATE_LIMIT_MESSAGE, isRateLimited } from "~/lib/rate-limit.server";
 
 export function meta({ loaderData: data }: Route.MetaArgs) {
   return [
@@ -62,6 +63,7 @@ export async function action({ request, params }: Route.ActionArgs): Promise<Act
   const user = await requireUser(request);
   const novel = await requireOwnNovel(user, params.novelId);
   const chapter = await requireOwnChapter(novel.id, params.chapterId);
+  if (await isRateLimited("write", user.id)) return { error: RATE_LIMIT_MESSAGE };
   const form = await request.formData();
   const intent = String(form.get("intent"));
   const db = getDb();

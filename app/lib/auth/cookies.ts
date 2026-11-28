@@ -35,3 +35,11 @@ export function serializeCookie(
 export function isSecureRequest(request: Request): boolean {
   return new URL(request.url).protocol === "https:";
 }
+
+/** คำขอนี้มาจากหน้าเว็บของเราเอง (ดู Origin ก่อน ถ้าไม่มีดู Sec-Fetch-Site) */
+export function isSameOriginRequest(request: Request): boolean {
+  const origin = request.headers.get("Origin");
+  if (origin) return origin === new URL(request.url).origin;
+  const site = request.headers.get("Sec-Fetch-Site");
+  return !site || site === "same-origin" || site === "none";
+}

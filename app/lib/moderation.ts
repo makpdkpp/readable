@@ -3,8 +3,11 @@ import type { ChapterStatus, NovelStatus, Rating } from "~/db/schema";
 /**
  * สถานะที่เรื่องจะได้เมื่อนักเขียนกด "เผยแพร่"
  * เรื่อง 18+ ต้องรอ admin อนุมัติก่อน ส่วนเรตอื่นขึ้นเว็บได้ทันที
+ * เรื่องที่ admin ไม่อนุมัติไปแล้ว ต้องกลับไปให้ admin ตรวจเสมอ แม้จะลดเรตลง
+ * (ไม่อย่างนั้นแค่เปลี่ยนเรตเป็น "ทั่วไป" ก็ขึ้นเว็บได้โดยไม่ผ่านการตรวจ)
  */
-export function statusOnPublish(rating: Rating): NovelStatus {
+export function statusOnPublish(rating: Rating, current: NovelStatus = "draft"): NovelStatus {
+  if (current === "rejected") return "pending_review";
   return rating === "18+" ? "pending_review" : "ongoing";
 }
 

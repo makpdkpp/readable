@@ -8,7 +8,8 @@ import { getDb } from "~/db/client";
 import { oauthAccounts, users } from "~/db/schema";
 import { hashPassword, verifyPassword } from "~/lib/auth/password";
 import { deleteAccount } from "~/lib/auth/delete-account.server";
-import { assertSameOrigin, destroySession, requireUser } from "~/lib/auth/session.server";
+import { assertSameOrigin, destroySession, requireUser, revokeOtherSessions } from "~/lib/auth/session.server";
+import { RATE_LIMIT_MESSAGE, isRateLimited } from "~/lib/rate-limit.server";
 import { isValidBirthDate, validateDisplayName, validatePassword } from "~/lib/auth/validation";
 import { ageOn } from "~/lib/moderation";
 
@@ -58,6 +59,9 @@ export async function action({ request }: Route.ActionArgs): Promise<ActionResul
     if (user.email.endsWith("@users.noreply.readable")) {
       return { form: "password", error: "บัญชีนี้ยังไม่มีอีเมล จึงตั้งรหัสผ่านไม่ได้" };
     }
+    if (await isRateLimited("auth", `password:${user.id}`)) {
+      return { form: "password", error: RATE_LIMIT_MESSAGE };
+    }
     const current = String(form.get("currentPassword") ?? "");
     const next = String(form.get("newPassword") ?? "");
     const [row] = await db
@@ -73,7 +77,9 @@ export async function action({ request }: Route.ActionArgs): Promise<ActionResul
       .update(users)
       .set({ passwordHash: await hashPassword(next), updatedAt: new Date() })
       .where(eq(users.id, user.id));
-    return { form: "password", ok: "บันทึกรหัสผ่านแล้ว" };
+    // ถ้ารหัสเดิมรั่ว คนที่ล็อกอินค้างไว้เครื่องอื่นจะถูกออกจากระบบทันที
+    await revokeOtherSessions(request, user.id);
+    return { form: "password", ok: "บันทึกรหัสผ่านแล้ว และออกจากระบบในเครื่องอื่นทั้งหมด" };
   }
 
   const displayName = String(form.get("displayName") ?? "").trim();

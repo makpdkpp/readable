@@ -1,11 +1,11 @@
 import { env } from "cloudflare:workers";
-import { and, eq, gt, lt } from "drizzle-orm";
+import { and, eq, gt, lt, ne } from "drizzle-orm";
 import { redirect } from "react-router";
 
 import { getDb } from "~/db/client";
 import { parseAdminEmails } from "~/lib/admin";
 import { sessions, users } from "~/db/schema";
-import { isSecureRequest, parseCookies, serializeCookie } from "./cookies";
+import { isSameOriginRequest, isSecureRequest, parseCookies, serializeCookie } from "./cookies";
 import { generateToken, sha256Hex } from "./token";
 
 export const SESSION_COOKIE = "rb_session";
@@ -46,18 +46,26 @@ export async function getCurrentUser(request: Request): Promise<CurrentUser | nu
       role: users.role,
       birthDate: users.birthDate,
       theme: users.theme,
+      emailVerified: users.emailVerified,
     })
     .from(sessions)
     .innerJoin(users, eq(sessions.userId, users.id))
     .where(and(eq(sessions.id, await sha256Hex(token)), gt(sessions.expiresAt, new Date())))
     .limit(1);
   if (!row) return null;
+  const { emailVerified, ...user } = row;
   // ตั้ง admin คนแรกได้จาก Cloudflare dashboard (ตัวแปร ADMIN_EMAILS) ไม่ต้องใช้คำสั่ง wrangler
-  if (row.role !== "admin" && parseAdminEmails(env.ADMIN_EMAILS).has(row.email.toLowerCase())) {
-    await db.update(users).set({ role: "admin", updatedAt: new Date() }).where(eq(users.id, row.id));
-    row.role = "admin";
+  // เฉพาะบัญชีที่ยืนยันอีเมลแล้ว (ล็อกอินผ่าน Google/LINE) เพราะสมัครด้วยอีเมลยังไม่มีการยืนยัน
+  // ใครก็สมัครด้วยอีเมลของ admin ที่ยังไม่มีบัญชีได้ แล้วจะได้สิทธิ์ admin ไปทันที
+  if (
+    user.role !== "admin" &&
+    emailVerified &&
+    parseAdminEmails(env.ADMIN_EMAILS).has(user.email.toLowerCase())
+  ) {
+    await db.update(users).set({ role: "admin", updatedAt: new Date() }).where(eq(users.id, user.id));
+    user.role = "admin";
   }
-  return row;
+  return user;
 }
 
 /** ใช้ใน loader/action ของหน้าที่ต้องล็อกอิน ถ้ายังไม่ล็อกอินจะพาไปหน้าเข้าสู่ระบบ */
@@ -82,13 +90,20 @@ export async function destroySession(request: Request): Promise<string> {
   return serializeCookie(SESSION_COOKIE, "", { maxAge: 0, secure: isSecureRequest(request) });
 }
 
+/** ออกจากระบบทุกเครื่อง ยกเว้นเครื่องที่ใช้อยู่ (ใช้หลังเปลี่ยนรหัสผ่าน) */
+export async function revokeOtherSessions(request: Request, userId: string) {
+  const token = parseCookies(request.headers.get("Cookie"))[SESSION_COOKIE];
+  const current = token ? await sha256Hex(token) : "";
+  await getDb()
+    .delete(sessions)
+    .where(and(eq(sessions.userId, userId), ne(sessions.id, current)));
+}
+
 /**
  * กัน CSRF เพิ่มจาก SameSite=Lax: ฟอร์มที่เปลี่ยนข้อมูลต้องส่งมาจากเว็บเราเอง
- * เบราว์เซอร์ปัจจุบันส่ง Origin มากับ POST เสมอ ถ้าไม่มีเลย (เช่นเครื่องมือทดสอบ) จะยอมให้ผ่าน
+ * เบราว์เซอร์ปัจจุบันส่ง Origin มากับ POST เสมอ ถ้าไม่มี Origin จะดู Sec-Fetch-Site แทน
+ * ถ้าไม่มีทั้งสองอย่าง (เช่นเครื่องมือทดสอบ) จะยอมให้ผ่าน เพราะไม่ใช่คำขอจากเบราว์เซอร์ของเหยื่อ
  */
 export function assertSameOrigin(request: Request) {
-  const origin = request.headers.get("Origin");
-  if (origin && origin !== new URL(request.url).origin) {
-    throw new Response("Forbidden", { status: 403 });
-  }
+  if (!isSameOriginRequest(request)) throw new Response("Forbidden", { status: 403 });
 }

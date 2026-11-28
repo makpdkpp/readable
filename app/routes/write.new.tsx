@@ -9,6 +9,7 @@ import { assertSameOrigin, requireUser } from "~/lib/auth/session.server";
 import { listCategories, setNovelTags } from "~/lib/novel/access.server";
 import { uploadCover } from "~/lib/novel/cover.server";
 import { parseNovelForm } from "~/lib/novel/validation";
+import { RATE_LIMIT_MESSAGE, isRateLimited } from "~/lib/rate-limit.server";
 
 export function meta({}: Route.MetaArgs) {
   return [{ title: "สร้างเรื่องใหม่ — readable" }, { name: "robots", content: "noindex" }];
@@ -22,6 +23,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 export async function action({ request }: Route.ActionArgs) {
   assertSameOrigin(request);
   const user = await requireUser(request);
+  if (await isRateLimited("write", user.id)) return { error: RATE_LIMIT_MESSAGE };
   const form = await request.formData();
   const categories = await listCategories();
   const parsed = parseNovelForm(

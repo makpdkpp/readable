@@ -9,6 +9,7 @@ import { enabledProviders } from "~/lib/auth/oauth.server";
 import { verifyPassword } from "~/lib/auth/password";
 import { assertSameOrigin, createSession, getCurrentUser } from "~/lib/auth/session.server";
 import { normalizeEmail, safeRedirect } from "~/lib/auth/validation";
+import { RATE_LIMIT_MESSAGE, anyRateLimited, clientIp } from "~/lib/rate-limit.server";
 
 // แฮชหลอกไว้เทียบเมื่อไม่พบอีเมล ให้ใช้เวลาตอบพอๆ กัน คนนอกจะเดาไม่ได้ว่าอีเมลไหนมีบัญชี
 const DUMMY_HASH =
@@ -37,6 +38,10 @@ export async function action({ request }: Route.ActionArgs) {
   const email = normalizeEmail(form.get("email"));
   const password = String(form.get("password") ?? "");
   const redirectTo = safeRedirect(form.get("redirectTo"));
+  // กันเดารหัสผ่าน: นับทั้งต่อ IP และต่ออีเมล (เผื่อยิงจากหลาย IP ใส่บัญชีเดียว)
+  if (await anyRateLimited("auth", [`login-ip:${clientIp(request)}`, `login-email:${email}`])) {
+    return { error: RATE_LIMIT_MESSAGE, email };
+  }
 
   const [user] = await getDb()
     .select({ id: users.id, passwordHash: users.passwordHash })

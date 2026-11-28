@@ -20,5 +20,10 @@
 			"binding": "COVERS",
 			"bucket_name": "readable-covers"
 		}
+	],
+	// จำกัดจำนวนครั้ง (ฟรี) namespace_id เป็นเลขที่ตั้งเองได้ ไม่ต้องสร้างอะไรใน dashboard
+	"ratelimits": [
+		{ "name": "AUTH_LIMITER", "namespace_id": "1001", "simple": { "limit": 10, "period": 60 } },
+		{ "name": "WRITE_LIMITER", "namespace_id": "1002", "simple": { "limit": 30, "period": 60 } }
 	]
 }
