@@ -24,9 +24,22 @@ npm run dev                # เปิด http://localhost:5173
 | `npm run typecheck` | ตรวจ type |
 | `npm run db:generate` | สร้างไฟล์ migration ใหม่หลังแก้ `app/db/schema.ts` |
 
-## Deploy ครั้งแรก
+## Deploy (Cloudflare Workers Builds)
 
-1. `npx wrangler login`
-2. `npx wrangler d1 create readable-db` แล้วนำ `database_id` ที่ได้ไปใส่ใน `wrangler.jsonc`
-3. ใน GitHub repo ไปที่ Settings → Secrets and variables → Actions แล้วเพิ่ม `CLOUDFLARE_API_TOKEN` (สิทธิ์ Workers Scripts: Edit และ D1: Edit) กับ `CLOUDFLARE_ACCOUNT_ID`
-4. ทุกครั้งที่ merge เข้า `main` ระบบจะรัน migration และ deploy ให้อัตโนมัติ
+repo นี้เชื่อมกับ Cloudflare Workers Builds ทุกครั้งที่ push เข้า `main` Cloudflare จะ build และ deploy ให้เอง
+
+ตั้งค่าใน Cloudflare dashboard → Workers & Pages → readable → Settings → Build
+
+| ช่อง | ค่า |
+|---|---|
+| Build command | `npm run build` |
+| Deploy command | `npm run deploy:workers-builds` |
+
+Deploy command นี้จะสร้าง/อัปเดตตารางใน D1 (`readable-db`) ก่อน แล้วค่อย deploy ถ้าใช้ค่าเริ่มต้น `npx wrangler deploy` ตารางจะไม่ถูกสร้าง และหน้าเว็บจะขึ้น "เกิดข้อผิดพลาด"
+
+ถ้าต้องการรัน migration เองจากเครื่อง:
+
+```bash
+npx wrangler login
+npm run db:migrate:remote
+```
