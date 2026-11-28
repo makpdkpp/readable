@@ -39,6 +39,38 @@ npm run dev                # เปิด http://localhost:5173
 | `npm run typecheck` | ตรวจ type |
 | `npm run db:generate` | สร้างไฟล์ migration ใหม่หลังแก้ `app/db/schema.ts` |
 
+## หน้าเว็บหลัก
+
+| URL | ใช้ทำอะไร |
+|---|---|
+| `/write` | นิยายของฉัน สร้างเรื่อง แก้ข้อมูลเรื่อง อัปโหลดปก เผยแพร่เรื่อง |
+| `/write/:id/chapters/:chapterId` | เขียนตอน บันทึกร่าง เผยแพร่ทันที หรือตั้งเวลาเผยแพร่ (เวลาไทย) |
+| `/novel/:id` | หน้าเรื่องสำหรับนักอ่าน พร้อมสารบัญ |
+| `/novel/:id/chapter/:chapterId` | หน้าอ่านตอน ปรับขนาดตัวอักษร ระยะบรรทัด และสีพื้นหลังได้ |
+| `/admin/review` | (admin) อนุมัติหรือไม่อนุมัติเรื่อง 18+ และซ่อนเรื่อง |
+
+กฎเรื่อง 18+
+
+- เรื่อง 18+ กดเผยแพร่แล้วจะเป็น "รอ admin อนุมัติ" อนุมัติครั้งเดียวต่อเรื่อง ตอนใหม่หลังจากนั้นเผยแพร่ได้เลย
+- ถ้าเรื่องที่ขึ้นเว็บแล้วเปลี่ยนเรตเป็น 18+ จะกลับไปรออนุมัติใหม่
+- นักอ่านต้องล็อกอินและกรอกวันเกิดว่าอายุ 18 ปีขึ้นไป คนอื่นเห็นแค่ชื่อเรื่องกับป้าย 18+ หน้าเรื่อง 18+ ตั้ง `noindex`
+- ตอนที่ตั้งเวลาไว้จะขึ้นเว็บเองเมื่อถึงเวลา ไม่ต้องมี cron
+
+ตั้งผู้ใช้เป็น admin (ยังไม่มีหน้าจัดการ ใช้คำสั่งนี้แทน)
+
+```bash
+npx wrangler d1 execute readable-db --remote --command "UPDATE users SET role='admin' WHERE email='อีเมลของคุณ'"
+```
+
+## รูปปก (R2)
+
+ปกนิยายเก็บใน R2 bucket ชื่อ `readable-covers` (binding `COVERS` ใน `wrangler.jsonc`) ต้องสร้าง bucket ก่อน deploy ครั้งแรก ไม่งั้น deploy จะล้ม
+
+- Cloudflare dashboard → R2 Object Storage → Create bucket → ชื่อ `readable-covers` → Create
+- หรือใช้คำสั่ง `npx wrangler r2 bucket create readable-covers`
+
+ในเครื่องและใน Docker ไม่ต้องทำอะไร wrangler จำลอง R2 ให้เอง
+
 ## Deploy (Cloudflare Workers Builds)
 
 repo นี้เชื่อมกับ Cloudflare Workers Builds ทุกครั้งที่ push เข้า `main` Cloudflare จะ build และ deploy ให้เอง

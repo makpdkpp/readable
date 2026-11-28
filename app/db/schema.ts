@@ -61,45 +61,74 @@ export const categories = sqliteTable("categories", {
   name: text("name").notNull(),
 });
 
-export const novels = sqliteTable("novels", {
+export const novels = sqliteTable(
+  "novels",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    authorId: text("author_id")
+      .notNull()
+      .references(() => users.id),
+    title: text("title").notNull(),
+    synopsis: text("synopsis").notNull().default(""),
+    coverKey: text("cover_key"),
+    categoryId: integer("category_id").references(() => categories.id),
+    rating: text("rating", { enum: ["all", "13+", "18+"] })
+      .notNull()
+      .default("all"),
+    status: text("status", {
+      enum: ["draft", "pending_review", "ongoing", "completed", "rejected", "hidden"],
+    })
+      .notNull()
+      .default("draft"),
+    reviewedBy: text("reviewed_by").references(() => users.id),
+    reviewedAt: integer("reviewed_at", { mode: "timestamp" }),
+    reviewNote: text("review_note"),
+    ...timestamps,
+  },
+  (t) => [index("novels_author_id_idx").on(t.authorId), index("novels_status_idx").on(t.status)],
+);
+
+export const tags = sqliteTable("tags", {
   id: integer("id").primaryKey({ autoIncrement: true }),
-  authorId: text("author_id")
-    .notNull()
-    .references(() => users.id),
-  title: text("title").notNull(),
-  synopsis: text("synopsis").notNull().default(""),
-  coverKey: text("cover_key"),
-  categoryId: integer("category_id").references(() => categories.id),
-  rating: text("rating", { enum: ["all", "13+", "18+"] })
-    .notNull()
-    .default("all"),
-  status: text("status", {
-    enum: ["draft", "pending_review", "ongoing", "completed", "rejected", "hidden"],
-  })
-    .notNull()
-    .default("draft"),
-  reviewedBy: text("reviewed_by").references(() => users.id),
-  reviewedAt: integer("reviewed_at", { mode: "timestamp" }),
-  reviewNote: text("review_note"),
-  ...timestamps,
+  name: text("name").notNull().unique(),
 });
 
-export const chapters = sqliteTable("chapters", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  novelId: integer("novel_id")
-    .notNull()
-    .references(() => novels.id, { onDelete: "cascade" }),
-  number: integer("number").notNull(),
-  title: text("title").notNull(),
-  contentJson: text("content_json").notNull().default("{}"),
-  contentHtml: text("content_html").notNull().default(""),
-  wordCount: integer("word_count").notNull().default(0),
-  status: text("status", { enum: ["draft", "scheduled", "published"] })
-    .notNull()
-    .default("draft"),
-  publishAt: integer("publish_at", { mode: "timestamp" }),
-  ...timestamps,
-});
+export const novelTags = sqliteTable(
+  "novel_tags",
+  {
+    novelId: integer("novel_id")
+      .notNull()
+      .references(() => novels.id, { onDelete: "cascade" }),
+    tagId: integer("tag_id")
+      .notNull()
+      .references(() => tags.id, { onDelete: "cascade" }),
+  },
+  (t) => [
+    primaryKey({ columns: [t.novelId, t.tagId] }),
+    index("novel_tags_tag_id_idx").on(t.tagId),
+  ],
+);
+
+export const chapters = sqliteTable(
+  "chapters",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    novelId: integer("novel_id")
+      .notNull()
+      .references(() => novels.id, { onDelete: "cascade" }),
+    number: integer("number").notNull(),
+    title: text("title").notNull(),
+    contentJson: text("content_json").notNull().default("{}"),
+    contentHtml: text("content_html").notNull().default(""),
+    wordCount: integer("word_count").notNull().default(0),
+    status: text("status", { enum: ["draft", "scheduled", "published"] })
+      .notNull()
+      .default("draft"),
+    publishAt: integer("publish_at", { mode: "timestamp" }),
+    ...timestamps,
+  },
+  (t) => [index("chapters_novel_id_number_idx").on(t.novelId, t.number)],
+);
 
 export const library = sqliteTable(
   "library",
@@ -119,5 +148,7 @@ export const library = sqliteTable(
 export type Novel = typeof novels.$inferSelect;
 export type Rating = Novel["rating"];
 export type NovelStatus = Novel["status"];
+export type Chapter = typeof chapters.$inferSelect;
+export type ChapterStatus = Chapter["status"];
 export type User = typeof users.$inferSelect;
 export type OAuthProvider = (typeof oauthAccounts.$inferSelect)["provider"];

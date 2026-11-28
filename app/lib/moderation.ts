@@ -1,4 +1,4 @@
-import type { NovelStatus, Rating } from "~/db/schema";
+import type { ChapterStatus, NovelStatus, Rating } from "~/db/schema";
 
 /**
  * สถานะที่เรื่องจะได้เมื่อนักเขียนกด "เผยแพร่"
@@ -28,4 +28,35 @@ export function canRead(
   if (rating !== "18+") return true;
   if (!reader?.birthDate) return false;
   return ageOn(reader.birthDate, today) >= 18;
+}
+
+/** สถานะที่นักอ่านทั่วไปมองเห็นเรื่องได้ */
+export const PUBLIC_STATUSES = ["ongoing", "completed"] as const satisfies readonly NovelStatus[];
+
+export function isNovelPublic(status: NovelStatus): boolean {
+  return (PUBLIC_STATUSES as readonly NovelStatus[]).includes(status);
+}
+
+/**
+ * สถานะใหม่เมื่อนักเขียนแก้เรต
+ * เรื่องที่ขึ้นเว็บแล้วถ้าเปลี่ยนเป็น 18+ ต้องกลับไปรอ admin อนุมัติ
+ * เรื่องที่รออนุมัติอยู่แล้วเปลี่ยนเรตลงจาก 18+ ก็ขึ้นเว็บได้เลย
+ */
+export function statusOnRatingChange(
+  status: NovelStatus,
+  oldRating: Rating,
+  newRating: Rating,
+): NovelStatus {
+  if (newRating === "18+" && oldRating !== "18+" && isNovelPublic(status)) return "pending_review";
+  if (newRating !== "18+" && status === "pending_review") return "ongoing";
+  return status;
+}
+
+/** ตอนที่ตั้งเวลาไว้จะนับว่าเผยแพร่แล้วเมื่อถึงเวลา ไม่ต้องรอ cron */
+export function isChapterLive(
+  chapter: { status: ChapterStatus; publishAt: Date | null },
+  now = new Date(),
+): boolean {
+  if (chapter.status === "published") return true;
+  return chapter.status === "scheduled" && !!chapter.publishAt && chapter.publishAt <= now;
 }

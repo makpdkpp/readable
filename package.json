@@ -17,6 +17,10 @@
     "deploy:workers-builds": "wrangler d1 migrations apply readable-db --remote && wrangler deploy"
   },
   "dependencies": {
+    "@tiptap/extension-text-align": "^3.35.1",
+    "@tiptap/pm": "^3.35.1",
+    "@tiptap/react": "^3.35.1",
+    "@tiptap/starter-kit": "^3.35.1",
     "arctic": "^3.7.0",
     "drizzle-orm": "^0.45.4",
     "isbot": "^5.1.36",

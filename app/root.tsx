@@ -16,7 +16,7 @@ import { getCurrentUser } from "~/lib/auth/session.server";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getCurrentUser(request);
-  return { user: user && { displayName: user.displayName } };
+  return { user: user && { displayName: user.displayName, isAdmin: user.role === "admin" } };
 }
 
 export const links: Route.LinksFunction = () => [
@@ -65,6 +65,10 @@ function UserNav() {
   }
   return (
     <nav className="flex items-center gap-4 text-sm">
+      {user.isAdmin && (
+        <Link to="/admin/review" className="hover:underline">อนุมัติเรื่อง</Link>
+      )}
+      <Link to="/write" className="hover:underline">เขียนนิยาย</Link>
       <Link to="/profile" className="font-semibold hover:underline">{user.displayName}</Link>
       <Form method="post" action="/logout">
         <button type="submit" className="text-stone-500 hover:underline">ออกจากระบบ</button>
