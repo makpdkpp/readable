@@ -157,6 +157,49 @@ export const library = sqliteTable(
   ],
 );
 
+export const chapterLikes = sqliteTable(
+  "chapter_likes",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    chapterId: integer("chapter_id")
+      .notNull()
+      .references(() => chapters.id, { onDelete: "cascade" }),
+    createdAt: timestamps.createdAt,
+  },
+  (t) => [
+    primaryKey({ columns: [t.userId, t.chapterId] }),
+    index("chapter_likes_chapter_id_idx").on(t.chapterId),
+  ],
+);
+
+export const comments = sqliteTable(
+  "comments",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    chapterId: integer("chapter_id")
+      .notNull()
+      .references(() => chapters.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    body: text("body").notNull(),
+    // hidden = admin ซ่อน คนอื่นไม่เห็น แต่ยังเก็บไว้เป็นหลักฐาน
+    status: text("status", { enum: ["visible", "hidden"] })
+      .notNull()
+      .default("visible"),
+    hiddenBy: text("hidden_by").references(() => users.id, { onDelete: "set null" }),
+    hiddenReason: text("hidden_reason"),
+    ...timestamps,
+  },
+  (t) => [
+    index("comments_chapter_id_idx").on(t.chapterId, t.createdAt),
+    index("comments_user_id_idx").on(t.userId, t.createdAt),
+    index("comments_status_idx").on(t.status, t.createdAt),
+  ],
+);
+
 export type Novel = typeof novels.$inferSelect;
 export type Rating = Novel["rating"];
 export type NovelStatus = Novel["status"];

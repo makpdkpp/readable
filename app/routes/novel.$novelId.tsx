@@ -18,6 +18,7 @@ import { isChapterLive, isNovelPublic } from "~/lib/moderation";
 import { getNovelTags } from "~/lib/novel/access.server";
 import { coverUrl } from "~/lib/novel/cover";
 import { assertSameOrigin, requireUser } from "~/lib/auth/session.server";
+import { getNovelLikeCount } from "~/lib/community.server";
 import { getLibraryEntry, setSaved } from "~/lib/novel/library.server";
 import { loadNovelForReader } from "~/lib/novel/reader.server";
 import { formatThaiDate } from "~/lib/novel/time";
@@ -56,6 +57,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       chapters: [],
       entry,
       loggedIn,
+      likeCount: 0,
     };
   }
   const now = new Date();
@@ -73,7 +75,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const list = rows
     .map((c) => ({ ...c, live: isChapterLive(c, now) }))
     .filter((c) => c.live || canPreview);
-  return { origin, gate, canPreview, novel, tags: await getNovelTags(novel.id), chapters: list, entry, loggedIn };
+  return { origin, gate, canPreview, novel, tags: await getNovelTags(novel.id), chapters: list, entry, loggedIn, likeCount: await getNovelLikeCount(novel.id) };
 }
 
 export async function action({ request, params }: Route.ActionArgs) {
@@ -112,7 +114,7 @@ function ShelfButton({ saved, loggedIn, novelId }: { saved: boolean; loggedIn: b
 }
 
 export default function NovelPage({ loaderData }: Route.ComponentProps) {
-  const { novel, gate, canPreview, tags, chapters: list, entry, loggedIn } = loaderData;
+  const { novel, gate, canPreview, tags, chapters: list, entry, loggedIn, likeCount } = loaderData;
   const first = list.find((c) => c.live) ?? list[0];
   const resume = entry?.lastChapterId ? list.find((c) => c.id === entry.lastChapterId) : undefined;
   const cover = coverUrl(novel.coverKey);
@@ -141,6 +143,7 @@ export default function NovelPage({ loaderData }: Route.ComponentProps) {
             {novel.category && <> · {novel.category}</>}
             {" · "}
             {novel.status === "completed" ? "จบแล้ว" : "ยังไม่จบ"}
+            {likeCount > 0 && <> · ♥ {likeCount}</>}
           </p>
           {tags.length > 0 && (
             <ul className="flex flex-wrap gap-2">

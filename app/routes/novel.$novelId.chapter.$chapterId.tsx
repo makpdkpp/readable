@@ -7,6 +7,10 @@ import { ReaderSettings, THEME_STYLE, useReaderPrefs } from "~/components/reader
 import { getDb } from "~/db/client";
 import { chapters } from "~/db/schema";
 import { isChapterLive, isNovelPublic } from "~/lib/moderation";
+import { CommentSection, LikeButton } from "~/components/chapter-community";
+import { assertSameOrigin, requireUser } from "~/lib/auth/session.server";
+import { parseCommentBody } from "~/lib/community";
+import { addComment, deleteOwnComment, getChapterLikes, listChapterComments, setChapterLike } from "~/lib/community.server";
 import { recordRead } from "~/lib/novel/library.server";
 import { loadNovelForReader } from "~/lib/novel/reader.server";
 import { formatThaiDateTime } from "~/lib/novel/time";
@@ -24,7 +28,9 @@ export function meta({ loaderData: data }: Route.MetaArgs) {
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { novel, gate, canPreview, viewer } = await loadNovelForReader(request, params.novelId);
   const novelInfo = { id: novel.id, title: novel.title, author: novel.author, rating: novel.rating, status: novel.status };
-  if (gate !== "ok") return { gate, novel: novelInfo, chapter: null, prev: null, next: null };
+  const viewerInfo = viewer && { id: viewer.id, isAdmin: viewer.role === "admin" };
+  if (gate !== "ok")
+    return { gate, novel: novelInfo, chapter: null, prev: null, next: null, viewer: viewerInfo, likes: null, comments: [] };
 
   const chapterId = Number(params.chapterId);
   const now = new Date();
@@ -50,6 +56,9 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const c = visible[idx];
   const live = isChapterLive(c, now);
   if (viewer && live) await recordRead(viewer.id, novel.id, c.id);
+  const [likes, commentRows] = live
+    ? await Promise.all([getChapterLikes(c.id, viewer?.id ?? null), listChapterComments(c.id, viewer)])
+    : [null, []];
   const pick = (x: (typeof visible)[number] | undefined) => (x ? { id: x.id, title: x.title } : null);
   return {
     gate,
@@ -64,11 +73,51 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     },
     prev: pick(visible[idx - 1]),
     next: pick(visible[idx + 1]),
+    viewer: viewerInfo,
+    likes,
+    comments: commentRows,
   };
 }
 
+/** ถูกใจและคอมเมนต์ได้เฉพาะตอนที่ขึ้นเว็บแล้ว และผู้ใช้ต้องเปิดอ่านเรื่องนี้ได้ */
+async function requireLiveChapter(request: Request, params: Route.ActionArgs["params"]) {
+  const { novel, gate, viewer } = await loadNovelForReader(request, params.novelId);
+  if (!viewer || gate !== "ok" || !isNovelPublic(novel.status)) throw new Response("Forbidden", { status: 403 });
+  const chapterId = Number(params.chapterId);
+  const [c] = await getDb()
+    .select({ id: chapters.id, status: chapters.status, publishAt: chapters.publishAt })
+    .from(chapters)
+    .where(and(eq(chapters.id, chapterId), eq(chapters.novelId, novel.id)));
+  if (!c || !isChapterLive(c)) throw new Response("Not Found", { status: 404 });
+  return { viewer, chapterId: c.id };
+}
+
+export async function action({ request, params }: Route.ActionArgs) {
+  assertSameOrigin(request);
+  await requireUser(request);
+  const form = await request.formData();
+  const intent = String(form.get("intent"));
+  const { viewer, chapterId } = await requireLiveChapter(request, params);
+
+  if (intent === "like" || intent === "unlike") {
+    await setChapterLike(viewer.id, chapterId, intent === "like");
+    return { ok: true };
+  }
+  if (intent === "comment") {
+    const parsed = parseCommentBody(form.get("body"));
+    if ("error" in parsed) return { error: parsed.error };
+    return addComment(viewer.id, chapterId, parsed.body);
+  }
+  const commentId = Number(form.get("commentId"));
+  if (intent === "delete-comment" && Number.isInteger(commentId)) {
+    await deleteOwnComment(viewer.id, commentId);
+    return { ok: true };
+  }
+  return { error: "ทำรายการนี้ไม่ได้" };
+}
+
 export default function ReadChapter({ loaderData }: Route.ComponentProps) {
-  const { gate, novel, chapter, prev, next } = loaderData;
+  const { gate, novel, chapter, prev, next, viewer, likes, comments } = loaderData;
   const [prefs, update] = useReaderPrefs();
 
   if (gate !== "ok") {
@@ -83,6 +132,7 @@ export default function ReadChapter({ loaderData }: Route.ComponentProps) {
   }
 
   if (!chapter) return null;
+  const loginHref = `/login?redirectTo=${encodeURIComponent(`/novel/${novel.id}/chapter/${chapter.id}`)}`;
 
   const nav = (
     <nav className="flex items-center justify-between gap-2 text-sm">
@@ -128,7 +178,17 @@ export default function ReadChapter({ loaderData }: Route.ComponentProps) {
           // HTML นี้สร้างฝั่ง server จาก JSON ด้วย renderContentHtml ซึ่ง escape ข้อความทั้งหมดแล้ว
           dangerouslySetInnerHTML={{ __html: chapter.contentHtml }}
         />
+        {likes && (
+          <div className="flex justify-center">
+            <LikeButton count={likes.count} liked={likes.liked} loginHref={viewer ? null : loginHref} />
+          </div>
+        )}
         {nav}
+        {chapter.live && (
+          <div className="border-t border-current/15 pt-6">
+            <CommentSection comments={comments} viewer={viewer} loginHref={loginHref} />
+          </div>
+        )}
       </article>
     </div>
   );
